@@ -1,0 +1,23 @@
+branches:
+  only:
+    - /^v[\d.]+\d$/
+    - master
+
+sudo: required
+
+services:
+  - docker
+
+script:
+- docker run --rm -v $(pwd)/guide-book:/guide-book ubuntu:16.04 bash /guide-book/build.sh
+- mv guide-book/guide-book.pdf guide-book.pdf
+
+deploy:
+  provider: releases
+  api_key:
+    secure: Z89xqQVepwpqUdPxrLdwFZh7qko5UgDXr6lOlt0KtRYNwbsoDiRO4uzXmJmn6ejES8nAjBB7rVwQ+0sAFk80dcM1GkiUx7TCYXPkpyUnCnOPmI64ohHhvYYm9EbIyihgQ7MKcugRpyLhsxkjnsjpoJdL57RS4R8ecbZwfghIrko8hLIJJqcusdG6exw0DD08BTYoog2bvLO0Rb82FQBn4pXW+eXACtxH14CFoGsKe/4aL/IlXzSYMFlA3NJx5Rf1BaC4EDr6+/kXnQyno7dH7oS5Me1ZKtR2O4q5nHP3hbZPweSlTAZ+FEjo1R44oDNy0YNKkoXCImt0XiQqjrFS0EEiJFyFYeo3N6oYGJqRE1qkA7KDgNVPabXOCtyWzWrxDi241JaXNBd0CBI4RQk2TmJ7Zk5uR5x9U/z1E5mje37IsvQS9lzyaB2SKAImQfhFb5TMeE9N6rhRd/wNQVuZYVxr66mrFv5kjii4S5YzidFP5QbgidzsVeftdBaHY98K+JiXBllcWifpbbFiPeXqfEMojr0Siz8K53mu/BUy9lymrsGWluUxaMmMuUIrjDSuFR8v6Ewl88IQ1nlnNgUoW3hA7KGTi223mQbvcjnBk3+CZj2E1e61ojnYumtFtPHwPeH213McsQR/1qwvxSOled8A7HKr62pcnD2tlETLNWg=
+  file: guide-book.pdf
+  skip_cleanup: true
+  on:
+    tags: true
+    repo: SivilTaram/BUAAOS-guide-book

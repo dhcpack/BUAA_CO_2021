@@ -1,0 +1,15 @@
+ISim log file
+Running: E:\1-Project\CPU\mips_tb_isim_beh.exe -intstyle ise -gui -tclbatch isim.cmd -wdb E:/1-Project/CPU/mips_tb_isim_beh.wdb 
+ISim P.20131013 (signature 0x7708f090)
+This is a Full version of ISim.
+Time resolution is 1 ps
+# onerror resume
+# wave add /
+# run 1000 ns
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+@00003000: $ 8 <= 0000000a
+@00003004: $ 9 <= 0000000b
+@00003008: $10 <= 00000001
+@00003014: $12 <= 00000000
+@0000301c: $13 <= 0000000c

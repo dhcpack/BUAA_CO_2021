@@ -1,0 +1,25 @@
+xst -intstyle ise -ifn "E:/ISE/practice/muxtwo.xst" -ofn "E:/ISE/practice/muxtwo.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/muxtwo.xst" -ofn "E:/ISE/practice/muxtwo.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/muxtwo.xst" -ofn "E:/ISE/practice/muxtwo.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/muxtwo.xst" -ofn "E:/ISE/practice/muxtwo.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/muxtwo.xst" -ofn "E:/ISE/practice/muxtwo.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/muxtwo.xst" -ofn "E:/ISE/practice/muxtwo.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/muxtwo.xst" -ofn "E:/ISE/practice/muxtwo.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/muxtwo.xst" -ofn "E:/ISE/practice/muxtwo.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/muxtwo.xst" -ofn "E:/ISE/practice/muxtwo.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xa3s50-vqg100-4 muxtwo.ngc muxtwo.ngd  
+map -intstyle ise -p xa3s50-vqg100-4 -cm area -ir off -pr off -c 100 -o muxtwo_map.ncd muxtwo.ngd muxtwo.pcf 
+par -w -intstyle ise -ol high -t 1 muxtwo_map.ncd muxtwo.ncd muxtwo.pcf 
+trce -intstyle ise -v 3 -s 4 -n 3 -fastpaths -xml muxtwo.twx muxtwo.ncd -o muxtwo.twr muxtwo.pcf 
+xst -intstyle ise -ifn "E:/ISE/practice/muxtwo.xst" -ofn "E:/ISE/practice/muxtwo.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/muxtwo.xst" -ofn "E:/ISE/practice/muxtwo.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/muxtwo.xst" -ofn "E:/ISE/practice/muxtwo.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xa3s50-vqg100-4 muxtwo.ngc muxtwo.ngd  
+map -intstyle ise -p xa3s50-vqg100-4 -cm area -ir off -pr off -c 100 -o muxtwo_map.ncd muxtwo.ngd muxtwo.pcf 
+par -w -intstyle ise -ol high -t 1 muxtwo_map.ncd muxtwo.ncd muxtwo.pcf 
+xst -intstyle ise -ifn "E:/ISE/practice/muxtwo.xst" -ofn "E:/ISE/practice/muxtwo.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/muxtwo.xst" -ofn "E:/ISE/practice/muxtwo.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xa3s50-vqg100-4 muxtwo.ngc muxtwo.ngd  
+map -intstyle ise -p xa3s50-vqg100-4 -cm area -ir off -pr off -c 100 -o muxtwo_map.ncd muxtwo.ngd muxtwo.pcf 
+par -w -intstyle ise -ol high -t 1 muxtwo_map.ncd muxtwo.ncd muxtwo.pcf 
+trce -intstyle ise -v 3 -s 4 -n 3 -fastpaths -xml muxtwo.twx muxtwo.ncd -o muxtwo.twr muxtwo.pcf 

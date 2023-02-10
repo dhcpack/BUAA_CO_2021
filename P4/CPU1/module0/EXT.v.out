@@ -1,0 +1,69 @@
+#! /c/Source/iverilog-install/bin/vvp
+:ivl_version "12.0 (devel)" "(s20150603-1110-g18392a46)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision - 12;
+:vpi_module "D:\iverilog\iverilog\lib\ivl\system.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\vhdl_sys.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\vhdl_textio.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\v2005_math.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\va_math.vpi";
+S_000001c950d8edb0 .scope module, "EXT" "EXT" 2 3;
+ .timescale -9 -12;
+    .port_info 0 /INPUT 16 "immoffset";
+    .port_info 1 /INPUT 2 "extop";
+    .port_info 2 /OUTPUT 32 "out";
+L_000001c950e8b018 .functor BUFT 1, C4<00>, C4<0>, C4<0>, C4<0>;
+v000001c950e449a0_0 .net/2u *"_ivl_0", 1 0, L_000001c950e8b018;  1 drivers
+v000001c950e136f0_0 .net *"_ivl_10", 0 0, L_000001c950e8a5f0;  1 drivers
+v000001c950e44080_0 .net *"_ivl_13", 0 0, L_000001c950e8a690;  1 drivers
+v000001c950e44120_0 .net *"_ivl_14", 15 0, L_000001c950e8a190;  1 drivers
+v000001c950e441c0_0 .net *"_ivl_16", 31 0, L_000001c950e8ae10;  1 drivers
+L_000001c950e8b0f0 .functor BUFT 1, C4<10>, C4<0>, C4<0>, C4<0>;
+v000001c950e8a870_0 .net/2u *"_ivl_18", 1 0, L_000001c950e8b0f0;  1 drivers
+v000001c950e8a910_0 .net *"_ivl_2", 0 0, L_000001c950e8a050;  1 drivers
+v000001c950e8a7d0_0 .net *"_ivl_20", 0 0, L_000001c950e8a2d0;  1 drivers
+v000001c950e8a9b0_0 .net *"_ivl_23", 0 0, L_000001c950e8aeb0;  1 drivers
+v000001c950e8a230_0 .net *"_ivl_24", 13 0, L_000001c950e8af50;  1 drivers
+L_000001c950e8b138 .functor BUFT 1, C4<00>, C4<0>, C4<0>, C4<0>;
+v000001c950e8acd0_0 .net/2u *"_ivl_26", 1 0, L_000001c950e8b138;  1 drivers
+v000001c950e8a730_0 .net *"_ivl_28", 31 0, L_000001c950ee4ac0;  1 drivers
+L_000001c950e8b180 .functor BUFT 1, C4<11111111111111111111111111111111>, C4<0>, C4<0>, C4<0>;
+v000001c950e8a0f0_0 .net/2u *"_ivl_30", 31 0, L_000001c950e8b180;  1 drivers
+v000001c950e8aa50_0 .net *"_ivl_32", 31 0, L_000001c950ee3f80;  1 drivers
+v000001c950e8ac30_0 .net *"_ivl_34", 31 0, L_000001c950ee3c60;  1 drivers
+L_000001c950e8b060 .functor BUFT 1, C4<0000000000000000>, C4<0>, C4<0>, C4<0>;
+v000001c950e8a370_0 .net/2u *"_ivl_4", 15 0, L_000001c950e8b060;  1 drivers
+v000001c950e8aaf0_0 .net *"_ivl_6", 31 0, L_000001c950e8a550;  1 drivers
+L_000001c950e8b0a8 .functor BUFT 1, C4<01>, C4<0>, C4<0>, C4<0>;
+v000001c950e8a410_0 .net/2u *"_ivl_8", 1 0, L_000001c950e8b0a8;  1 drivers
+o000001c950e472e8 .functor BUFZ 2, C4<zz>; HiZ drive
+v000001c950e8ab90_0 .net "extop", 1 0, o000001c950e472e8;  0 drivers
+o000001c950e47318 .functor BUFZ 16, C4<zzzzzzzzzzzzzzzz>; HiZ drive
+v000001c950e8ad70_0 .net "immoffset", 15 0, o000001c950e47318;  0 drivers
+v000001c950e8a4b0_0 .net "out", 31 0, L_000001c950ee4ca0;  1 drivers
+L_000001c950e8a050 .cmp/eq 2, o000001c950e472e8, L_000001c950e8b018;
+L_000001c950e8a550 .concat [ 16 16 0 0], o000001c950e47318, L_000001c950e8b060;
+L_000001c950e8a5f0 .cmp/eq 2, o000001c950e472e8, L_000001c950e8b0a8;
+L_000001c950e8a690 .part o000001c950e47318, 15, 1;
+LS_000001c950e8a190_0_0 .concat [ 1 1 1 1], L_000001c950e8a690, L_000001c950e8a690, L_000001c950e8a690, L_000001c950e8a690;
+LS_000001c950e8a190_0_4 .concat [ 1 1 1 1], L_000001c950e8a690, L_000001c950e8a690, L_000001c950e8a690, L_000001c950e8a690;
+LS_000001c950e8a190_0_8 .concat [ 1 1 1 1], L_000001c950e8a690, L_000001c950e8a690, L_000001c950e8a690, L_000001c950e8a690;
+LS_000001c950e8a190_0_12 .concat [ 1 1 1 1], L_000001c950e8a690, L_000001c950e8a690, L_000001c950e8a690, L_000001c950e8a690;
+L_000001c950e8a190 .concat [ 4 4 4 4], LS_000001c950e8a190_0_0, LS_000001c950e8a190_0_4, LS_000001c950e8a190_0_8, LS_000001c950e8a190_0_12;
+L_000001c950e8ae10 .concat [ 16 16 0 0], o000001c950e47318, L_000001c950e8a190;
+L_000001c950e8a2d0 .cmp/eq 2, o000001c950e472e8, L_000001c950e8b0f0;
+L_000001c950e8aeb0 .part o000001c950e47318, 15, 1;
+LS_000001c950e8af50_0_0 .concat [ 1 1 1 1], L_000001c950e8aeb0, L_000001c950e8aeb0, L_000001c950e8aeb0, L_000001c950e8aeb0;
+LS_000001c950e8af50_0_4 .concat [ 1 1 1 1], L_000001c950e8aeb0, L_000001c950e8aeb0, L_000001c950e8aeb0, L_000001c950e8aeb0;
+LS_000001c950e8af50_0_8 .concat [ 1 1 1 1], L_000001c950e8aeb0, L_000001c950e8aeb0, L_000001c950e8aeb0, L_000001c950e8aeb0;
+LS_000001c950e8af50_0_12 .concat [ 1 1 0 0], L_000001c950e8aeb0, L_000001c950e8aeb0;
+L_000001c950e8af50 .concat [ 4 4 4 2], LS_000001c950e8af50_0_0, LS_000001c950e8af50_0_4, LS_000001c950e8af50_0_8, LS_000001c950e8af50_0_12;
+L_000001c950ee4ac0 .concat [ 2 16 14 0], L_000001c950e8b138, o000001c950e47318, L_000001c950e8af50;
+L_000001c950ee3f80 .functor MUXZ 32, L_000001c950e8b180, L_000001c950ee4ac0, L_000001c950e8a2d0, C4<>;
+L_000001c950ee3c60 .functor MUXZ 32, L_000001c950ee3f80, L_000001c950e8ae10, L_000001c950e8a5f0, C4<>;
+L_000001c950ee4ca0 .functor MUXZ 32, L_000001c950ee3c60, L_000001c950e8a550, L_000001c950e8a050, C4<>;
+# The file index is used to find the file name in the following table.
+:file_names 3;
+    "N/A";
+    "<interactive>";
+    "EXT.v";

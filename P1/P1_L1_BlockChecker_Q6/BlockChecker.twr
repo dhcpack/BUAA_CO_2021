@@ -1,0 +1,78 @@
+--------------------------------------------------------------------------------
+Release 14.7 Trace  (nt64)
+Copyright (c) 1995-2013 Xilinx, Inc.  All rights reserved.
+
+D:\ISESetup\14.7\ISE_DS\ISE\bin\nt64\unwrapped\trce.exe -intstyle ise -v 3 -s 2
+-n 3 -fastpaths -xml BlockChecker.twx BlockChecker.ncd -o BlockChecker.twr
+BlockChecker.pcf
+
+Design file:              BlockChecker.ncd
+Physical constraint file: BlockChecker.pcf
+Device,package,speed:     xc6slx4,tqg144,C,-2 (PRODUCTION 1.23 2013-10-13)
+Report level:             verbose report
+
+Environment Variable      Effect 
+--------------------      ------ 
+NONE                      No environment variables were set
+--------------------------------------------------------------------------------
+
+INFO:Timing:2698 - No timing constraints found, doing default enumeration.
+INFO:Timing:3412 - To improve timing, see the Timing Closure User Guide (UG612).
+INFO:Timing:2752 - To get complete path coverage, use the unconstrained paths 
+   option. All paths that are not constrained will be reported in the 
+   unconstrained paths section(s) of the report.
+INFO:Timing:3339 - The clock-to-out numbers in this timing report are based on 
+   a 50 Ohm transmission line loading model.  For the details of this model, 
+   and for more information on accounting for different loading conditions, 
+   please see the device datasheet.
+
+
+
+Data Sheet report:
+-----------------
+All values displayed in nanoseconds (ns)
+
+Setup/Hold to clock clk
+------------+------------+------------+------------+------------+------------------+--------+
+            |Max Setup to|  Process   |Max Hold to |  Process   |                  | Clock  |
+Source      | clk (edge) |   Corner   | clk (edge) |   Corner   |Internal Clock(s) | Phase  |
+------------+------------+------------+------------+------------+------------------+--------+
+in<0>       |    6.970(R)|      SLOW  |    0.004(R)|      SLOW  |clk_BUFGP         |   0.000|
+in<1>       |    7.269(R)|      SLOW  |    0.109(R)|      SLOW  |clk_BUFGP         |   0.000|
+in<2>       |    7.800(R)|      SLOW  |   -0.276(R)|      SLOW  |clk_BUFGP         |   0.000|
+in<3>       |    7.602(R)|      SLOW  |   -0.564(R)|      FAST  |clk_BUFGP         |   0.000|
+in<4>       |    7.468(R)|      SLOW  |   -0.611(R)|      FAST  |clk_BUFGP         |   0.000|
+in<5>       |    6.138(R)|      SLOW  |   -0.876(R)|      FAST  |clk_BUFGP         |   0.000|
+in<6>       |    7.536(R)|      SLOW  |   -0.623(R)|      FAST  |clk_BUFGP         |   0.000|
+in<7>       |    7.706(R)|      SLOW  |   -0.569(R)|      FAST  |clk_BUFGP         |   0.000|
+reset       |    2.972(R)|      SLOW  |    0.041(R)|      SLOW  |clk_BUFGP         |   0.000|
+------------+------------+------------+------------+------------+------------------+--------+
+
+Clock clk to Pad
+------------+-----------------+------------+-----------------+------------+------------------+--------+
+            |Max (slowest) clk|  Process   |Min (fastest) clk|  Process   |                  | Clock  |
+Destination |  (edge) to PAD  |   Corner   |  (edge) to PAD  |   Corner   |Internal Clock(s) | Phase  |
+------------+-----------------+------------+-----------------+------------+------------------+--------+
+result      |        13.033(R)|      SLOW  |         4.437(R)|      FAST  |clk_BUFGP         |   0.000|
+------------+-----------------+------------+-----------------+------------+------------------+--------+
+
+Clock to Setup on destination clock clk
+---------------+---------+---------+---------+---------+
+               | Src:Rise| Src:Fall| Src:Rise| Src:Fall|
+Source Clock   |Dest:Rise|Dest:Rise|Dest:Fall|Dest:Fall|
+---------------+---------+---------+---------+---------+
+clk            |    4.991|         |         |         |
+---------------+---------+---------+---------+---------+
+
+
+Analysis completed Thu Oct 21 21:26:04 2021 
+--------------------------------------------------------------------------------
+
+Trace Settings:
+-------------------------
+Trace Settings 
+
+Peak Memory Usage: 4554 MB
+
+
+

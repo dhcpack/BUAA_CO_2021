@@ -1,0 +1,83 @@
+#! /c/Source/iverilog-install/bin/vvp
+:ivl_version "12.0 (devel)" "(s20150603-1110-g18392a46)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision - 12;
+:vpi_module "D:\iverilog\iverilog\lib\ivl\system.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\vhdl_sys.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\vhdl_textio.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\v2005_math.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\va_math.vpi";
+S_000001a4c80932f0 .scope module, "NPC" "NPC" 2 3;
+ .timescale -9 -12;
+    .port_info 0 /INPUT 32 "pc";
+    .port_info 1 /INPUT 32 "bimm";
+    .port_info 2 /INPUT 1 "zero";
+    .port_info 3 /INPUT 24 "jimm";
+    .port_info 4 /INPUT 32 "ra";
+    .port_info 5 /INPUT 32 "npcop";
+    .port_info 6 /OUTPUT 32 "npc";
+L_000001a4c8112438 .functor BUFT 1, C4<00000000000000000000000000000100>, C4<0>, C4<0>, C4<0>;
+v000001a4c80bb0c0_0 .net/2u *"_ivl_0", 31 0, L_000001a4c8112438;  1 drivers
+v000001a4c80bbb60_0 .net *"_ivl_10", 0 0, L_000001a4c8111ff0;  1 drivers
+L_000001a4c8112510 .functor BUFT 1, C4<00000000000000000000000000000100>, C4<0>, C4<0>, C4<0>;
+v000001a4c80bb480_0 .net/2u *"_ivl_12", 31 0, L_000001a4c8112510;  1 drivers
+v000001a4c80bb200_0 .net *"_ivl_14", 31 0, L_000001a4c8111370;  1 drivers
+v000001a4c80bbc00_0 .net *"_ivl_16", 31 0, L_000001a4c8111690;  1 drivers
+v000001a4c80baf80_0 .net *"_ivl_21", 9 0, L_000001a4c81114b0;  1 drivers
+L_000001a4c8112558 .functor BUFT 1, C4<00>, C4<0>, C4<0>, C4<0>;
+v000001a4c80bbd40_0 .net/2u *"_ivl_22", 1 0, L_000001a4c8112558;  1 drivers
+v000001a4c80bbac0_0 .net *"_ivl_24", 35 0, L_000001a4c8111550;  1 drivers
+L_000001a4c81125a0 .functor BUFT 1, C4<00000000000000000000000000000000>, C4<0>, C4<0>, C4<0>;
+v000001a4c80bbde0_0 .net/2u *"_ivl_28", 31 0, L_000001a4c81125a0;  1 drivers
+v000001a4c80bbca0_0 .net *"_ivl_30", 0 0, L_000001a4c8111a50;  1 drivers
+L_000001a4c81125e8 .functor BUFT 1, C4<00000000000000000000000000000001>, C4<0>, C4<0>, C4<0>;
+v000001a4c80bb7a0_0 .net/2u *"_ivl_32", 31 0, L_000001a4c81125e8;  1 drivers
+v000001a4c80bbe80_0 .net *"_ivl_34", 0 0, L_000001a4c8110ab0;  1 drivers
+L_000001a4c8112630 .functor BUFT 1, C4<00000000000000000000000000000010>, C4<0>, C4<0>, C4<0>;
+v000001a4c80bb8e0_0 .net/2u *"_ivl_36", 31 0, L_000001a4c8112630;  1 drivers
+v000001a4c80bb520_0 .net *"_ivl_38", 0 0, L_000001a4c8110e70;  1 drivers
+v000001a4c80bb5c0_0 .net *"_ivl_4", 31 0, L_000001a4c8110970;  1 drivers
+L_000001a4c8112678 .functor BUFT 1, C4<11111111111111111111111111111111>, C4<0>, C4<0>, C4<0>;
+v000001a4c80bb020_0 .net/2u *"_ivl_40", 31 0, L_000001a4c8112678;  1 drivers
+v000001a4c80bb660_0 .net *"_ivl_42", 31 0, L_000001a4c8111d70;  1 drivers
+v000001a4c80bb700_0 .net *"_ivl_44", 31 0, L_000001a4c8111cd0;  1 drivers
+L_000001a4c8112480 .functor BUFT 1, C4<0000000000000000000000000000000>, C4<0>, C4<0>, C4<0>;
+v000001a4c80bb160_0 .net *"_ivl_7", 30 0, L_000001a4c8112480;  1 drivers
+L_000001a4c81124c8 .functor BUFT 1, C4<00000000000000000000000000000001>, C4<0>, C4<0>, C4<0>;
+v000001a4c80bb2a0_0 .net/2u *"_ivl_8", 31 0, L_000001a4c81124c8;  1 drivers
+o000001a4c80c7358 .functor BUFZ 32, C4<zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz>; HiZ drive
+v000001a4c80bb980_0 .net "bimm", 31 0, o000001a4c80c7358;  0 drivers
+o000001a4c80c7388 .functor BUFZ 24, C4<zzzzzzzzzzzzzzzzzzzzzzzz>; HiZ drive
+v000001a4c80bba20_0 .net "jimm", 23 0, o000001a4c80c7388;  0 drivers
+v000001a4c80bb840_0 .net "npc", 31 0, L_000001a4c8110830;  1 drivers
+o000001a4c80c73e8 .functor BUFZ 32, C4<zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz>; HiZ drive
+v000001a4c8111410_0 .net "npcop", 31 0, o000001a4c80c73e8;  0 drivers
+o000001a4c80c7418 .functor BUFZ 32, C4<zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz>; HiZ drive
+v000001a4c81105b0_0 .net "pc", 31 0, o000001a4c80c7418;  0 drivers
+v000001a4c8110470_0 .net "pc4", 31 0, L_000001a4c8112270;  1 drivers
+v000001a4c81121d0_0 .net "pcbimm", 31 0, L_000001a4c81106f0;  1 drivers
+v000001a4c8111730_0 .net "pcjimm", 31 0, L_000001a4c81115f0;  1 drivers
+o000001a4c80c74d8 .functor BUFZ 32, C4<zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz>; HiZ drive
+v000001a4c8110510_0 .net "ra", 31 0, o000001a4c80c74d8;  0 drivers
+o000001a4c80c7508 .functor BUFZ 1, C4<z>; HiZ drive
+v000001a4c8110c90_0 .net "zero", 0 0, o000001a4c80c7508;  0 drivers
+L_000001a4c8112270 .arith/sum 32, o000001a4c80c7418, L_000001a4c8112438;
+L_000001a4c8110970 .concat [ 1 31 0 0], o000001a4c80c7508, L_000001a4c8112480;
+L_000001a4c8111ff0 .cmp/eq 32, L_000001a4c8110970, L_000001a4c81124c8;
+L_000001a4c8111370 .arith/sum 32, o000001a4c80c7418, L_000001a4c8112510;
+L_000001a4c8111690 .arith/sum 32, L_000001a4c8111370, o000001a4c80c7358;
+L_000001a4c81106f0 .functor MUXZ 32, L_000001a4c8112270, L_000001a4c8111690, L_000001a4c8111ff0, C4<>;
+L_000001a4c81114b0 .part o000001a4c80c7418, 22, 10;
+L_000001a4c8111550 .concat [ 2 24 10 0], L_000001a4c8112558, o000001a4c80c7388, L_000001a4c81114b0;
+L_000001a4c81115f0 .part L_000001a4c8111550, 0, 32;
+L_000001a4c8111a50 .cmp/eq 32, o000001a4c80c73e8, L_000001a4c81125a0;
+L_000001a4c8110ab0 .cmp/eq 32, o000001a4c80c73e8, L_000001a4c81125e8;
+L_000001a4c8110e70 .cmp/eq 32, o000001a4c80c73e8, L_000001a4c8112630;
+L_000001a4c8111d70 .functor MUXZ 32, L_000001a4c8112678, L_000001a4c81115f0, L_000001a4c8110e70, C4<>;
+L_000001a4c8111cd0 .functor MUXZ 32, L_000001a4c8111d70, L_000001a4c81106f0, L_000001a4c8110ab0, C4<>;
+L_000001a4c8110830 .functor MUXZ 32, L_000001a4c8111cd0, L_000001a4c8112270, L_000001a4c8111a50, C4<>;
+# The file index is used to find the file name in the following table.
+:file_names 3;
+    "N/A";
+    "<interactive>";
+    "NPC.v";

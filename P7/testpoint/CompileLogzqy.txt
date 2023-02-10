@@ -1,0 +1,56 @@
+Running: D:\ISESetup\14.7\ISE_DS\ISE\bin\nt64\unwrapped\fuse.exe --nodebug --prj testzqy.prj -o testmipszqy.exe mips_txt 
+ISim P.20131013 (signature 0x7708f090)
+Number of CPUs detected in this system: 12
+Turning on mult-threading, number of parallel sub-compilation jobs: 24 
+Determining compilation order of HDL files
+Analyzing Verilog file "E:\1-Project\P7\testpoint\modulezqy\control_values.v" into library work
+Analyzing Verilog file "E:\1-Project\P7\testpoint\modulezqy\mips.v" into library work
+Analyzing Verilog file "E:\1-Project\P7\testpoint\modulezqy\mips_bridge.v" into library work
+Analyzing Verilog file "E:\1-Project\P7\testpoint\modulezqy\mips_cpu.v" into library work
+Analyzing Verilog file "E:\1-Project\P7\testpoint\modulezqy\mips_timer.v" into library work
+Analyzing Verilog file "E:\1-Project\P7\testpoint\modulezqy\mips_txt.v" into library work
+Analyzing Verilog file "E:\1-Project\P7\testpoint\modulezqy\mod_ALU.v" into library work
+Analyzing Verilog file "E:\1-Project\P7\testpoint\modulezqy\mod_Branch.v" into library work
+Analyzing Verilog file "E:\1-Project\P7\testpoint\modulezqy\mod_CMP.v" into library work
+Analyzing Verilog file "E:\1-Project\P7\testpoint\modulezqy\mod_Controller.v" into library work
+Analyzing Verilog file "E:\1-Project\P7\testpoint\modulezqy\mod_CoProc0.v" into library work
+Analyzing Verilog file "E:\1-Project\P7\testpoint\modulezqy\mod_DataExt.v" into library work
+Analyzing Verilog file "E:\1-Project\P7\testpoint\modulezqy\mod_EXT.v" into library work
+Analyzing Verilog file "E:\1-Project\P7\testpoint\modulezqy\mod_GRF.v" into library work
+Analyzing Verilog file "E:\1-Project\P7\testpoint\modulezqy\mod_MultDiv.v" into library work
+Analyzing Verilog file "E:\1-Project\P7\testpoint\modulezqy\mod_PC.v" into library work
+Analyzing Verilog file "E:\1-Project\P7\testpoint\modulezqy\mod_regEXMem.v" into library work
+Analyzing Verilog file "E:\1-Project\P7\testpoint\modulezqy\mod_regIDEX.v" into library work
+Analyzing Verilog file "E:\1-Project\P7\testpoint\modulezqy\mod_regIFID.v" into library work
+Analyzing Verilog file "E:\1-Project\P7\testpoint\modulezqy\mod_regMemWB.v" into library work
+Analyzing Verilog file "E:\1-Project\P7\testpoint\modulezqy\mod_Replacer.v" into library work
+Analyzing Verilog file "E:\1-Project\P7\testpoint\modulezqy\mod_Splitter.v" into library work
+Starting static elaboration
+Completed static elaboration
+Compiling module mod_PC
+Compiling module mod_regFD
+Compiling module mod_Splitter
+Compiling module mod_Replacer
+Compiling module mod_CMP
+Compiling module mod_Branch
+Compiling module mod_EXT
+Compiling module mod_regDE
+Compiling module mod_ALU
+Compiling module mod_MultDiv
+Compiling module mod_CP0
+Compiling module mod_regEM
+Compiling module mod_DataExt
+Compiling module mod_regMW
+Compiling module mod_RF
+Compiling module mod_Controller
+Compiling module mips_cpu
+Compiling module mips_bridge
+Compiling module TC
+Compiling module mips
+Compiling module mips_txt
+Time Resolution for simulation is 1ps.
+Waiting for 1 sub-compilation(s) to finish...
+Compiled 21 Verilog Units
+Built simulation executable testmipszqy.exe
+Fuse Memory Usage: 34116 KB
+Fuse CPU Usage: 655 ms

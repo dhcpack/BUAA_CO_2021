@@ -1,0 +1,4 @@
+Error in C:\Users\Си\Desktop\Debug_Program\test\mips10.asm line 205 column 5: Symbol "func1" not found in symbol table.
+
+Processing terminated due to errors.
+This segment has not been written to, there is nothing to dump.

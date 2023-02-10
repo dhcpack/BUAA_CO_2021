@@ -1,0 +1,2 @@
+xst -intstyle ise -ifn "E:/ISE/ALU/ALU.xst" -ofn "E:/ISE/ALU/ALU.syr" 
+vhdtdtfi -lang verilog -prj ALU -o E:/ISE/ALU/ALU.tfi -lib work E:/ISE/ALU//ALU.v -module ALU -template D:/ISESetup/14.7/ISE_DS/ISE//data/tfi.tft -deleteonerror 

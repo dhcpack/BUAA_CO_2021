@@ -1,0 +1,23 @@
+lui $t0,0xffff
+ori $t0,0x1234
+lui $t1,0x2345
+ori $t1,256
+mult $t0,$t1
+addu $s0,$t0,$t1
+addu $s1,$s0,$t0
+subu $s2,$t1,$s1
+sw $s1,0($0)
+mfhi $t2
+mflo $t3
+multu $t0,$t3
+mfhi $k0
+mflo $t4
+div $t3,$t4
+mfhi $t5
+mflo $k0
+divu $t3,$t2
+mfhi $k0
+mflo $t6
+
+mtlo $t3
+mthi $t4

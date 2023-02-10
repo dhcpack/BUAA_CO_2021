@@ -1,0 +1,1 @@
+-intstyle "ise" -incremental -lib "unisims_ver" -lib "unimacro_ver" -lib "xilinxcorelib_ver" -lib "secureip" -o "E:/ISE/Pre/learn/learn20211203/practice_tb_isim_beh.exe" -prj "E:/ISE/Pre/learn/learn20211203/practice_tb_beh.prj" "work.practice_tb" "work.glbl" 

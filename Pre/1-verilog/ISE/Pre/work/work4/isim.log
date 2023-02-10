@@ -1,0 +1,325 @@
+ISim log file
+Running: E:\ISE\work\work4\tb_isim_beh.exe -intstyle ise -gui -tclbatch isim.cmd -wdb E:/ISE/work/work4/tb_isim_beh.wdb 
+ISim P.20131013 (signature 0x7708f090)
+This is a Full version of ISim.
+Time resolution is 1 ps
+# onerror resume
+# wave add /
+# run 1000 ns
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+1
+0
+0
+0
+0
+0
+0
+0
+0
+# step
+Stopped at time : 1001 ns : File "E:/ISE/work/work4/cpu_checker_tb.v" Line 76
+# step
+Stopped at time : 1001 ns : File "E:/ISE/work/work4/cpu_checker_tb.v" Line 76
+# restart
+# run all
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+1
+0
+0
+0
+0
+0
+0
+0
+0
+Stopped at time : 13373246 ns : File "E:/ISE/work/work4/cpu_checker_tb.v" Line 76
+# step
+Stopped at time : 13373246 ns : File "E:/ISE/work/work4/cpu_checker_tb.v" Line 76
+# step
+Stopped at time : 13373247 ns : File "E:/ISE/work/work4/cpu_checker_tb.v" Line 76
+# restart
+# restart
+# run all
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+Stopped at time : 54 ns : File "E:/ISE/work/work4/cpu_checker_tb.v" Line 63
+# run all
+0
+Stopped at time : 56 ns : File "E:/ISE/work/work4/cpu_checker_tb.v" Line 63
+# run all
+Stopped at time : 56 ns : File "E:/ISE/work/work4/cpu_checker_tb.v" Line 64
+# run all
+0
+Stopped at time : 58 ns : File "E:/ISE/work/work4/cpu_checker_tb.v" Line 65
+# restart
+# run all
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+Stopped at time : 58 ns : File "E:/ISE/work/work4/cpu_checker_tb.v" Line 65
+# step
+Stopped at time : 58 ns : File "E:/ISE/work/work4/cpu_checker_tb.v" Line 76
+ISim P.20131013 (signature 0x7708f090)
+This is a Full version of ISim.
+# run 1000 ns
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+Stopped at time : 58 ns : File "E:/ISE/work/work4/cpu_checker_tb.v" Line 65
+# step
+Stopped at time : 58 ns : File "E:/ISE/work/work4/cpu_checker_tb.v" Line 76
+# step
+Stopped at time : 58 ns : File "E:/ISE/work/work4/cpu_checker_tb.v" Line 76
+# restart
+# run all
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+Stopped at time : 58 ns : File "E:/ISE/work/work4/cpu_checker_tb.v" Line 65
+# run 1.00us
+0
+Stopped at time : 60 ns : File "E:/ISE/work/work4/cpu_checker_tb.v" Line 65
+# restart
+# run 1.00us
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+Stopped at time : 58 ns : File "E:/ISE/work/work4/cpu_checker_tb.v" Line 65
+ISim P.20131013 (signature 0x7708f090)
+This is a Full version of ISim.
+# run 1000 ns
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+Stopped at time : 58 ns : File "E:/ISE/work/work4/cpu_checker_tb.v" Line 65
+ISim P.20131013 (signature 0x7708f090)
+This is a Full version of ISim.
+# run 1000 ns
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+Stopped at time : 58 ns : File "E:/ISE/work/work4/cpu_checker_tb.v" Line 65

@@ -1,0 +1,555 @@
+name	31	30	29	28	27	26	5	4	3	2	1	0	MemtoReg	MemWrite	Branch		ALU[4]		ALU[3]		ALU[2]
+lw		1	0	0	0	1	1	X	X	X	X	X	X	1			0			0			0			0			0
+sw		1	0	1	0	1	1	X	X	X	X	X	X	X			1			0			0			0			0
+lb		1	0	0	0	0	0	X	X	X	X	X	X	1			0			0			0			0			0
+lbu		1	0	0	1	0	0	X	X	X	X	X	X	1			0			0			0			0			0
+sb		1	0	1	0	0	0	X	X	X	X	X	X	X			1			0			0			0			0
+lh		1	0	0	0	0	1	X	X	X	X	X	X	1			0			0			0			0			0
+lhu		1	0	0	1	0	1	X	X	X	X	X	X	1			0			0			0			0			0
+sh		1	0	1	0	0	1	X	X	X	X	X	X	X			1			0			0			0			0
+add		0	0	0	0	0	0	1	0	0	0	0	0	0			0			0			0			0			0
+addu	0	0	0	0	0	0	1	0	0	0	0	1	0			0			0			0			0			0
+sub		0	0	0	0	0	0	1	0	0	0	1	0	0			0			0			0			0			1
+subu	0	0	0	0	0	0	1	0	0	0	1	1	0			0			0			0			0			1
+and		0	0	0	0	0	0	1	0	0	1	0	0	0			0			0			0			0			0
+or		0	0	0	0	0	0	1	0	0	1	0	1	0			0			0			0			0			0
+slt		0	0	0	0	0	0	1	0	1	0	1	0	0			0			0			0			0			1
+nor		0	0	0	0	0	0	1	0	0	1	1	1	0			0			0			0			1			1
+xor		0	0	0	0	0	0	1	0	0	1	1	0	0			0			0			0			0			0
+sll		0	0	0	0	0	0	0	0	0	0	0	0	0			0			0			0			1			0
+srl		0	0	0	0	0	0	0	0	0	0	1	0	0			0			0			0			1			0
+sra		0	0	0	0	0	0	0	0	0	0	1	1	0			0			0			0			1			0
+sllv	0	0	0	0	0	0	0	0	0	1	0	0	0			0			0			0			1			0
+srlv	0	0	0	0	0	0	0	0	0	1	1	0	0			0			0			0			1			0
+srav	0	0	0	0	0	0	0	0	0	1	1	1	0			0			0			0			1			0
+sltu	0	0	0	0	0	0	1	0	1	0	1	1	0			0			0			0			1			1
+beq		0	0	0	1	0	0	X	X	X	X	X	X	X			0			1			0			0			0
+bne		0	0	0	1	0	1	X	X	X	X	X	X	X			0			1			0			1			1
+bgtz	0	0	0	1	1	1	X	X	X	X	X	X	X			0			1			0			0			1
+blez	0	0	0	1	1	0	X	X	X	X	X	X	X			0			1			0			1			1
+bltz	0	0	0	0	0	1	\N	\0	\0	\0	\0	\0	X			0			1			0			0			1
+bgez	0	0	0	0	0	1	\N	\0	\0	\0	\0	\1	X			0			1			0			1			0
+addi	0	0	1	0	0	0	X	X	X	X	X	X	0			0			0			0			0			0
+addiu	0	0	1	0	0	1	X	X	X	X	X	X	0			0			0			0			0			0
+andi	0	0	1	1	0	0	X	X	X	X	X	X	0			0			0			0			0			0
+ori		0	0	1	1	0	1	X	X	X	X	X	X	0			0			0			0			0			0
+xori	0	0	1	1	1	0	X	X	X	X	X	X	0			0			0			0			0			0
+lui		0	0	1	1	1	1	X	X	X	X	X	X	0			0			0			1			0			0
+slti	0	0	1	0	1	0	X	X	X	X	X	X	0			0			0			0			0			1
+sltiu	0	0	1	0	1	1	X	X	X	X	X	X	0			0			0			0			1			1
+j		0	0	0	0	1	0	X	X	X	X	X	X	X			0			X			X			X			X
+jr		0	0	0	0	0	0	0	0	1	0	0	0	X			0			X			X			X			X
+jal		0	0	0	0	1	1	X	X	X	X	X	X	0			0			X			X			X			X
+jalr	0	0	0	0	0	0	0	0	1	0	0	1	0			0			X			X			X			X
+name	31	30	29	28	27	26	5	4	3	2	1	0	ALU[1]		ALU[0]		ALUSrc[1]	ALUSrc[0]	RegDst		RegWrite
+lw		1	0	0	0	1	1	X	X	X	X	X	X	1			0			0			1			0			1
+sw		1	0	1	0	1	1	X	X	X	X	X	X	1			0			0			1			X			0
+lb		1	0	0	0	0	0	X	X	X	X	X	X	1			0			0			1			0			1
+lbu		1	0	0	1	0	0	X	X	X	X	X	X	1			0			0			1			0			1
+sb		1	0	1	0	0	0	X	X	X	X	X	X	1			0			0			1			X			0
+lh		1	0	0	0	0	1	X	X	X	X	X	X	1			0			0			1			0			1
+lhu		1	0	0	1	0	1	X	X	X	X	X	X	1			0			0			1			0			1
+sh		1	0	1	0	0	1	X	X	X	X	X	X	1			0			0			1			X			0
+add		0	0	0	0	0	0	1	0	0	0	0	0	1			0			0			0			1			1
+addu	0	0	0	0	0	0	1	0	0	0	0	1	1			0			0			0			1			1
+sub		0	0	0	0	0	0	1	0	0	0	1	0	1			0			0			0			1			1
+subu	0	0	0	0	0	0	1	0	0	0	1	1	1			0			0			0			1			1
+and		0	0	0	0	0	0	1	0	0	1	0	0	0			0			0			0			1			1
+or		0	0	0	0	0	0	1	0	0	1	0	1	0			1			0			0			1			1
+slt		0	0	0	0	0	0	1	0	1	0	1	0	1			1			0			0			1			1
+nor		0	0	0	0	0	0	1	0	0	1	1	1	0			0			0			0			1			1
+xor		0	0	0	0	0	0	1	0	0	1	1	0	1			1			0			0			1			1
+sll		0	0	0	0	0	0	0	0	0	0	0	0	0			1			1			0			1			1
+srl		0	0	0	0	0	0	0	0	0	0	1	0	1			0			1			0			1			1
+sra		0	0	0	0	0	0	0	0	0	0	1	1	1			1			1			0			1			1
+sllv	0	0	0	0	0	0	0	0	0	1	0	0	0			1			0			0			1			1
+srlv	0	0	0	0	0	0	0	0	0	1	1	0	1			0			0			0			1			1
+srav	0	0	0	0	0	0	0	0	0	1	1	1	1			1			0			0			1			1
+sltu	0	0	0	0	0	0	1	0	1	0	1	1	1			0			0			0			1			1
+beq		0	0	0	1	0	0	X	X	X	X	X	X	1			1			0			0			X			0
+bne		0	0	0	1	0	1	X	X	X	X	X	X	0			1			0			0			X			0
+bgtz	0	0	0	1	1	1	X	X	X	X	X	X	0			0			0			0			X			0
+blez	0	0	0	1	1	0	X	X	X	X	X	X	1			1			0			0			X			0
+bltz	0	0	0	0	0	1	\N	\0	\0	\0	\0	\0	0			1			0			0			X			0
+bgez	0	0	0	0	0	1	\N	\0	\0	\0	\0	\1	0			0			0			0			X			0
+addi	0	0	1	0	0	0	X	X	X	X	X	X	1			0			0			1			0			1
+addiu	0	0	1	0	0	1	X	X	X	X	X	X	1			0			0			1			0			1
+andi	0	0	1	1	0	0	X	X	X	X	X	X	0			0			0			1			0			1
+ori		0	0	1	1	0	1	X	X	X	X	X	X	0			1			0			1			0			1
+xori	0	0	1	1	1	0	X	X	X	X	X	X	1			1			0			1			0			1
+lui		0	0	1	1	1	1	X	X	X	X	X	X	0			0			0			1			0			1
+slti	0	0	1	0	1	0	X	X	X	X	X	X	1			1			0			1			0			1
+sltiu	0	0	1	0	1	1	X	X	X	X	X	X	1			0			0			1			0			1
+j		0	0	0	0	1	0	X	X	X	X	X	X	X			X			X			X			X			0
+jr		0	0	0	0	0	0	0	0	1	0	0	0	X			X			X			X			X			0
+jal		0	0	0	0	1	1	X	X	X	X	X	X	X			X			X			X			X			1
+jalr	0	0	0	0	0	0	0	0	1	0	0	1	X			X			X			X			1			1
+name	31	30	29	28	27	26	5	4	3	2	1	0	HAndD[2]	HAndD[1]	HAndD[0]	Extend[1]	Extend[0]	JL[1]
+lw		1	0	0	0	1	1	X	X	X	X	X	X	0			0			X			0			0			0
+sw		1	0	1	0	1	1	X	X	X	X	X	X	0			0			X			0			0			0
+lb		1	0	0	0	0	0	X	X	X	X	X	X	1			0			1			0			0			0
+lbu		1	0	0	1	0	0	X	X	X	X	X	X	1			0			0			0			0			0
+sb		1	0	1	0	0	0	X	X	X	X	X	X	1			0			X			0			0			0
+lh		1	0	0	0	0	1	X	X	X	X	X	X	0			1			1			0			0			0
+lhu		1	0	0	1	0	1	X	X	X	X	X	X	0			1			0			0			0			0
+sh		1	0	1	0	0	1	X	X	X	X	X	X	0			1			X			0			0			0
+add		0	0	0	0	0	0	1	0	0	0	0	0	X			X			X			X			X			0
+add		0	0	0	0	0	0	1	0	0	0	0	1	X			X			X			X			X			0
+sub		0	0	0	0	0	0	1	0	0	0	1	0	X			X			X			X			X			0
+subu	0	0	0	0	0	0	1	0	0	0	1	1	X			X			X			X			X			0
+and		0	0	0	0	0	0	1	0	0	1	0	0	X			X			X			X			X			0
+or		0	0	0	0	0	0	1	0	0	1	0	1	X			X			X			X			X			0
+slt		0	0	0	0	0	0	1	0	1	0	1	0	X			X			X			X			X			0
+nor		0	0	0	0	0	0	1	0	0	1	1	1	X			X			X			X			X			0
+xor		0	0	0	0	0	0	1	0	0	1	1	0	X			X			X			X			X			0
+sll		0	0	0	0	0	0	0	0	0	0	0	0	X			X			X			1			0			0
+srl		0	0	0	0	0	0	0	0	0	0	1	0	X			X			X			1			0			0
+sra		0	0	0	0	0	0	0	0	0	0	1	1	X			X			X			1			0			0
+sllv	0	0	0	0	0	0	0	0	0	1	0	0	X			X			X			X			X			0
+srlv	0	0	0	0	0	0	0	0	0	1	1	0	X			X			X			X			X			0
+srav	0	0	0	0	0	0	0	0	0	1	1	1	X			X			X			X			X			0
+sltu	0	0	0	0	0	0	1	0	1	0	1	1	X			X			X			X			X			0
+beq		0	0	0	1	0	0	X	X	X	X	X	X	X			X			X			0			0			0
+bne		0	0	0	1	0	1	X	X	X	X	X	X	X			X			X			0			0			0
+bgtz	0	0	0	1	1	1	X	X	X	X	X	X	X			X			X			0			0			0
+blez	0	0	0	1	1	0	X	X	X	X	X	X	X			X			X			0			0			0
+bltz	0	0	0	0	0	1	\N	\0	\0	\0	\0	\0	X			X			X			0			0			0
+bgez	0	0	0	0	0	1	\N	\0	\0	\0	\0	\1	X			X			X			0			0			0
+addi	0	0	1	0	0	0	X	X	X	X	X	X	X			X			X			0			0			0
+addiu	0	0	1	0	0	1	X	X	X	X	X	X	X			X			X			0			0			0
+andi	0	0	1	1	0	0	X	X	X	X	X	X	X			X			X			0			1			0
+ori		0	0	1	1	0	1	X	X	X	X	X	X	X			X			X			0			1			0
+xori	0	0	1	1	1	0	X	X	X	X	X	X	X			X			X			0			1			0
+lui		0	0	1	1	1	1	X	X	X	X	X	X	X			X			X			0			0			0
+slti	0	0	1	0	1	0	X	X	X	X	X	X	X			X			X			0			0			0
+sltiu	0	0	1	0	1	1	X	X	X	X	X	X	X			X			X			0			0			0
+j		0	0	0	0	1	0	X	X	X	X	X	X	X			X			X			X			X			0
+jr		0	0	0	0	0	0	0	0	1	0	0	0	X			X			X			X			X			1
+jal		0	0	0	0	1	1	X	X	X	X	X	X	X			X			X			X			X			0
+jalr	0	0	0	0	0	0	0	0	1	0	0	1	X			X			X			X			X			1
+name	31	30	29	28	27	26	5	4	3	2	1	0	JL[0]		JR			To31		Overflow	NULL		NULL
+lw		1	0	0	0	1	1	X	X	X	X	X	X	0			0			0			0						
+sw		1	0	1	0	1	1	X	X	X	X	X	X	0			X			X			0						
+lb		1	0	0	0	0	0	X	X	X	X	X	X	0			0			0			0						
+lbu		1	0	0	1	0	0	X	X	X	X	X	X	0			0			0			0						
+sb		1	0	1	0	0	0	X	X	X	X	X	X	0			X			X			0						
+lh		1	0	0	0	0	1	X	X	X	X	X	X	0			0			0			0						
+lhu		1	0	0	1	0	1	X	X	X	X	X	X	0			0			0			0						
+sh		1	0	1	0	0	1	X	X	X	X	X	X	0			X			X			0						
+add		0	0	0	0	0	0	1	0	0	0	0	0	0			0			0			1						
+addu	0	0	0	0	0	0	1	0	0	0	0	1	0			0			0			0						
+sub		0	0	0	0	0	0	1	0	0	0	1	0	0			0			0			1						
+subu	0	0	0	0	0	0	1	0	0	0	1	1	0			0			0			0						
+and		0	0	0	0	0	0	1	0	0	1	0	0	0			0			0			0						
+or		0	0	0	0	0	0	1	0	0	1	0	1	0			0			0			0						
+slt		0	0	0	0	0	0	1	0	1	0	1	0	0			0			0			0						
+nor		0	0	0	0	0	0	1	0	0	1	1	1	0			0			0			0						
+xor		0	0	0	0	0	0	1	0	0	1	1	0	0			0			0			0						
+sll		0	0	0	0	0	0	0	0	0	0	0	0	0			0			0			0						
+srl		0	0	0	0	0	0	0	0	0	0	1	0	0			0			0			0						
+sra		0	0	0	0	0	0	0	0	0	0	1	1	0			0			0			0						
+sllv	0	0	0	0	0	0	0	0	0	1	0	0	0			0			0			0						
+srlv	0	0	0	0	0	0	0	0	0	1	1	0	0			0			0			0						
+srav	0	0	0	0	0	0	0	0	0	1	1	1	0			0			0			0						
+sltu	0	0	0	0	0	0	1	0	1	0	1	1	0			0			0			0						
+beq		0	0	0	1	0	0	X	X	X	X	X	X	0			X			X			0						
+bne		0	0	0	1	0	1	X	X	X	X	X	X	0			X			X			0						
+bgtz	0	0	0	1	1	1	X	X	X	X	X	X	0			X			X			0						
+blez	0	0	0	1	1	0	X	X	X	X	X	X	0			X			X			0						
+bltz	0	0	0	0	0	1	\N	\0	\0	\0	\0	\0	0			X			X			0						
+bgez	0	0	0	0	0	1	\N	\0	\0	\0	\0	\1	0			X			X			0						
+addi	0	0	1	0	0	0	X	X	X	X	X	X	0			0			0			1						
+addiu	0	0	1	0	0	1	X	X	X	X	X	X	0			0			0			0						
+andi	0	0	1	1	0	0	X	X	X	X	X	X	0			0			0			0						
+ori		0	0	1	1	0	1	X	X	X	X	X	X	0			0			0			0						
+xori	0	0	1	1	1	0	X	X	X	X	X	X	0			0			0			0						
+lui		0	0	1	1	1	1	X	X	X	X	X	X	0			0			0			0						
+slti	0	0	1	0	1	0	X	X	X	X	X	X	0			0			0			0						
+sltiu	0	0	1	0	1	1	X	X	X	X	X	X	0			0			0			0						
+j		0	0	0	0	1	0	X	X	X	X	X	X	1			X			X			0						
+jr		0	0	0	0	0	0	0	0	1	0	0	0	0			X			X			0						
+jal		0	0	0	0	1	1	X	X	X	X	X	X	1			1			1			0						
+jalr	0	0	0	0	0	0	0	0	1	0	0	1	0			1			0			0						
+------------------------------------------------------------------------------------------------------------------
+
+//22 Output
+
+31-26
+1 0 0 0 1 1 -> 1 0 0 0 0 0 1 0 0 1 0 1 0 0 X 0 0 0 0 0 0 0
+1 0 1 0 1 1 -> X 1 0 0 0 0 1 0 0 1 X 0 0 0 X 0 0 0 0 X X 0
+1 0 0 0 0 0 -> 1 0 0 0 0 0 1 0 0 1 0 1 1 0 1 0 0 0 0 0 0 0
+1 0 0 1 0 0 -> 1 0 0 0 0 0 1 0 0 1 0 1 1 0 0 0 0 0 0 0 0 0
+1 0 1 0 0 0 -> X 1 0 0 0 0 1 0 0 1 X 0 1 0 X 0 0 0 0 X X 0
+1 0 0 0 0 1 -> 1 0 0 0 0 0 1 0 0 1 0 1 0 1 1 0 0 0 0 0 0 0
+1 0 0 1 0 1 -> 1 0 0 0 0 0 1 0 0 1 0 1 0 1 0 0 0 0 0 0 0 0
+1 0 1 0 0 1 -> X 1 0 0 0 0 1 0 0 1 X 0 0 1 X 0 0 0 0 X X 0
+0 0 0 1 0 0 -> X 0 1 0 0 0 1 1 0 0 X 0 X X X 0 0 0 0 X X 0
+0 0 0 1 0 1 -> X 0 1 0 1 1 0 1 0 0 X 0 X X X 0 0 0 0 X X 0
+0 0 0 1 1 1 -> X 0 1 0 0 1 0 0 0 0 X 0 X X X 0 0 0 0 X X 0
+0 0 0 1 1 0 -> X 0 1 0 1 1 1 1 0 0 X 0 X X X 0 0 0 0 X X 0
+0 0 1 0 0 0 -> 0 0 0 0 0 0 1 0 0 1 0 1 X X X 0 0 0 0 0 0 1
+0 0 1 0 0 1 -> 0 0 0 0 0 0 1 0 0 1 0 1 X X X 0 0 0 0 0 0 0
+0 0 1 1 0 0 -> 0 0 0 0 0 0 0 0 0 1 0 1 X X X 0 1 0 0 0 0 0
+0 0 1 1 0 1 -> 0 0 0 0 0 0 0 1 0 1 0 1 X X X 0 1 0 0 0 0 0
+0 0 1 1 1 0 -> 0 0 0 0 0 0 1 1 0 1 0 1 X X X 0 1 0 0 0 0 0
+0 0 1 1 1 1 -> 0 0 0 1 0 0 0 0 0 1 0 1 X X X 0 0 0 0 0 0 0
+0 0 1 0 1 0 -> 0 0 0 0 0 1 1 1 0 1 0 1 X X X 0 0 0 0 0 0 0
+0 0 1 0 1 1 -> 0 0 0 0 1 1 1 0 0 1 0 1 X X X 0 0 0 0 0 0 0
+0 0 0 0 1 0 -> X 0 X X X X X X X X X 0 X X X X X 0 1 X X 0
+0 0 0 0 1 1 -> 0 0 X X X X X X X X X 1 X X X X X 0 1 1 1 0
+
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x 0 x x x x x x x x x 0
+0 0 x x x x x x x x x 1
+x 0 1 0 0 0 1 1 0 0 x 0
+x 0 1 0 1 1 0 1 0 0 x 0
+x 0 1 0 1 1 1 1 0 0 x 0
+x 0 1 0 0 1 0 0 0 0 x 0
+0 0 0 0 0 0 1 0 0 1 0 1
+0 0 0 0 0 0 1 0 0 1 0 1
+0 0 0 0 0 1 1 1 0 1 0 1
+0 0 0 0 1 1 1 0 0 1 0 1
+0 0 0 0 0 0 0 0 0 1 0 1
+0 0 0 0 0 0 0 1 0 1 0 1
+0 0 0 0 0 0 1 1 0 1 0 1
+0 0 0 1 0 0 0 0 0 1 0 1
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+1 0 0 0 0 0 1 0 0 1 0 1
+1 0 0 0 0 0 1 0 0 1 0 1
+x x x x x x x x x x x x
+1 0 0 0 0 0 1 0 0 1 0 1
+1 0 0 0 0 0 1 0 0 1 0 1
+1 0 0 0 0 0 1 0 0 1 0 1
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x 1 0 0 0 0 1 0 0 1 x 0
+x 1 0 0 0 0 1 0 0 1 x 0
+x x x x x x x x x x x x
+x 1 0 0 0 0 1 0 0 1 x 0
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x 0 1 x x 0
+x x x x x 0 1 1 1 0
+x x x 0 0 0 0 x x 0
+x x x 0 0 0 0 x x 0
+x x x 0 0 0 0 x x 0
+x x x 0 0 0 0 x x 0
+x x x 0 0 0 0 0 0 1
+x x x 0 0 0 0 0 0 0
+x x x 0 0 0 0 0 0 0
+x x x 0 0 0 0 0 0 0
+x x x 0 1 0 0 0 0 0
+x x x 0 1 0 0 0 0 0
+x x x 0 1 0 0 0 0 0
+x x x 0 0 0 0 0 0 0
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+1 0 1 0 0 0 0 0 0 0
+0 1 1 0 0 0 0 0 0 0
+x x x x x x x x x x
+0 0 x 0 0 0 0 0 0 0
+1 0 0 0 0 0 0 0 0 0
+0 1 0 0 0 0 0 0 0 0
+x x x x x x x x x x
+x x x x x x x x x x
+1 0 x 0 0 0 0 x x 0
+0 1 x 0 0 0 0 x x 0
+x x x x x x x x x x
+0 0 x 0 0 0 0 x x 0
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+
+--------------------------------------------------------------
+
+//18 Output
+
+5-0
+1 0 0 0 0 0 -> 0 0 0 0 0 0 1 0 0 0 1 1 X X X X X 0 0 0 0 1
+1 0 0 0 0 1 -> 0 0 0 0 0 0 1 0 0 0 1 1 X X X X X 0 0 0 0 0
+1 0 0 0 1 0 -> 0 0 0 0 0 1 1 0 0 0 1 1 X X X X X 0 0 0 0 1
+1 0 0 0 1 1 -> 0 0 0 0 0 1 1 0 0 0 1 1 X X X X X 0 0 0 0 0
+1 0 0 1 0 0 -> 0 0 0 0 0 0 0 0 0 0 1 1 X X X X X 0 0 0 0 0
+1 0 0 1 0 1 -> 0 0 0 0 0 0 0 1 0 0 1 1 X X X X X 0 0 0 0 0
+1 0 1 0 1 0 -> 0 0 0 0 0 1 1 1 0 0 1 1 X X X X X 0 0 0 0 0
+1 0 0 1 1 1 -> 0 0 0 0 1 1 0 0 0 0 1 1 X X X X X 0 0 0 0 0
+1 0 0 1 1 0 -> 0 0 0 0 0 0 1 1 0 0 1 1 X X X X X 0 0 0 0 0
+0 0 0 0 0 0 -> 0 0 0 0 1 0 0 1 1 0 1 1 X X X 1 0 0 0 0 0 0
+0 0 0 0 1 0 -> 0 0 0 0 1 0 1 0 1 0 1 1 X X X 1 0 0 0 0 0 0
+0 0 0 0 1 1 -> 0 0 0 0 1 0 1 1 1 0 1 1 X X X 1 0 0 0 0 0 0
+0 0 0 1 0 0 -> 0 0 0 0 1 0 0 1 0 0 1 1 X X X X X 0 0 0 0 0
+0 0 0 1 1 0 -> 0 0 0 0 1 0 1 0 0 0 1 1 X X X X X 0 0 0 0 0
+0 0 0 1 1 1 -> 0 0 0 0 1 0 1 1 0 0 1 1 X X X X X 0 0 0 0 0
+1 0 1 0 1 1 -> 0 0 0 0 1 1 1 0 0 0 1 1 X X X X X 0 0 0 0 0
+0 0 1 0 0 0 -> X 0 X X X X X X X X X 0 X X X X X 1 0 X X 0
+0 0 1 0 0 1 -> 0 0 X X X X X X X X 1 1 X X X X X 1 0 1 0 0
+
+0 0 0 0 1 0 0 1 1 0 1 1
+x x x x x x x x x x x x
+0 0 0 0 1 0 1 0 1 0 1 1
+0 0 0 0 1 0 1 1 1 0 1 1
+0 0 0 0 1 0 0 1 0 0 1 1
+x x x x x x x x x x x x
+0 0 0 0 1 0 1 0 0 0 1 1
+0 0 0 0 1 0 1 1 0 0 1 1
+x 0 x x x x x x x x x 0
+0 0 x x x x x x x x 1 1
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+0 0 0 0 0 0 1 0 0 0 1 1
+0 0 0 0 0 0 1 0 0 0 1 1
+0 0 0 0 0 1 1 0 0 0 1 1
+0 0 0 0 0 1 1 0 0 0 1 1
+0 0 0 0 0 0 0 0 0 0 1 1
+0 0 0 0 0 0 0 1 0 0 1 1
+0 0 0 0 0 0 1 1 0 0 1 1
+0 0 0 0 1 1 0 0 0 0 1 1
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+0 0 0 0 0 1 1 1 0 0 1 1
+0 0 0 0 1 1 1 0 0 0 1 1
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+
+x x x 1 0 0 0 0 0 0
+x x x x x x x x x x
+x x x 1 0 0 0 0 0 0
+x x x 1 0 0 0 0 0 0
+x x x x x 0 0 0 0 0
+x x x x x x x x x x
+x x x x x 0 0 0 0 0
+x x x x x 0 0 0 0 0
+x x x x x 1 0 x x 0
+x x x x x 1 0 1 0 0
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x 0 0 0 0 1
+x x x x x 0 0 0 0 0
+x x x x x 0 0 0 0 1
+x x x x x 0 0 0 0 0
+x x x x x 0 0 0 0 0
+x x x x x 0 0 0 0 0
+x x x x x 0 0 0 0 0
+x x x x x 0 0 0 0 0
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x 0 0 0 0 0
+x x x x x 0 0 0 0 0
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+
+--------------------------------------------------------------
+
+20-16
+0 0 0 0 0 -> X 0 1 0 0 1 0 1 0 0 X 0 X X X 0 0 0 0 X X 0
+0 0 0 0 1 -> X 0 1 0 1 0 0 0 0 0 X 0 X X X 0 0 0 0 X X 0
+
+x 0 1 0 0 1 0 1 0 0 x 0
+x 0 1 0 1 0 0 0 0 0 x 0
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+
+x x x 0 0 0 0 x x 0
+x x x 0 0 0 0 x x 0
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x

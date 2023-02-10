@@ -1,0 +1,3 @@
+verilog isim_temp "waytodealwithsignedwords.v"
+verilog isim_temp "wa_tb.v"
+verilog isim_temp "D:/ISESetup/14.7/ISE_DS/ISE//verilog/src/glbl.v"

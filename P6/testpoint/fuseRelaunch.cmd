@@ -1,0 +1,1 @@
+--nodebug --prj "testlcy.prj" -o "testmipslcy.exe" "mips_txt" 

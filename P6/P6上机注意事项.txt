@@ -1,0 +1,54 @@
+P6上机注意事项
+
+注意添加指令时要加到特定的指令类里面：
+	1.	写PC+8的指令要加到jump and link类里，RiskSolveUnit才会有操作
+	2.	乘除运算类指令要加到对应的指令类里面（read set cal ALU），且乘在controller最后的部分有乘除运算单元操作选择信号(set cal ALU)，要注意添加。
+增加指令类的时候更需要注意
+
+RiskSolveUnit里特殊处理的指令类：
+1.	jump and link 写PC+8
+2.	calmudv setmudv readmudv mudvALU 判断暂停需要使用，一定要注意！！！！
+
+E级特殊处理的指令类：
+1.	readmudv 在ALU进行多路选择的时候会用到
+如果新增指令涉及到这几种操作，一定要将它加入到指令类里面
+
+注意乘除类运算指令会不会产生start和busy信号，在controller产生这两种信号的指令类为calmudv、mudvALU
+
+EMW三个写入地址是相互独立的，若要修改其中一级，该级之后的也要同时修改
+
+Mars配置：
+1.	settings -> delaybranching √
+2.	settings -> memory configuration -> Compact,Data at Address0(中)
+
+暂停功能是否成功，需要看D级指令
+
+Tuse
+！！！注意仔细看指令操作，区分Tuse_rs和Tuse_rt
+1.	CMP需要，Tuse=0
+2.	ALU需要，Tuse=1
+3.	DM需要（sw的存储数据），Tuse=2
+4.	不需要新数据，Tuse=5
+
+Tnew
+1.	运算类指令，在ALU中产生结果的，Tnew=2
+2.	跳转链接存地址类指令，与ALU结果同时转发，Tnew=2
+3.	取DM类指令，在DM中产生结果的，Tnew=3
+4.	不产生新结果的，Tnew=0
+
+不考虑延迟槽需要的改动
+1.	D级寄存器加清除信号，清除信号优先级低于阻塞信号
+2.	link register时可能写入PC+4
+
+
+关于位拼接
+	Res = {16'b0,immoffset}  # 零扩展
+Res = {{16{immoffset[15]}},immoffset}  # 符号扩展
+
+注意事项：
+宏定义的opcode和funct一定要仔细检查
+复制完代码记得改宏
+注意有符号数和无符号数
+有符号数移位，注意三目运算符中的算数右移$signed($signed(A) >>> B)
+有符号数比较大小，$signed(A) > $signed(B)
+有符号数{temphi, templo} <= {registerhi, registerlo} + $signed( $signed(64'd0) + $signed(a) * $signed(b));

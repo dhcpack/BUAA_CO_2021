@@ -1,0 +1,293 @@
+1. AluSelect
+module AluSelect(
+	input [31:0] regReadData1
+	input [31:0] regReadData2
+	input [31:0] immAfterExtend
+	input [1:0] aluInputSelect
+	output [31:0] aluInputA
+	output [31:0] aluInputB
+)
+
+2. ArithmeticLogicalUnit
+module ArithmeticLogicalUnit(
+	input [31:0] aluInputA
+	input [31:0] aluInputB
+	input [3:0] aluOperation
+	output [31:0] aluOutput
+	output aluOverFlow
+)
+
+3. BitExtender
+module BitExtender(
+	input [1:0] extendMood
+	input [15:0] immToExtend
+	output [31:0] immAfterExtend
+)
+
+4. CompareUnit
+module CompareUnit(
+	input [31:0] cmpInputA
+	input [31:0] cmpInputB
+	input [3:0] cmpOperation
+	output toBranch
+)
+
+5. ControlUnit
+module ControlUnit(
+	input [31:0] currentCommand
+	output [1:0] extendMoodInID
+	output [1:0] aluInputSelectInID
+	output [3:0] aluOperationInID
+	output cuOverFlowInID
+	output cuRegBranchInID
+	output cuDmBranchInID
+	output [3:0] cmpOperationInID
+	output memWriteEnabledInID
+	output [3:0] loadWriteMoodInID
+	output [1:0] regDstSelectInID
+	output regWriteEnabledInID
+	output regConditionMoveInID
+	output dmConditionMoveInID
+	output [1:0] pcControlInID
+	output [5:0] dataToRegSelectInID
+	output [2:0] tUseOf2521InID
+	output [2:0] tUseOf2016InID
+	output [2:0] tNewInID
+)
+
+6. DataMemory
+module DataMemory(
+	input clk
+	input reset
+	input [3:0] loadWriteMood
+	input [31:0] addrOfDataInMem
+	input memWriteEnabled
+	input [31:0] dataWriteToMem
+	input [31:0] currentCommandAddr
+	output [31:0] dataGiveToReg
+)
+
+7. DataWriteToRegSelect
+module DataWriteToRegSelect(
+	input [31:0] dataToSelectBy0
+	input [31:0] dataToSelectBy1
+	input [31:0] dataToSelectBy2
+	input [31:0] dataToSelectBy3
+	input [1:0] dataToRegSelect
+	output [31:0] dataWriteToReg
+)
+
+8. DoubleForwardSelect
+module DoubleForwardSelect(
+	input [31:0] srcDataA
+	input [31:0] srcDataB
+	input [31:0] dataCanUseEarlier
+	input [31:0] dataCanUseLater
+	input [3:0] dataForwardSelect
+	output [31:0] dataASelected
+	output [31:0] dataBSelected
+)
+
+9. FlowReg_EX_MEM
+module FlowReg_EX_MEM(
+	input clk
+	input resetOf_EX_MEM
+	input stallOf_EX_MEM
+	input [2:0] tNewInEX
+	input [31:0] currentCommandInEX
+	input [31:0] currentCommandAddrInEX
+	input [31:0] aluOutputInEX
+	input cuDmBranchInEX
+	input [3:0] cmpOperationInEX
+	input dmConditionMoveInEX
+	input memWriteEnabledInEX
+	input [3:0] loadWriteMoodInEX
+	input [1:0] pcControlInEX
+	input [1:0] dataToRegSelectInEX
+	input regWriteEnabledInEX
+	input [4:0] regFinalDstInEX
+	input [31:0] dataWriteToRegInEX
+	input [31:0] regData1ForwardedInEX
+	input [31:0] regData2ForwardedInEX
+	output [2:0] tNewInMEM
+	output [31:0] currentCommandInMEM
+	output [31:0] currentCommandAddrInMEM
+	output [31:0] aluOutputInMEM
+	output cuDmBranchInMEM
+	output [3:0] cmpOperationInMEM
+	output dmConditionMoveInMEM
+	output memWriteEnabledInMEM
+	output [3:0] loadWriteMoodInMEM
+	output [1:0] pcControlInMEM
+	output [1:0] dataToRegSelectInMEM
+	output regWriteEnabledInMEM
+	output [4:0] regFinalDstInMEM
+	output [31:0] dataWriteToRegFormEXInMEM
+	output [31:0] regData1InMEM
+	output [31:0] regData2InMEM
+)
+
+10. FlowReg_ID_EX
+module FlowReg_ID_EX(
+	input clk
+	input resetOf_ID_EX
+	input stallOf_ID_EX
+	input [2:0] tNewInID
+	input [31:0] currentCommandInID
+	input [31:0] currentCommandAddrInID
+	input [3:0] aluOperationInID
+	input [1:0] aluInputSelectInID
+	input cuOverFlowInID
+	input [31:0] immAfterExtendInID
+	input cuDmBranchInID
+	input [3:0] cmpOperationInID
+	input dmConditionMoveInID
+	input memWriteEnabledInID
+	input [3:0] loadWriteMoodInID
+	input [1:0] pcControlInID
+	input [3:0] dataToRegSelectInID
+	input [4:0] regFinalDstInID
+	input regWriteEnabledInID
+	input [31:0] dataWriteToRegInID
+	input [31:0] regData1ForwardedInID
+	input [31:0] regData2ForwardedInID
+	output [2:0] tNewInEX
+	output [31:0] currentCommandInEX
+	output [31:0] currentCommandAddrInEX
+	output [3:0] aluOperationInEX
+	output [1:0] aluInputSelectInEX
+	output cuOverFlowInEX
+	output [31:0] immAfterExtendInEX
+	output cuDmBranchInEX
+	output [3:0] cmpOperationInEX
+	output dmConditionMoveInEX
+	output memWriteEnabledInEX
+	output [3:0] loadWriteMoodInEX
+	output [1:0] pcControlInEX
+	output [3:0] dataToRegSelectInEX
+	output [4:0] regFinalDstInEX
+	output regWriteEnabledInEX
+	output [31:0] dataWriteToRegFormIDInEX
+	output [31:0] regData1InEX
+	output [31:0] regData2InEX
+)
+
+11. FlowReg_IF_ID
+module FlowReg_IF_ID(
+	input clk
+	input resetOf_IF_ID
+	input stallOf_IF_ID
+	input [31:0] currentCommandInIF
+	input [31:0] currentCommandAddrInIF
+	input [31:0] nextCommandAddrInIF
+	output [31:0] currentCommandInID
+	output [31:0] currentCommandAddrInID
+	output [31:0] nextCommandAddrInID
+)
+
+12. FlowReg_MEM_WB
+module FlowReg_MEM_WB(
+	input clk
+	input resetOf_MEM_WB
+	input stallOf_MEM_WB
+	input [31:0] currentCommandAddrInMEM
+	input regWriteEnabledInMEM
+	input [31:0] dataWriteToRegInMEM
+	input [4:0] regFinalDstInMEM
+	output [31:0] currentCommandAddrInWB
+	output regWriteEnabledInWB
+	output [31:0] dataWriteToRegFormMEMInWB
+	output [4:0] regFinalDstInWB
+)
+
+13. InstructionMemory
+module InstructionMemory(
+	input [31:0] currentCommandAddr
+	output [31:0] currentCommand
+)
+
+14. ProgramCounter
+module ProgramCounter(
+	input clk
+	input reset
+	input pcEnabled
+	input [1:0] pcControlInID
+	input [1:0] pcControlInMEM
+	input toBranchInID
+	input cuRegBranchInID
+	input toBranchInMEM
+	input cuDmBranchInMEM
+	input [31:0] branchAddrInID
+	input [31:0] branchAddrInMEM
+	input [25:0] jumpAddrFromImm
+	input [31:0] jumpAddrFormReg1InID
+	input [31:0] jumpAddrFormReg2InID
+	input [31:0] jumpAddrFormReg1InMEM
+	input [31:0] jumpAddrFormReg2InMEM
+	output [31:0] currentCommandAddr
+	output [31:0] nextCommandAddr
+)
+
+15. RegDstSelect
+module RegDstSelect(
+	input [4:0] currentCommand2016
+	input [4:0] currentCommand1511
+	input [1:0] regDstSelect
+	output [4:0] regFinalDst
+)
+
+16. RegisterFile
+module RegisterFile(
+	input clk
+	input reset
+	input regWriteEnabled
+	input [4:0] regReadAddr1
+	input [4:0] regReadAddr2
+	input [4:0] regWriteAddr
+	input [31:0] dataWriteToReg
+	input [31:0] currentCommandAddr
+	output [31:0] regReadData1
+	output [31:0] regReadData2
+)
+
+17. RiskSolveUnit
+module RiskSolveUnit(
+	input [2:0] tNewInEX
+	input [2:0] tNewInMEM
+	input [2:0] tUseOf2521InID
+	input [2:0] tUseOf2016InID
+	input [4:0] currentCommand2521InID
+	input [4:0] currentCommand2016InID
+	input [4:0] currentCommand2521InEX
+	input [4:0] currentCommand2016InEX
+	input [4:0] currentCommand2521InMEM
+	input [4:0] currentCommand2016InMEM
+	input regWriteEnabledInEX
+	input regConditionMoveInEX
+	input regWriteEnabledInMEM
+	input regConditionMoveInMEM
+	input regWriteEnabledInWB
+	input [4:0] regFinalDstInEX
+	input [4:0] regFinalDstInMEM
+	input [4:0] regFinalDstInWB
+	output [3:0] forwardInID
+	output [3:0] forwardInEX
+	output [1:0] forwardInMEM
+	output stallAndFlush
+)
+
+18. SingleForwardSelect
+module SingleForwardSelect(
+	input [31:0] srcDataA
+	input [31:0] srcDataB
+	input [31:0] dataCanUse
+	input [1:0] dataForwardSelect
+	output [31:0] dataASelected
+	output [31:0] dataBSelected
+)
+
+19. mips
+module mips(
+	input clk
+	input reset
+)

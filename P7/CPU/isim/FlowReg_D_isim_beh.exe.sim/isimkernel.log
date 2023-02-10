@@ -1,0 +1,28 @@
+Command line:
+   FlowReg_D_isim_beh.exe
+     -simmode  gui
+     -simrunnum  1
+     -socket  58063
+
+Wed Dec 15 16:05:37 2021
+
+
+ Elaboration Time: 0.046875 sec
+
+ Current Memory Usage: 5159.11 Meg
+
+ Total Signals          : 23
+ Total Nets             : 182
+ Total Signal Drivers   : 9
+ Total Blocks           : 2
+ Total Primitive Blocks : 2
+ Total Processes        : 12
+ Total Traceable Variables  : 22
+ Total Scalar Nets and Variables : 328
+
+ Total Simulation Time: 0.0625 sec
+
+ Current Memory Usage: 5159.11 Meg
+
+Wed Dec 15 16:05:41 2021
+

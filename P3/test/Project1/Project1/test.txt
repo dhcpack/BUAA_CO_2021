@@ -1,0 +1,146 @@
+ori $22,$0,14
+ori $23,$0,62
+ori $7,$0,80
+ori $6,$0,69
+ori $8,$0,76
+ori $20,$0,12
+ori $1,$0,111
+ori $9,$0,27
+sw $8,278($23)
+lui $19,45617
+beq $6,$22,branch1
+lw $3,154($22)
+addu $24,$6,$0
+beq $21,$9,branch2
+addu $15,$18,$14
+lw $25,74($22)
+beq $10,$0,branch3
+nop
+subu $0,$14,$24
+addu $21,$24,$25
+addu $13,$14,$10
+ori $15,$22,18840
+ori $2,$4,21678
+nop
+addu $10,$2,$26
+subu $26,$5,$6
+branch2:
+subu $15,$18,$16
+addu $10,$20,$0
+beq $16,$7,branch4
+lw $25,440($20)
+subu $5,$3,$10
+addu $3,$12,$9
+branch4:
+lui $16,45609
+addu $12,$26,$2
+ori $3,$16,40745
+beq $26,$3,branch5
+lw $0,380($20)
+addu $16,$18,$23
+sw $14,196($8)
+branch1:
+nop
+beq $10,$16,branch6
+ori $19,$19,21898
+sw $0,104($20)
+sw $10,81($1)
+beq $5,$21,branch7
+ori $12,$17,5657
+lw $13,224($20)
+addu $18,$8,$20
+nop
+subu $13,$11,$13
+nop
+sw $7,201($1)
+addu $2,$10,$10
+lui $10,27267
+subu $27,$27,$17
+subu $5,$21,$24
+subu $3,$26,$24
+beq $0,$22,branch8
+ori $5,$5,36382
+addu $10,$0,$24
+branch5:
+beq $24,$7,branch9
+ori $17,$21,63691
+beq $16,$25,branch10
+branch9:
+nop
+addu $12,$2,$12
+nop
+subu $21,$25,$4
+nop
+branch8:
+lui $24,15363
+addu $0,$23,$26
+lw $12,428($20)
+beq $14,$4,branch11
+sw $10,139($6)
+lui $11,19616
+subu $4,$24,$22
+sw $20,380($7)
+addu $14,$14,$0
+ori $13,$26,26247
+sw $18,144($7)
+nop
+sw $17,298($22)
+nop
+subu $16,$21,$21
+lw $27,264($20)
+sw $3,181($1)
+nop
+beq $6,$3,branch12
+addu $11,$0,$12
+nop
+beq $7,$27,branch13
+subu $15,$19,$16
+ori $25,$11,33219
+beq $23,$14,branch14
+branch7:
+subu $10,$4,$5
+ori $11,$23,19923
+lw $24,364($8)
+lw $10,290($23)
+branch6:
+branch13:
+beq $24,$15,branch15
+subu $16,$11,$7
+sw $10,296($8)
+beq $4,$21,branch16
+ori $26,$3,55203
+branch14:
+lui $19,39323
+beq $3,$22,branch17
+nop
+branch3:
+lui $0,54805
+sw $5,156($8)
+branch11:
+branch12:
+ori $17,$5,42610
+addu $4,$22,$21
+ori $2,$9,33410
+sw $18,239($6)
+addu $14,$0,$7
+sw $7,393($1)
+lui $21,44425
+branch16:
+nop
+subu $21,$7,$5
+lui $27,42035
+subu $3,$20,$26
+nop
+addu $10,$22,$26
+addu $2,$19,$15
+branch10:
+beq $21,$22,branch18
+lui $0,1489
+addu $21,$20,$17
+branch18:
+ori $24,$24,37568
+branch17:
+lui $19,10593
+branch15:
+lw $2,230($23)
+addu $24,$5,$21

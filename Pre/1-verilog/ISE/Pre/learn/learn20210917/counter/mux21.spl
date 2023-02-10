@@ -1,0 +1,10 @@
+[Inputs]
+a
+b
+s
+[Outputs]
+y
+[BiDir]
+[ATTRIBUTES]
+VeriModel mux21
+

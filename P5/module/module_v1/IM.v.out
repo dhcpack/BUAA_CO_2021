@@ -1,0 +1,51 @@
+#! /c/Source/iverilog-install/bin/vvp
+:ivl_version "12.0 (devel)" "(s20150603-1110-g18392a46)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision + 0;
+:vpi_module "D:\iverilog\iverilog\lib\ivl\system.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\vhdl_sys.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\vhdl_textio.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\v2005_math.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\va_math.vpi";
+S_00000161ed2c6260 .scope module, "IM" "IM" 2 1;
+ .timescale 0 0;
+    .port_info 0 /INPUT 32 "address";
+    .port_info 1 /OUTPUT 32 "command";
+L_00000161ed2c6a80 .functor BUFZ 32, L_00000161ed2ce510, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>;
+v00000161ed2ce790_0 .net *"_ivl_0", 31 0, L_00000161ed2ce510;  1 drivers
+v00000161ed2ceb50_0 .net *"_ivl_3", 11 0, L_00000161ed2ce150;  1 drivers
+v00000161ed2ce8d0_0 .net *"_ivl_4", 13 0, L_00000161ed2ce650;  1 drivers
+L_00000161ed228848 .functor BUFT 1, C4<00>, C4<0>, C4<0>, C4<0>;
+v00000161ed2ce470_0 .net *"_ivl_7", 1 0, L_00000161ed228848;  1 drivers
+o00000161ed1e7098 .functor BUFZ 32, C4<zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz>; HiZ drive
+v00000161ed2ce3d0_0 .net "address", 31 0, o00000161ed1e7098;  0 drivers
+v00000161ed2cdc50_0 .net "command", 31 0, L_00000161ed2c6a80;  1 drivers
+v00000161ed2cdf70 .array "command_momery", 4095 0, 31 0;
+v00000161ed2cea10_0 .var/i "i", 31 0;
+L_00000161ed2ce510 .array/port v00000161ed2cdf70, L_00000161ed2ce650;
+L_00000161ed2ce150 .part o00000161ed1e7098, 2, 12;
+L_00000161ed2ce650 .concat [ 12 2 0 0], L_00000161ed2ce150, L_00000161ed228848;
+    .scope S_00000161ed2c6260;
+T_0 ;
+    %pushi/vec4 0, 0, 32;
+    %store/vec4 v00000161ed2cea10_0, 0, 32;
+T_0.0 ;
+    %load/vec4 v00000161ed2cea10_0;
+    %cmpi/s 4096, 0, 32;
+    %jmp/0xz T_0.1, 5;
+    %pushi/vec4 0, 0, 32;
+    %ix/getv/s 4, v00000161ed2cea10_0;
+    %store/vec4a v00000161ed2cdf70, 4, 0;
+    %load/vec4 v00000161ed2cea10_0;
+    %addi 1, 0, 32;
+    %store/vec4 v00000161ed2cea10_0, 0, 32;
+    %jmp T_0.0;
+T_0.1 ;
+    %vpi_call 2 13 "$readmemh", "code.txt", v00000161ed2cdf70 {0 0 0};
+    %end;
+    .thread T_0;
+# The file index is used to find the file name in the following table.
+:file_names 3;
+    "N/A";
+    "<interactive>";
+    "IM.v";

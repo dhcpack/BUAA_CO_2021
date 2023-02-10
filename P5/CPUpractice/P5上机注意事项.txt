@@ -1,0 +1,34 @@
+Mars配置：
+1.	settings -> delaybranching √
+2.	settings -> memory configuration -> Compact,Data at Address0(中)
+
+暂停功能是否成功，需要看D级指令
+
+Tuse
+！！！注意仔细看指令操作，区分Tuse_rs和Tuse_rt
+1.	CMP需要，Tuse=0
+2.	ALU需要，Tuse=1
+3.	DM需要（sw的存储数据），Tuse=2
+4.	不需要新数据，Tuse=5
+
+Tnew
+1.	运算类指令，在ALU中产生结果的，Tnew=2
+2.	跳转链接存地址类指令，与ALU结果同时转发，Tnew=2
+3.	取DM类指令，在DM中产生结果的，Tnew=3
+4.	不产生新结果的，Tnew=0
+
+不考虑延迟槽需要的改动
+1.	D级寄存器加清除信号，清除信号优先级低于阻塞信号
+2.	link register时可能写入PC+4
+
+
+关于位拼接
+	Res = {16'b0,immoffset}  # 零扩展
+Res = {{16{immoffset[15]}},immoffset}  # 符号扩展
+
+注意事项：
+宏定义的opcode和funct一定要仔细检查
+复制完代码记得改宏
+注意有符号数和无符号数
+有符号数移位，注意三目运算符中的算数右移$signed($signed(A) >>> B)
+有符号数比较大小，$signed(A) > $signed(B)

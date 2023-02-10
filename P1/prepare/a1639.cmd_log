@@ -1,0 +1,6 @@
+xst -intstyle ise -ifn "E:/ISE/P1/prepare/a1639.xst" -ofn "E:/ISE/P1/prepare/a1639.syr" 
+xst -intstyle ise -ifn "E:/ISE/P1/prepare/a1639.xst" -ofn "E:/ISE/P1/prepare/a1639.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc6slx4-tqg144-2 a1639.ngc a1639.ngd  
+map -intstyle ise -p xc6slx4-tqg144-2 -w -logic_opt off -ol high -t 1 -xt 0 -register_duplication off -r 4 -global_opt off -mt off -ir off -pr off -lc off -power off -o a1639_map.ncd a1639.ngd a1639.pcf 
+par -w -intstyle ise -ol high -mt off a1639_map.ncd a1639.ncd a1639.pcf 
+trce -intstyle ise -v 3 -s 2 -n 3 -fastpaths -xml a1639.twx a1639.ncd -o a1639.twr a1639.pcf 

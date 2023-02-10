@@ -1,0 +1,119 @@
+#! /c/Source/iverilog-install/bin/vvp
+:ivl_version "12.0 (devel)" "(s20150603-1110-g18392a46)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision + 0;
+:vpi_module "D:\iverilog\iverilog\lib\ivl\system.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\vhdl_sys.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\vhdl_textio.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\v2005_math.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\va_math.vpi";
+S_00000222b8482f30 .scope module, "FlowReg_M" "FlowReg_M" 2 1;
+ .timescale 0 0;
+    .port_info 0 /INPUT 1 "clk";
+    .port_info 1 /INPUT 1 "rfwe_E";
+    .port_info 2 /INPUT 1 "dmwe_E";
+    .port_info 3 /INPUT 2 "rfwdsel_E";
+    .port_info 4 /INPUT 2 "dmtype_E";
+    .port_info 5 /INPUT 2 "tnew_E";
+    .port_info 6 /INPUT 5 "wrrf_E";
+    .port_info 7 /INPUT 32 "ALUres_E";
+    .port_info 8 /INPUT 32 "wddm_E";
+    .port_info 9 /INPUT 32 "pc_Jal_E";
+    .port_info 10 /INPUT 32 "writeaddr_E";
+    .port_info 11 /OUTPUT 1 "rfwe_M";
+    .port_info 12 /OUTPUT 1 "dmwe_M";
+    .port_info 13 /OUTPUT 2 "rfwdsel_M";
+    .port_info 14 /OUTPUT 2 "dmtype_M";
+    .port_info 15 /OUTPUT 2 "tnew_M";
+    .port_info 16 /OUTPUT 5 "wrrf_M";
+    .port_info 17 /OUTPUT 32 "ALUres_M";
+    .port_info 18 /OUTPUT 32 "wddm_M";
+    .port_info 19 /OUTPUT 32 "pc_Jal_M";
+    .port_info 20 /OUTPUT 32 "writeaddr_M";
+o00000222b84bcfa8 .functor BUFZ 32, C4<zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz>; HiZ drive
+v00000222b8483600_0 .net "ALUres_E", 31 0, o00000222b84bcfa8;  0 drivers
+v00000222b846c330_0 .var "ALUres_M", 31 0;
+o00000222b84bd008 .functor BUFZ 1, C4<z>; HiZ drive
+v00000222b8483220_0 .net "clk", 0 0, o00000222b84bd008;  0 drivers
+o00000222b84bd038 .functor BUFZ 2, C4<zz>; HiZ drive
+v00000222b84832c0_0 .net "dmtype_E", 1 0, o00000222b84bd038;  0 drivers
+v00000222b8483360_0 .var "dmtype_M", 1 0;
+o00000222b84bd098 .functor BUFZ 1, C4<z>; HiZ drive
+v00000222b84b3470_0 .net "dmwe_E", 0 0, o00000222b84bd098;  0 drivers
+v00000222b84b3510_0 .var "dmwe_M", 0 0;
+o00000222b84bd0f8 .functor BUFZ 32, C4<zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz>; HiZ drive
+v00000222b84b35b0_0 .net "pc_Jal_E", 31 0, o00000222b84bd0f8;  0 drivers
+v00000222b84b3650_0 .var "pc_Jal_M", 31 0;
+o00000222b84bd158 .functor BUFZ 2, C4<zz>; HiZ drive
+v00000222b84b36f0_0 .net "rfwdsel_E", 1 0, o00000222b84bd158;  0 drivers
+v00000222b84b3790_0 .var "rfwdsel_M", 1 0;
+o00000222b84bd1b8 .functor BUFZ 1, C4<z>; HiZ drive
+v00000222b84b3830_0 .net "rfwe_E", 0 0, o00000222b84bd1b8;  0 drivers
+v00000222b84b38d0_0 .var "rfwe_M", 0 0;
+o00000222b84bd218 .functor BUFZ 2, C4<zz>; HiZ drive
+v00000222b84b3970_0 .net "tnew_E", 1 0, o00000222b84bd218;  0 drivers
+v00000222b84b3a10_0 .var "tnew_M", 1 0;
+o00000222b84bd278 .functor BUFZ 32, C4<zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz>; HiZ drive
+v00000222b84b3ab0_0 .net "wddm_E", 31 0, o00000222b84bd278;  0 drivers
+v00000222b8500c50_0 .var "wddm_M", 31 0;
+o00000222b84bd2d8 .functor BUFZ 32, C4<zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz>; HiZ drive
+v00000222b8500f70_0 .net "writeaddr_E", 31 0, o00000222b84bd2d8;  0 drivers
+v00000222b8500750_0 .var "writeaddr_M", 31 0;
+o00000222b84bd338 .functor BUFZ 5, C4<zzzzz>; HiZ drive
+v00000222b8500a70_0 .net "wrrf_E", 4 0, o00000222b84bd338;  0 drivers
+v00000222b85007f0_0 .var "wrrf_M", 4 0;
+E_00000222b84bb570 .event posedge, v00000222b8483220_0;
+    .scope S_00000222b8482f30;
+T_0 ;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v00000222b84b38d0_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v00000222b84b3510_0, 0;
+    %pushi/vec4 0, 0, 2;
+    %assign/vec4 v00000222b84b3790_0, 0;
+    %pushi/vec4 0, 0, 2;
+    %assign/vec4 v00000222b8483360_0, 0;
+    %pushi/vec4 0, 0, 2;
+    %assign/vec4 v00000222b84b3a10_0, 0;
+    %pushi/vec4 0, 0, 5;
+    %assign/vec4 v00000222b85007f0_0, 0;
+    %pushi/vec4 0, 0, 32;
+    %assign/vec4 v00000222b846c330_0, 0;
+    %pushi/vec4 0, 0, 32;
+    %assign/vec4 v00000222b8500c50_0, 0;
+    %pushi/vec4 0, 0, 32;
+    %assign/vec4 v00000222b84b3650_0, 0;
+    %pushi/vec4 0, 0, 32;
+    %assign/vec4 v00000222b8500750_0, 0;
+    %end;
+    .thread T_0;
+    .scope S_00000222b8482f30;
+T_1 ;
+    %wait E_00000222b84bb570;
+    %load/vec4 v00000222b84b3830_0;
+    %assign/vec4 v00000222b84b38d0_0, 0;
+    %load/vec4 v00000222b84b3470_0;
+    %assign/vec4 v00000222b84b3510_0, 0;
+    %load/vec4 v00000222b84b36f0_0;
+    %assign/vec4 v00000222b84b3790_0, 0;
+    %load/vec4 v00000222b84832c0_0;
+    %assign/vec4 v00000222b8483360_0, 0;
+    %load/vec4 v00000222b84b3970_0;
+    %assign/vec4 v00000222b84b3a10_0, 0;
+    %load/vec4 v00000222b8500a70_0;
+    %assign/vec4 v00000222b85007f0_0, 0;
+    %load/vec4 v00000222b8483600_0;
+    %assign/vec4 v00000222b846c330_0, 0;
+    %load/vec4 v00000222b84b3ab0_0;
+    %assign/vec4 v00000222b8500c50_0, 0;
+    %load/vec4 v00000222b84b35b0_0;
+    %assign/vec4 v00000222b84b3650_0, 0;
+    %load/vec4 v00000222b8500f70_0;
+    %assign/vec4 v00000222b8500750_0, 0;
+    %jmp T_1;
+    .thread T_1;
+# The file index is used to find the file name in the following table.
+:file_names 3;
+    "N/A";
+    "<interactive>";
+    "FlowReg_M.v";

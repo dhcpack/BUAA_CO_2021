@@ -1,0 +1,1 @@
+--nodebug --prj "testz.prj" -o "testmipsz.exe" "mips_tb" 

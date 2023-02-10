@@ -1,0 +1,28 @@
+Command line:
+   testmips.exe
+     -simmode  tcl
+     -simrunnum  0
+     -socket  60571
+
+Mon Nov 22 14:25:49 2021
+
+
+ Elaboration Time: 0.046875 sec
+
+ Current Memory Usage: 5134.52 Meg
+
+ Total Signals          : 267
+ Total Nets             : 1479
+ Total Signal Drivers   : 94
+ Total Blocks           : 20
+ Total Primitive Blocks : 14
+ Total Processes        : 118
+ Total Traceable Variables  : 71
+ Total Scalar Nets and Variables : 265462
+
+ Total Simulation Time: 0.046875 sec
+
+ Current Memory Usage: 5134.52 Meg
+
+Mon Nov 22 14:25:49 2021
+

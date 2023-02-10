@@ -1,0 +1,10 @@
+xst -intstyle ise -ifn "E:/ISE/practice/sample.xst" -ofn "E:/ISE/practice/sample.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/sample.xst" -ofn "E:/ISE/practice/sample.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/sample.xst" -ofn "E:/ISE/practice/sample.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/sample.xst" -ofn "E:/ISE/practice/sample.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/sample.xst" -ofn "E:/ISE/practice/sample.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/sample.xst" -ofn "E:/ISE/practice/sample.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xa3s50-vqg100-4 sample.ngc sample.ngd  
+map -intstyle ise -p xa3s50-vqg100-4 -cm area -ir off -pr off -c 100 -o sample_map.ncd sample.ngd sample.pcf 
+par -w -intstyle ise -ol high -t 1 sample_map.ncd sample.ncd sample.pcf 
+trce -intstyle ise -v 3 -s 4 -n 3 -fastpaths -xml sample.twx sample.ncd -o sample.twr sample.pcf 

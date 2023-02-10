@@ -1,0 +1,48 @@
+Running: D:\ISESetup\14.7\ISE_DS\ISE\bin\nt64\unwrapped\fuse.exe --nodebug --prj testzqy.prj -o testmipszqy.exe mips_txt 
+ISim P.20131013 (signature 0x7708f090)
+Number of CPUs detected in this system: 12
+Turning on mult-threading, number of parallel sub-compilation jobs: 24 
+Determining compilation order of HDL files
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulezqy\control_values.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulezqy\mips.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulezqy\mips_tb.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulezqy\mod_ALU.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulezqy\mod_Branch.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulezqy\mod_CMP.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulezqy\mod_Controller.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulezqy\mod_DataExt.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulezqy\mod_EXT.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulezqy\mod_GRF.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulezqy\mod_MultDiv.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulezqy\mod_PC.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulezqy\mod_regEXMem.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulezqy\mod_regIDEX.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulezqy\mod_regIFID.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulezqy\mod_regMemWB.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulezqy\mod_Replacer.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulezqy\mod_Splitter.v" into library work
+Starting static elaboration
+Completed static elaboration
+Compiling module mod_PC
+Compiling module mod_regFD
+Compiling module mod_Splitter
+Compiling module mod_Replacer
+Compiling module mod_CMP
+Compiling module mod_Branch
+Compiling module mod_EXT
+Compiling module mod_regDE
+Compiling module mod_ALU
+Compiling module mod_MultDiv
+Compiling module mod_regEM
+Compiling module mod_DataExt
+Compiling module mod_regMW
+Compiling module mod_RF
+Compiling module mod_Controller
+Compiling module mips
+Compiling module mips_txt
+Time Resolution for simulation is 1ps.
+Waiting for 1 sub-compilation(s) to finish...
+Compiled 17 Verilog Units
+Built simulation executable testmipszqy.exe
+Fuse Memory Usage: 32024 KB
+Fuse CPU Usage: 452 ms

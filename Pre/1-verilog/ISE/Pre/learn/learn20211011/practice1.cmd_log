@@ -1,0 +1,10 @@
+xst -intstyle ise -ifn "E:/ISE/learn/learn20211011/practice1.xst" -ofn "E:/ISE/learn/learn20211011/practice1.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc6slx4-tqg144-2 practice1.ngc practice1.ngd  
+map -intstyle ise -p xc6slx4-tqg144-2 -w -logic_opt off -ol high -t 1 -xt 0 -register_duplication off -r 4 -global_opt off -mt off -ir off -pr off -lc off -power off -o practice1_map.ncd practice1.ngd practice1.pcf 
+par -w -intstyle ise -ol high -mt off practice1_map.ncd practice1.ncd practice1.pcf 
+trce -intstyle ise -v 3 -s 2 -n 3 -fastpaths -xml practice1.twx practice1.ncd -o practice1.twr practice1.pcf 
+xst -intstyle ise -ifn "E:/ISE/learn/learn20211011/practice1.xst" -ofn "E:/ISE/learn/learn20211011/practice1.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc6slx4-tqg144-2 practice1.ngc practice1.ngd  
+map -intstyle ise -p xc6slx4-tqg144-2 -w -logic_opt off -ol high -t 1 -xt 0 -register_duplication off -r 4 -global_opt off -mt off -ir off -pr off -lc off -power off -o practice1_map.ncd practice1.ngd practice1.pcf 
+par -w -intstyle ise -ol high -mt off practice1_map.ncd practice1.ncd practice1.pcf 
+trce -intstyle ise -v 3 -s 2 -n 3 -fastpaths -xml practice1.twx practice1.ncd -o practice1.twr practice1.pcf 

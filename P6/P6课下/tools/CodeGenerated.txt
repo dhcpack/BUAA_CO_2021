@@ -1,0 +1,78 @@
+	//------------------------------------------------
+	assign packedControl=(|currentCommand)?
+		(currentCommand[31:26]==0)?judgeByLowerSix:
+		(currentCommand[31:26]==1)?judgeByMiddleFive:
+		(currentCommand[31:26]==28)?judgeByDoubleSix:
+		judgeByUpperSix:50'b0;
+	//------------------------------------------------
+	assign judgeByUpperSix=(currentCommand[31:26]==`lw)?(50'h000058000780409C):
+		(currentCommand[31:26]==`sw)?(50'h0000580200000098):
+		(currentCommand[31:26]==`lb)?(50'h00005800A780409C):
+		(currentCommand[31:26]==`lbu)?(50'h000058008780409C):
+		(currentCommand[31:26]==`sb)?(50'h0000580280000098):
+		(currentCommand[31:26]==`lh)?(50'h000058006780409C):
+		(currentCommand[31:26]==`lhu)?(50'h000058004780409C):
+		(currentCommand[31:26]==`sh)?(50'h0000580240000098):
+		(currentCommand[31:26]==`beq)?(50'h0000010000200048):
+		(currentCommand[31:26]==`bne)?(50'h0000010400200048):
+		(currentCommand[31:26]==`bgtz)?(50'h0000010C00200078):
+		(currentCommand[31:26]==`blez)?(50'h0000011000200078):
+		(currentCommand[31:26]==`addi)?(50'h00005A00078100BB):
+		(currentCommand[31:26]==`addiu)?(50'h00005800078100BB):
+		(currentCommand[31:26]==`andi)?(50'h00014000078100BB):
+		(currentCommand[31:26]==`ori)?(50'h00014400078100BB):
+		(currentCommand[31:26]==`xori)?(50'h00014C00078100BB):
+		(currentCommand[31:26]==`lui)?(50'h00030000079001FA):
+		(currentCommand[31:26]==`slti)?(50'h00005000078100BB):
+		(currentCommand[31:26]==`sltiu)?(50'h00005400078100BB):
+		(currentCommand[31:26]==`j)?(50'h00000000004001F8):
+		(currentCommand[31:26]==`jal)?(50'h0000000017C001FA):
+		(currentCommand[31:26]==`bmltzalr)?(50'h000058541760009C):
+		(currentCommand[31:26]==`bmgezalr)?(50'h000058481760009C):50'h0;
+	//------------------------------------------------
+	assign judgeByLowerSix=(currentCommand[5:0]==`add)?(50'h00001A000F810093):
+		(currentCommand[5:0]==`addu)?(50'h000018000F810093):
+		(currentCommand[5:0]==`sub)?(50'h00001E000F810093):
+		(currentCommand[5:0]==`subu)?(50'h00001C000F810093):
+		(currentCommand[5:0]==`and)?(50'h000000000F810093):
+		(currentCommand[5:0]==`or)?(50'h000004000F810093):
+		(currentCommand[5:0]==`slt)?(50'h000010000F810093):
+		(currentCommand[5:0]==`nor)?(50'h000008000F810093):
+		(currentCommand[5:0]==`xor)?(50'h00000C000F810093):
+		(currentCommand[5:0]==`sll)?(50'h0002A0000F8101D3):
+		(currentCommand[5:0]==`srl)?(50'h0002A4000F8101D3):
+		(currentCommand[5:0]==`sra)?(50'h0002A8000F8101D3):
+		(currentCommand[5:0]==`sllv)?(50'h000020000F810093):
+		(currentCommand[5:0]==`srlv)?(50'h000024000F810093):
+		(currentCommand[5:0]==`srav)?(50'h000028000F810093):
+		(currentCommand[5:0]==`sltu)?(50'h000014000F810093):
+		(currentCommand[5:0]==`jr)?(50'h0000000000600078):
+		(currentCommand[5:0]==`jalr)?(50'h000000000FE0007A):
+		(currentCommand[5:0]==`mfhi)?(50'h000000000F8221FB):
+		(currentCommand[5:0]==`mflo)?(50'h000000000F8321FB):
+		(currentCommand[5:0]==`mthi)?(50'h00000000000022B8):
+		(currentCommand[5:0]==`mtlo)?(50'h00000000000024B8):
+		(currentCommand[5:0]==`mult)?(50'h0000000000002A90):
+		(currentCommand[5:0]==`multu)?(50'h0000000000002C90):
+		(currentCommand[5:0]==`div)?(50'h0000000000002690):
+		(currentCommand[5:0]==`divu)?(50'h0000000000002890):
+		(currentCommand[5:0]==`movz)?(50'h000000300D8801CA):
+		(currentCommand[5:0]==`movn)?(50'h000000340D8801CA):
+		(currentCommand[5:0]==`bltzalr)?(50'h000001140DE0004A):
+		(currentCommand[5:0]==`bgezalr)?(50'h000001080DE0004A):
+		(currentCommand[5:0]==`bloltzalr)?(50'h000000940EE02083):
+		(currentCommand[5:0]==`blogezalr)?(50'h000000880EE02083):50'h0;
+	//------------------------------------------------
+	assign judgeByMiddleFive=(currentCommand[20:16]==`bltz)?(50'h0000011400200078):
+		(currentCommand[20:16]==`bgez)?(50'h0000010800200078):
+		(currentCommand[20:16]==`bltzal)?(50'h0000011415A0007A):
+		(currentCommand[20:16]==`bgezal)?(50'h0000010815A0007A):50'h0;
+	//------------------------------------------------
+	assign judgeByDoubleSix=(currentCommand[5:0]==`madd)?(50'h0000000000002E90):
+		(currentCommand[5:0]==`maddu)?(50'h0000000000003090):
+		(currentCommand[5:0]==`msub)?(50'h0000000000003290):
+		(currentCommand[5:0]==`msubu)?(50'h0000000000003490):
+		(currentCommand[5:0]==`clo)?(50'h00002C000F8100BB):
+		(currentCommand[5:0]==`clz)?(50'h000030000F8100BB):50'h0;
+
+endmodule

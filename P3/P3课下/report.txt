@@ -1,0 +1,14617 @@
+CPU设计文档
+一、CPU设计方案综述
+	（一）总体设计概述
+		本CPU为Logisim实现的单周期MIPS-CPU，支持的指令集包含{lw、sw、lb、lbu、sb、lh、lhu、sh、add、addu、sub、subu、and、or、slt、nor、xor、sll、srl、sra、sllv、srlv、srav、sltu、beq、bne、bgtz、blez、bltz、bgez、addi、addiu、andi、ori、xori、lui、slti、sltiu、j、jr、jal、jalr}共42条，其中add和sub不支持溢出中断，但会输出溢出信号。为了实现这些功能，CPU主要包含了instruction_memory、data_memory、centrol_processing_unit、program_counter、register_file、control_unit、bit_entender、arithmetic_logical_unit、upper_six、lower_six、middle_five，这些模块分成三级，第一级模块为instruction_memory、data_memory、centrol_processing_unit，centrol_processing_unit中包含了第二级模块program_counter、register_file、control_unit、bit_entender、arithmetic_logical_unit，control_unit包含了第三级模块upper_six、lower_six、middle_five。
+	（二）关键模块定义及内部逻辑实现
+		instruction_memory：
+		模块定义：
+			序号		功能名称				数据方向		功能描述
+			1.		输入地址				输入			32位，输入的地址
+			2.		输出指令				输出			32位，输出的指令
+			注：
+			1.如果需要改变地址位宽可直接修改splitter来实现。
+			2.如果需要改变初始指令地址可以修改减法器的减数配合修改PC中初始化的值实现。
+		内部逻辑：
+			采用Logisim自带的ROM即可实现。
+		----------------------------------------
+		data_memory：
+		模块定义：
+			序号		功能名称				数据方向		功能描述
+			1.		时钟信号				输入			1位，上跳沿更新内存的值
+			2.		异步复位信号			输入			1位，信号为1时将此模块复位
+			3.		写使能信号			输入			1位，信号为1时数据对DM的写入有效
+			4.		LS类型选择			输入			3位，对LS按W/H/B等进行选择
+			5.		LS内存地址			输入			32位，写入下述数据的地址
+			6.		写入数据				输入			32位，写入到上述地址的数据
+			7.		输出数据				输出			32位，上述地址对应的数据
+			注：
+			1.LS类型选择信号的高两位选择load和write针对word(信号的高两位为0)half(信号的高两位为1)还是byte(信号的高两位为2)，LS类型选择信号的最低位仅对load有效，当loadhalf或loadbyte时用以选择零扩展(0)或符号扩展(1)。
+			2.如果需要改变地址位宽可直接修改splitter来实现。
+			3.写使能信号为1时，输出数据无意义，为高阻态，若两个选择信号中有非法(3)的情况，写入或输出的数据为0x7fffffff。
+		内部逻辑：
+			采用Logisim自带的RAM实现，同时按照word/half/byte和零扩展/符号扩展进行处理，用数据选择器实现对LS类型选择的支持。
+		----------------------------------------
+		centrol_processing_unit
+		模块定义：
+			序号		功能名称				数据方向		功能描述	
+			1.		时钟信号				输入			1位，上跳沿更新其中PC和GRF的值
+			2.		异步复位信号			输入			1位，信号为1时将其中的PC和GRF复位
+			3.		输入指令				输入			32位，由IM给出的当前指令地址的指令
+			4.		输入数据				输入			32位，由DM给出的当前数据地址的数据
+			5.		输出指令地址			输出			32位，下一条输入指令在IM中的地址
+			6.		GRF写使能信号		输出			1位，信号为1时数据对GRF的写入有效(输出此信号以使OJ评判CPU正确性)
+			7.		GRF写入地址			输出			5位，对GRF写入下述数据的地址(输出此信号以使OJ评判CPU正确性)
+			8.		GRF写入数据			输出			32位，对GRF写入到上述地址的数据(输出此信号以使OJ评判CPU正确性)
+			9.		ALU溢出信号			输出			1位，当前指令为add或sub且结果发生溢出时，此信号为1
+			10.		DM写使能信号			输出			1位，信号为1时数据对DM的写入有效
+			11.		DM的LS类型选择		输出			32位，对LS按W/H/B等进行选择
+			12.		DM的LS内存地址		输出			32位，DM写入下述数据的地址
+			13.		DM的写入数据			输出			32位，DM上述地址对应的数据
+			注：
+			1.本CPU的IM和DM指令均采用24位，顶层模块在输出DM的LS内存地址时需使用splitter截取第二位到第六位输出。
+		内部逻辑：
+			包含了program_counter、register_file、control_unit、bit_entender、arithmetic_logical_unit等模块，对输入的指令提取指定位在control_unit中进行译码，得到控制信号输入给program_counter、register_file、bit_entender、arithmetic_logical_unit等模块或输出，并通过PC给出下一条指令的地址，各模块详细的内部逻辑实现如下文所述。
+		----------------------------------------
+		program_counter
+		模块定义：
+			序号		功能名称				数据方向		功能描述
+			1.		时钟信号				输入			1位，上跳沿更新当前指令地址为下一条指令地址
+			2.		异步复位信号			输入			1位，信号为1时将当前指令恢复到初始化时的值
+			3.		立即数分支地址		输入			32位，处理b类指令时得到的已处理的跳转地址，配合分支选择信号实现分支
+			4.		立即数跳转地址		输入			24位，处理j和jal指令时得到的未处理的跳转地址，配合跳转选择信号实现跳转
+			5.		寄存器跳转地址		输入			32位，处理jr和jalr指令时得到的来自寄存器的跳转地址，配合跳转选择信号实现跳转
+			6.		分支选择信号			输入			1位，用来选择下一条指令，如果是0就选择当前指令加四，否则选择立即数分支地址
+			7.		跳转选择信号			输入			2位，用来选择下一条指令，如果是0就选择经过分支选择信号选择的信号，如果是1就选择经过
+													处理的立即数跳转地址，如果是2就选择寄存器跳转地址
+			8.		当前指令地址			输出			32位，当前指令的地址
+			9.		下一条指令地址		输出			32位，当前指令加四，即没有分支或跳转的情况下，下一条指令应该的地址
+			注：
+			1.如果需要改变地址位宽可直接修改splitter来实现。
+			2.如果需要改变初始指令地址可以修改初始化的值配合修改IM中减法器的减数实现。
+			3.处理B类指令时得到的已处理的跳转地址是指已经对立即数进行了零扩展，左移两位和加下一条地址。
+			4.处理j和jal指令时得到的未处理的跳转地址是指来自当前指令0到25位的立即数。
+			5.经过处理的立即数跳转地址是指对4中立即数零扩展到28位，左移两位作为低28位，下一条地址的高4位作为高4位得到的地址。
+			6.若跳转选择信号非法(3)，下一条指令的地址为0x7fffffff。
+		内部逻辑：
+			通过一个寄存器存储当前指令并在时钟上跳沿更新其中内容，同时计算出上述立即数分支地址，立即数跳转地址，寄存器跳转地址和下一条指令地址，通过数据选择器选择需要存入的下一条指令，使用一个计数器配合数据选择器实现对第一条指令地址的初始化。
+		----------------------------------------
+		register_file
+		模块定义：
+			序号		功能名称				数据方向		功能描述
+			1.		时钟信号				输入			1位，上跳沿更新内存的值
+			2.		异步复位信号			输入			1位，信号为1时将此模块复位
+			3.		写使能信号			输入			1位，信号为1时数据对GRF的写入有效
+			4.		写31号寄存器			输入			1位，信号为1时如果写入数据，数据写入到$31
+			5.		读取地址1			输入			5位，读取到下述输出数据1的数据的地址
+			6.		读取地址2			输入			5位，读取到下述输出数据2的数据的地址
+			7.		写入地址3			输入			5位，写入下述输入数据的地址
+			8.		输入数据				输入			32位，上述写入地址3需要写入的数据
+			9.		输出数据1			输出			32位，上述读取地址1对应的数据
+			10.		输出数据2			输出			32位，上述读取地址2对应的数据
+			注：
+			1.为实现jal单独增加了31号寄存器的控制信号，因此输出写寄存器的地址时需要考虑这一点，当31号寄存器的控制信号为1时输出0x1f。
+		内部逻辑：
+			采用解码器和数据选择器将5位地址对应到32个寄存器之一。
+		----------------------------------------
+		control_unit
+		模块定义：
+			序号		功能名称				数据方向		功能描述
+			1.		第一段输入指令		输入			6位，当前指令的高六位，以此判断指令类型
+			2.		第二段输入指令		输入			6位，当前指令的低六位，若高六位全零，说明是R类型指令，以此判断指令类型
+			3.		第三段输入指令		输入			5位，当前指令的第16到20位，处理bltz和bgez指令时用以判断指令类型
+			4.		寄存器写入选择		输出			1位，选择将ALU的结果写入寄存器(0)还是从DM中取出数据写入寄存器(1)
+			5.		内存写入使能			输出			1位，信号为1时数据对DM的写入有效
+			6.		分支控制信号			输出			1位，信号为1时若ALU输出为0则进行分支跳转
+			7.		ALU功能选择信号		输出			5位，控制ALU进行不同的运算操作，详细定义见ALU部分
+			8.		ALU输入选择信号		输出			2位，选择ALU的输入，高位用以选择第一个操作数来自GRF第一个输出(0)还是立即数(1)，
+													低位用以选择第二个操作数来自GRF第二个输出(0)还是立即数(1)
+			9.		寄存器写入地址选择	输出			1位，选择GRF的写入地址来自指令[20:16](0)还是[15:11](1)
+			10.		寄存器使能信号		输出			1位，信号为1时数据对GRF的写入有效
+			11.		LS类型选择信号		输出			3位，在DM对LS按W/H/B等进行选择
+			12.		位扩展选择信号		输出			2位，控制对立即数的扩展方式，分为符号扩展(0)，零扩展(1)和部分位零扩展(2)
+			13.		判断溢出信号			输出			1位，当前指令为add、sub时有效，用以与ALU的溢出信号，得到溢出信号
+			14.		31号寄存器写入		输出			1位，信号为1时如果写入数据到GRF，数据写入到31号寄存器
+			15.		PC跳转选择信号		输出			2位，用来选择下一条指令，详见PC部分的说明
+			16.		PC跳转链接信号		输出			1位，用以选择写入GRF的数据，为1时将下一条指令地址写入GRF实现跳转并链接
+			注：
+			1.部分位零扩展指处理sll、srl、sra的时候将[10:6]进行零扩展。
+		内部逻辑：
+			将输入信号分为三类处理，先将输出合并成22位信号以方便进行选择，再在选择后分离成需要输出的信号，详见重要机制实现方法-控制模块设计。
+		----------------------------------------
+		bit_entender
+		模块定义：
+			序号		功能名称				数据方向		功能描述
+			1.		待扩展数据			输入			16位，来自当前指令的低16位
+			2.		扩展模式选择			输入			2位，符号扩展(0)，零扩展(1)和用于sll、srl、sra指令的部分位零扩展(2)
+			3.		扩展后数据			输出			32位，按选择信号要求扩展后的数据
+			注：
+			1.若选择信号非法(3)，输出为0x7fffffff。
+		内部逻辑：
+			分别进行三种扩展，后用数据选择器从扩展结果中选择需要的。
+		----------------------------------------
+		arithmetic_logical_unit
+		模块定义：
+			序号		功能名称				数据方向		功能描述
+			1.		操作数1				输入			32位，传入ALU的第一个操作数
+			2.		操作数2				输入			32位，传入ALU的第二个操作数
+			3.		操作类型信号			输入			5位，ALU操作类型选择信号
+			4.		溢出信号				输出			1位，ALU结果溢出信号(未判断操作类型)
+			5.		结果为零信号			输出			1位，ALU的计算结果为0时此信号为1
+			6.		运算结果				输出			32位，两个操作数运算的结果
+			注：
+			1.溢出判断基于两个运算数符号相同且与结果符号不同，因此需要另行确定当前进行的是add或sub运算，这个信号从control_unit引出。
+			2.最多支持32种不同的运算，现已定义了前17种运算，如果进行未定义的运算，得到的结果是0x7fffffff。
+			3.ALU支持的运算定义表：
+				序号		输入信号		执行的操作
+				1.		0			两个操作数按位与
+				2.		1			两个操作数按位或
+				3.		2			两个操作数做加法
+				4.		3			两个操作数按位异或
+				5.		4			第一个操作数大于0时输出0
+				6.		5			第一个操作数小于0时输出0
+				7.		6			两个操作数做减法
+				8.		7			两个操作数符号比较，第一个操作数更小时输出1
+				9.		8			第一个操作数大于等于0时输出0
+				10.		9			第二个操作数逻辑左移第一个操作数位
+				11.		10			第二个操作数逻辑右移第一个操作数位
+				12.		11			第二个操作数算术右移第一个操作数位
+				13.		12			两个操作数按位或非
+				14.		13			两个操作数不相等时输出0
+				15.		14			两个操作数无符号比较，第一个操作数更小时输出1
+				16.		15			第一个操作数小于等于0时输出0
+				17.		16			将第二个操作数的低16位作为输出的高16位，其余位输出0
+		内部逻辑：
+			同时进行所有支持的运算，然后将所有运算的结果接入数据选择器选择需要的结果，并进行0和溢出判断。
+		----------------------------------------
+		upper_six
+		模块定义：
+			序号		功能名称				数据方向		功能描述
+			1.		当前指令31位			输入			1位，输入信号，用来进行组合逻辑运算以得到22位控制信号的每一位
+			2.		当前指令30位			输入			1位，输入信号，用来进行组合逻辑运算以得到22位控制信号的每一位
+			3.		当前指令29位			输入			1位，输入信号，用来进行组合逻辑运算以得到22位控制信号的每一位
+			4.		当前指令28位			输入			1位，输入信号，用来进行组合逻辑运算以得到22位控制信号的每一位
+			5.		当前指令27位			输入			1位，输入信号，用来进行组合逻辑运算以得到22位控制信号的每一位
+			6.		当前指令26位			输入			1位，输入信号，用来进行组合逻辑运算以得到22位控制信号的每一位
+			7.		合并的控制信号		输出			22位，输出的控制信号
+			注：
+			1.为便于后续选择而将22个输出信号全部合并输出。
+			2.本模块适用的指令为：lw、sw、lb、lbu、sb、lh、lhu、sh、beq、bne、bgtz、blez、addi、andi、ori、xori、lui、slti、sltiu、j、jal。
+		内部逻辑：
+			纯与或非门实现的组合逻辑电路，由Logisim分析电路功能直接生成。
+		----------------------------------------
+		lower_six
+		模块定义：
+			序号		功能名称				数据方向		功能描述
+			1.		当前指令5位			输入			1位，输入信号，用来进行组合逻辑运算以得到22位控制信号的每一位
+			2.		当前指令4位			输入			1位，输入信号，用来进行组合逻辑运算以得到22位控制信号的每一位
+			3.		当前指令3位			输入			1位，输入信号，用来进行组合逻辑运算以得到22位控制信号的每一位
+			4.		当前指令2位			输入			1位，输入信号，用来进行组合逻辑运算以得到22位控制信号的每一位
+			5.		当前指令1位			输入			1位，输入信号，用来进行组合逻辑运算以得到22位控制信号的每一位
+			6.		当前指令0位			输入			1位，输入信号，用来进行组合逻辑运算以得到22位控制信号的每一位
+			7.		合并的控制信号		输出			22位，输出的控制信号
+			注：
+			1.为便于后续选择而将22个输出信号全部合并输出。
+			2.本模块适用的指令为：add、sub、and、or、slt、nor、xor、sll、srl、sra、sllv、srlv、srav、sltu、jr、jalr。
+		内部逻辑：
+			纯与或非门实现的组合逻辑电路，由Logisim分析电路功能直接生成。
+		----------------------------------------
+		middle_five
+		模块定义：
+			序号		功能名称				数据方向		功能描述
+			1.		当前指令20位			输入			1位，输入信号，用来进行组合逻辑运算以得到22位控制信号的每一位
+			2.		当前指令19位			输入			1位，输入信号，用来进行组合逻辑运算以得到22位控制信号的每一位
+			3.		当前指令18位			输入			1位，输入信号，用来进行组合逻辑运算以得到22位控制信号的每一位
+			4.		当前指令17位			输入			1位，输入信号，用来进行组合逻辑运算以得到22位控制信号的每一位
+			5.		当前指令16位			输入			1位，输入信号，用来进行组合逻辑运算以得到22位控制信号的每一位
+			6.		合并的控制信号		输出			22位，输出的控制信号
+			注：
+			1.为便于后续选择而将22个输出信号全部合并输出。
+			2.本模块适用的指令为：bltz、bgez。
+		内部逻辑：
+			纯与或非门实现的组合逻辑电路，由Logisim分析电路功能直接生成。
+	（三）控制模块设计
+		控制模块真值表如下：
+		为便于表格呈现，将表格分为四部分，将确定bltz、bgez的20-16位填在4-0位的位置，并以前导/进行区分。
+		name	31	30	29	28	27	26	5	4	3	2	1	0	MemtoReg	MemWrite	Branch		ALU[4]		ALU[3]		ALU[2]
+		lw		1	0	0	0	1	1	X	X	X	X	X	X	1			0			0			0			0			0
+		sw		1	0	1	0	1	1	X	X	X	X	X	X	X			1			0			0			0			0
+		lb		1	0	0	0	0	0	X	X	X	X	X	X	1			0			0			0			0			0
+		lbu		1	0	0	1	0	0	X	X	X	X	X	X	1			0			0			0			0			0
+		sb		1	0	1	0	0	0	X	X	X	X	X	X	X			1			0			0			0			0
+		lh		1	0	0	0	0	1	X	X	X	X	X	X	1			0			0			0			0			0
+		lhu		1	0	0	1	0	1	X	X	X	X	X	X	1			0			0			0			0			0
+		sh		1	0	1	0	0	1	X	X	X	X	X	X	X			1			0			0			0			0
+		add		0	0	0	0	0	0	1	0	0	0	0	0	0			0			0			0			0			0
+		addu	0	0	0	0	0	0	1	0	0	0	0	1	0			0			0			0			0			0
+		sub		0	0	0	0	0	0	1	0	0	0	1	0	0			0			0			0			0			1
+		subu	0	0	0	0	0	0	1	0	0	0	1	1	0			0			0			0			0			1
+		and		0	0	0	0	0	0	1	0	0	1	0	0	0			0			0			0			0			0
+		or		0	0	0	0	0	0	1	0	0	1	0	1	0			0			0			0			0			0
+		slt		0	0	0	0	0	0	1	0	1	0	1	0	0			0			0			0			0			1
+		nor		0	0	0	0	0	0	1	0	0	1	1	1	0			0			0			0			1			1
+		xor		0	0	0	0	0	0	1	0	0	1	1	0	0			0			0			0			0			0
+		sll		0	0	0	0	0	0	0	0	0	0	0	0	0			0			0			0			1			0
+		srl		0	0	0	0	0	0	0	0	0	0	1	0	0			0			0			0			1			0
+		sra		0	0	0	0	0	0	0	0	0	0	1	1	0			0			0			0			1			0
+		sllv	0	0	0	0	0	0	0	0	0	1	0	0	0			0			0			0			1			0
+		srlv	0	0	0	0	0	0	0	0	0	1	1	0	0			0			0			0			1			0
+		srav	0	0	0	0	0	0	0	0	0	1	1	1	0			0			0			0			1			0
+		sltu	0	0	0	0	0	0	1	0	1	0	1	1	0			0			0			0			1			1
+		beq		0	0	0	1	0	0	X	X	X	X	X	X	X			0			1			0			0			0
+		bne		0	0	0	1	0	1	X	X	X	X	X	X	X			0			1			0			1			1
+		bgtz	0	0	0	1	1	1	X	X	X	X	X	X	X			0			1			0			0			1
+		blez	0	0	0	1	1	0	X	X	X	X	X	X	X			0			1			0			1			1
+		bltz	0	0	0	0	0	1	\N	\0	\0	\0	\0	\0	X			0			1			0			0			1
+		bgez	0	0	0	0	0	1	\N	\0	\0	\0	\0	\1	X			0			1			0			1			0
+		addi	0	0	1	0	0	0	X	X	X	X	X	X	0			0			0			0			0			0
+		addiu	0	0	1	0	0	1	X	X	X	X	X	X	0			0			0			0			0			0
+		andi	0	0	1	1	0	0	X	X	X	X	X	X	0			0			0			0			0			0
+		ori		0	0	1	1	0	1	X	X	X	X	X	X	0			0			0			0			0			0
+		xori	0	0	1	1	1	0	X	X	X	X	X	X	0			0			0			0			0			0
+		lui		0	0	1	1	1	1	X	X	X	X	X	X	0			0			0			1			0			0
+		slti	0	0	1	0	1	0	X	X	X	X	X	X	0			0			0			0			0			1
+		sltiu	0	0	1	0	1	1	X	X	X	X	X	X	0			0			0			0			1			1
+		j		0	0	0	0	1	0	X	X	X	X	X	X	X			0			X			X			X			X
+		jr		0	0	0	0	0	0	0	0	1	0	0	0	X			0			X			X			X			X
+		jal		0	0	0	0	1	1	X	X	X	X	X	X	0			0			X			X			X			X
+		jalr	0	0	0	0	0	0	0	0	1	0	0	1	0			0			X			X			X			X
+		name	31	30	29	28	27	26	5	4	3	2	1	0	ALU[1]		ALU[0]		ALUSrc[1]	ALUSrc[0]	RegDst		RegWrite
+		lw		1	0	0	0	1	1	X	X	X	X	X	X	1			0			0			1			0			1
+		sw		1	0	1	0	1	1	X	X	X	X	X	X	1			0			0			1			X			0
+		lb		1	0	0	0	0	0	X	X	X	X	X	X	1			0			0			1			0			1
+		lbu		1	0	0	1	0	0	X	X	X	X	X	X	1			0			0			1			0			1
+		sb		1	0	1	0	0	0	X	X	X	X	X	X	1			0			0			1			X			0
+		lh		1	0	0	0	0	1	X	X	X	X	X	X	1			0			0			1			0			1
+		lhu		1	0	0	1	0	1	X	X	X	X	X	X	1			0			0			1			0			1
+		sh		1	0	1	0	0	1	X	X	X	X	X	X	1			0			0			1			X			0
+		add		0	0	0	0	0	0	1	0	0	0	0	0	1			0			0			0			1			1
+		addu	0	0	0	0	0	0	1	0	0	0	0	1	1			0			0			0			1			1
+		sub		0	0	0	0	0	0	1	0	0	0	1	0	1			0			0			0			1			1
+		subu	0	0	0	0	0	0	1	0	0	0	1	1	1			0			0			0			1			1
+		and		0	0	0	0	0	0	1	0	0	1	0	0	0			0			0			0			1			1
+		or		0	0	0	0	0	0	1	0	0	1	0	1	0			1			0			0			1			1
+		slt		0	0	0	0	0	0	1	0	1	0	1	0	1			1			0			0			1			1
+		nor		0	0	0	0	0	0	1	0	0	1	1	1	0			0			0			0			1			1
+		xor		0	0	0	0	0	0	1	0	0	1	1	0	1			1			0			0			1			1
+		sll		0	0	0	0	0	0	0	0	0	0	0	0	0			1			1			0			1			1
+		srl		0	0	0	0	0	0	0	0	0	0	1	0	1			0			1			0			1			1
+		sra		0	0	0	0	0	0	0	0	0	0	1	1	1			1			1			0			1			1
+		sllv	0	0	0	0	0	0	0	0	0	1	0	0	0			1			0			0			1			1
+		srlv	0	0	0	0	0	0	0	0	0	1	1	0	1			0			0			0			1			1
+		srav	0	0	0	0	0	0	0	0	0	1	1	1	1			1			0			0			1			1
+		sltu	0	0	0	0	0	0	1	0	1	0	1	1	1			0			0			0			1			1
+		beq		0	0	0	1	0	0	X	X	X	X	X	X	1			1			0			0			X			0
+		bne		0	0	0	1	0	1	X	X	X	X	X	X	0			1			0			0			X			0
+		bgtz	0	0	0	1	1	1	X	X	X	X	X	X	0			0			0			0			X			0
+		blez	0	0	0	1	1	0	X	X	X	X	X	X	1			1			0			0			X			0
+		bltz	0	0	0	0	0	1	\N	\0	\0	\0	\0	\0	0			1			0			0			X			0
+		bgez	0	0	0	0	0	1	\N	\0	\0	\0	\0	\1	0			0			0			0			X			0
+		addi	0	0	1	0	0	0	X	X	X	X	X	X	1			0			0			1			0			1
+		addiu	0	0	1	0	0	1	X	X	X	X	X	X	1			0			0			1			0			1
+		andi	0	0	1	1	0	0	X	X	X	X	X	X	0			0			0			1			0			1
+		ori		0	0	1	1	0	1	X	X	X	X	X	X	0			1			0			1			0			1
+		xori	0	0	1	1	1	0	X	X	X	X	X	X	1			1			0			1			0			1
+		lui		0	0	1	1	1	1	X	X	X	X	X	X	0			0			0			1			0			1
+		slti	0	0	1	0	1	0	X	X	X	X	X	X	1			1			0			1			0			1
+		sltiu	0	0	1	0	1	1	X	X	X	X	X	X	1			0			0			1			0			1
+		j		0	0	0	0	1	0	X	X	X	X	X	X	X			X			X			X			X			0
+		jr		0	0	0	0	0	0	0	0	1	0	0	0	X			X			X			X			X			0
+		jal		0	0	0	0	1	1	X	X	X	X	X	X	X			X			X			X			X			1
+		jalr	0	0	0	0	0	0	0	0	1	0	0	1	X			X			X			X			1			1
+		name	31	30	29	28	27	26	5	4	3	2	1	0	HAndD[2]	HAndD[1]	HAndD[0]	Extend[1]	Extend[0]	JL[1]
+		lw		1	0	0	0	1	1	X	X	X	X	X	X	0			0			X			0			0			0
+		sw		1	0	1	0	1	1	X	X	X	X	X	X	0			0			X			0			0			0
+		lb		1	0	0	0	0	0	X	X	X	X	X	X	1			0			1			0			0			0
+		lbu		1	0	0	1	0	0	X	X	X	X	X	X	1			0			0			0			0			0
+		sb		1	0	1	0	0	0	X	X	X	X	X	X	1			0			X			0			0			0
+		lh		1	0	0	0	0	1	X	X	X	X	X	X	0			1			1			0			0			0
+		lhu		1	0	0	1	0	1	X	X	X	X	X	X	0			1			0			0			0			0
+		sh		1	0	1	0	0	1	X	X	X	X	X	X	0			1			X			0			0			0
+		add		0	0	0	0	0	0	1	0	0	0	0	0	X			X			X			X			X			0
+		add		0	0	0	0	0	0	1	0	0	0	0	1	X			X			X			X			X			0
+		sub		0	0	0	0	0	0	1	0	0	0	1	0	X			X			X			X			X			0
+		subu	0	0	0	0	0	0	1	0	0	0	1	1	X			X			X			X			X			0
+		and		0	0	0	0	0	0	1	0	0	1	0	0	X			X			X			X			X			0
+		or		0	0	0	0	0	0	1	0	0	1	0	1	X			X			X			X			X			0
+		slt		0	0	0	0	0	0	1	0	1	0	1	0	X			X			X			X			X			0
+		nor		0	0	0	0	0	0	1	0	0	1	1	1	X			X			X			X			X			0
+		xor		0	0	0	0	0	0	1	0	0	1	1	0	X			X			X			X			X			0
+		sll		0	0	0	0	0	0	0	0	0	0	0	0	X			X			X			1			0			0
+		srl		0	0	0	0	0	0	0	0	0	0	1	0	X			X			X			1			0			0
+		sra		0	0	0	0	0	0	0	0	0	0	1	1	X			X			X			1			0			0
+		sllv	0	0	0	0	0	0	0	0	0	1	0	0	X			X			X			X			X			0
+		srlv	0	0	0	0	0	0	0	0	0	1	1	0	X			X			X			X			X			0
+		srav	0	0	0	0	0	0	0	0	0	1	1	1	X			X			X			X			X			0
+		sltu	0	0	0	0	0	0	1	0	1	0	1	1	X			X			X			X			X			0
+		beq		0	0	0	1	0	0	X	X	X	X	X	X	X			X			X			0			0			0
+		bne		0	0	0	1	0	1	X	X	X	X	X	X	X			X			X			0			0			0
+		bgtz	0	0	0	1	1	1	X	X	X	X	X	X	X			X			X			0			0			0
+		blez	0	0	0	1	1	0	X	X	X	X	X	X	X			X			X			0			0			0
+		bltz	0	0	0	0	0	1	\N	\0	\0	\0	\0	\0	X			X			X			0			0			0
+		bgez	0	0	0	0	0	1	\N	\0	\0	\0	\0	\1	X			X			X			0			0			0
+		addi	0	0	1	0	0	0	X	X	X	X	X	X	X			X			X			0			0			0
+		addiu	0	0	1	0	0	1	X	X	X	X	X	X	X			X			X			0			0			0
+		andi	0	0	1	1	0	0	X	X	X	X	X	X	X			X			X			0			1			0
+		ori		0	0	1	1	0	1	X	X	X	X	X	X	X			X			X			0			1			0
+		xori	0	0	1	1	1	0	X	X	X	X	X	X	X			X			X			0			1			0
+		lui		0	0	1	1	1	1	X	X	X	X	X	X	X			X			X			0			0			0
+		slti	0	0	1	0	1	0	X	X	X	X	X	X	X			X			X			0			0			0
+		sltiu	0	0	1	0	1	1	X	X	X	X	X	X	X			X			X			0			0			0
+		j		0	0	0	0	1	0	X	X	X	X	X	X	X			X			X			X			X			0
+		jr		0	0	0	0	0	0	0	0	1	0	0	0	X			X			X			X			X			1
+		jal		0	0	0	0	1	1	X	X	X	X	X	X	X			X			X			X			X			0
+		jalr	0	0	0	0	0	0	0	0	1	0	0	1	X			X			X			X			X			1
+		name	31	30	29	28	27	26	5	4	3	2	1	0	JL[0]		JR			To31		Overflow	NULL		NULL
+		lw		1	0	0	0	1	1	X	X	X	X	X	X	0			0			0			0						
+		sw		1	0	1	0	1	1	X	X	X	X	X	X	0			X			X			0						
+		lb		1	0	0	0	0	0	X	X	X	X	X	X	0			0			0			0						
+		lbu		1	0	0	1	0	0	X	X	X	X	X	X	0			0			0			0						
+		sb		1	0	1	0	0	0	X	X	X	X	X	X	0			X			X			0						
+		lh		1	0	0	0	0	1	X	X	X	X	X	X	0			0			0			0						
+		lhu		1	0	0	1	0	1	X	X	X	X	X	X	0			0			0			0						
+		sh		1	0	1	0	0	1	X	X	X	X	X	X	0			X			X			0						
+		add		0	0	0	0	0	0	1	0	0	0	0	0	0			0			0			1						
+		addu	0	0	0	0	0	0	1	0	0	0	0	1	0			0			0			0						
+		sub		0	0	0	0	0	0	1	0	0	0	1	0	0			0			0			1						
+		subu	0	0	0	0	0	0	1	0	0	0	1	1	0			0			0			0						
+		and		0	0	0	0	0	0	1	0	0	1	0	0	0			0			0			0						
+		or		0	0	0	0	0	0	1	0	0	1	0	1	0			0			0			0						
+		slt		0	0	0	0	0	0	1	0	1	0	1	0	0			0			0			0						
+		nor		0	0	0	0	0	0	1	0	0	1	1	1	0			0			0			0						
+		xor		0	0	0	0	0	0	1	0	0	1	1	0	0			0			0			0						
+		sll		0	0	0	0	0	0	0	0	0	0	0	0	0			0			0			0						
+		srl		0	0	0	0	0	0	0	0	0	0	1	0	0			0			0			0						
+		sra		0	0	0	0	0	0	0	0	0	0	1	1	0			0			0			0						
+		sllv	0	0	0	0	0	0	0	0	0	1	0	0	0			0			0			0						
+		srlv	0	0	0	0	0	0	0	0	0	1	1	0	0			0			0			0						
+		srav	0	0	0	0	0	0	0	0	0	1	1	1	0			0			0			0						
+		sltu	0	0	0	0	0	0	1	0	1	0	1	1	0			0			0			0						
+		beq		0	0	0	1	0	0	X	X	X	X	X	X	0			X			X			0						
+		bne		0	0	0	1	0	1	X	X	X	X	X	X	0			X			X			0						
+		bgtz	0	0	0	1	1	1	X	X	X	X	X	X	0			X			X			0						
+		blez	0	0	0	1	1	0	X	X	X	X	X	X	0			X			X			0						
+		bltz	0	0	0	0	0	1	\N	\0	\0	\0	\0	\0	0			X			X			0						
+		bgez	0	0	0	0	0	1	\N	\0	\0	\0	\0	\1	0			X			X			0						
+		addi	0	0	1	0	0	0	X	X	X	X	X	X	0			0			0			1						
+		addiu	0	0	1	0	0	1	X	X	X	X	X	X	0			0			0			0						
+		andi	0	0	1	1	0	0	X	X	X	X	X	X	0			0			0			0						
+		ori		0	0	1	1	0	1	X	X	X	X	X	X	0			0			0			0						
+		xori	0	0	1	1	1	0	X	X	X	X	X	X	0			0			0			0						
+		lui		0	0	1	1	1	1	X	X	X	X	X	X	0			0			0			0						
+		slti	0	0	1	0	1	0	X	X	X	X	X	X	0			0			0			0						
+		sltiu	0	0	1	0	1	1	X	X	X	X	X	X	0			0			0			0						
+		j		0	0	0	0	1	0	X	X	X	X	X	X	1			X			X			0						
+		jr		0	0	0	0	0	0	0	0	1	0	0	0	0			X			X			0						
+		jal		0	0	0	0	1	1	X	X	X	X	X	X	1			1			1			0						
+		jalr	0	0	0	0	0	0	0	0	1	0	0	1	0			1			0			0						
+		------------------------------------------------------------------------------------------------------------------
+		考虑到以上指令分三类，lw、sw、lb、lbu、sb、lh、lhu、sh、beq、bne、bgtz、blez、addi、andi、ori、xori、lui、slti、sltiu、j、jal以[31:26]进行编码，add、sub、and、or、slt、nor、xor、sll、srl、sra、sllv、srlv、srav、sltu、jr、jalr[31:26]全为0，以[5:0]编码，bltz、bgez[31:26]仅第26位为1，以[20:16]编码，因此可将指令分为上述三类分别进行处理(即上文中的upper_six、lower_six、middle_five三个模块)，并用数据选择器选择最终的控制信号，以使控制器简洁且有条理。
+		下给出三个模块实际的真值表(为上述真值表的子集，且为便于补全真值表的程序的处理进行了简化)
+		upper_six：
+		1 0 0 0 1 1 -> 1 0 0 0 0 0 1 0 0 1 0 1 0 0 X 0 0 0 0 0 0 0
+		1 0 1 0 1 1 -> X 1 0 0 0 0 1 0 0 1 X 0 0 0 X 0 0 0 0 X X 0
+		1 0 0 0 0 0 -> 1 0 0 0 0 0 1 0 0 1 0 1 1 0 1 0 0 0 0 0 0 0
+		1 0 0 1 0 0 -> 1 0 0 0 0 0 1 0 0 1 0 1 1 0 0 0 0 0 0 0 0 0
+		1 0 1 0 0 0 -> X 1 0 0 0 0 1 0 0 1 X 0 1 0 X 0 0 0 0 X X 0
+		1 0 0 0 0 1 -> 1 0 0 0 0 0 1 0 0 1 0 1 0 1 1 0 0 0 0 0 0 0
+		1 0 0 1 0 1 -> 1 0 0 0 0 0 1 0 0 1 0 1 0 1 0 0 0 0 0 0 0 0
+		1 0 1 0 0 1 -> X 1 0 0 0 0 1 0 0 1 X 0 0 1 X 0 0 0 0 X X 0
+		0 0 0 1 0 0 -> X 0 1 0 0 0 1 1 0 0 X 0 X X X 0 0 0 0 X X 0
+		0 0 0 1 0 1 -> X 0 1 0 1 1 0 1 0 0 X 0 X X X 0 0 0 0 X X 0
+		0 0 0 1 1 1 -> X 0 1 0 0 1 0 0 0 0 X 0 X X X 0 0 0 0 X X 0
+		0 0 0 1 1 0 -> X 0 1 0 1 1 1 1 0 0 X 0 X X X 0 0 0 0 X X 0
+		0 0 1 0 0 0 -> 0 0 0 0 0 0 1 0 0 1 0 1 X X X 0 0 0 0 0 0 1
+		0 0 1 0 0 1 -> 0 0 0 0 0 0 1 0 0 1 0 1 X X X 0 0 0 0 0 0 0
+		0 0 1 1 0 0 -> 0 0 0 0 0 0 0 0 0 1 0 1 X X X 0 1 0 0 0 0 0
+		0 0 1 1 0 1 -> 0 0 0 0 0 0 0 1 0 1 0 1 X X X 0 1 0 0 0 0 0
+		0 0 1 1 1 0 -> 0 0 0 0 0 0 1 1 0 1 0 1 X X X 0 1 0 0 0 0 0
+		0 0 1 1 1 1 -> 0 0 0 1 0 0 0 0 0 1 0 1 X X X 0 0 0 0 0 0 0
+		0 0 1 0 1 0 -> 0 0 0 0 0 1 1 1 0 1 0 1 X X X 0 0 0 0 0 0 0
+		0 0 1 0 1 1 -> 0 0 0 0 1 1 1 0 0 1 0 1 X X X 0 0 0 0 0 0 0
+		0 0 0 0 1 0 -> X 0 X X X X X X X X X 0 X X X X X 0 1 X X 0
+		0 0 0 0 1 1 -> 0 0 X X X X X X X X X 1 X X X X X 0 1 1 1 0
+		lower_six：
+		1 0 0 0 0 1 -> 0 0 0 0 0 0 1 0 0 0 1 1 X X X X X 0 0 0 0 0
+		1 0 0 0 1 0 -> 0 0 0 0 0 1 1 0 0 0 1 1 X X X X X 0 0 0 0 1
+		1 0 0 0 1 1 -> 0 0 0 0 0 1 1 0 0 0 1 1 X X X X X 0 0 0 0 0
+		1 0 0 1 0 0 -> 0 0 0 0 0 0 0 0 0 0 1 1 X X X X X 0 0 0 0 0
+		1 0 0 1 0 1 -> 0 0 0 0 0 0 0 1 0 0 1 1 X X X X X 0 0 0 0 0
+		1 0 1 0 1 0 -> 0 0 0 0 0 1 1 1 0 0 1 1 X X X X X 0 0 0 0 0
+		1 0 0 1 1 1 -> 0 0 0 0 1 1 0 0 0 0 1 1 X X X X X 0 0 0 0 0
+		1 0 0 1 1 0 -> 0 0 0 0 0 0 1 1 0 0 1 1 X X X X X 0 0 0 0 0
+		0 0 0 0 0 0 -> 0 0 0 0 1 0 0 1 1 0 1 1 X X X 1 0 0 0 0 0 0
+		0 0 0 0 1 0 -> 0 0 0 0 1 0 1 0 1 0 1 1 X X X 1 0 0 0 0 0 0
+		0 0 0 0 1 1 -> 0 0 0 0 1 0 1 1 1 0 1 1 X X X 1 0 0 0 0 0 0
+		0 0 0 1 0 0 -> 0 0 0 0 1 0 0 1 0 0 1 1 X X X X X 0 0 0 0 0
+		0 0 0 1 1 0 -> 0 0 0 0 1 0 1 0 0 0 1 1 X X X X X 0 0 0 0 0
+		0 0 0 1 1 1 -> 0 0 0 0 1 0 1 1 0 0 1 1 X X X X X 0 0 0 0 0
+		1 0 1 0 1 1 -> 0 0 0 0 1 1 1 0 0 0 1 1 X X X X X 0 0 0 0 0
+		0 0 1 0 0 0 -> X 0 X X X X X X X X X 0 X X X X X 1 0 X X 0
+		0 0 1 0 0 1 -> 0 0 X X X X X X X X 1 1 X X X X X 1 0 1 0 0
+		middle_five：
+		0 0 0 0 0 -> X 0 1 0 0 1 0 1 0 0 X 0 X X X 0 0 0 0 X X 0
+		0 0 0 0 1 -> X 0 1 0 1 0 0 0 0 0 X 0 X X X 0 0 0 0 X X 0
+	（四）辅助搭建电路的程序
+		我们需要将上述三个真值表转换为电路实现，手工搭建是一件痛苦的事情，因此考虑使用Logisim的分析电路功能，由于手动修改真值表也是一件痛苦的事情，考虑将上述不完整的真值表补全(即没有定义的输入输出均为X)，从而可以直接将真值表粘贴到Logisim中，以高效的生成电路。
+		采用c语言编程补全真值表，算法为建立一棵0-1 Trie树，将真值表插入这棵树，最后遍历这棵树，如果某种输入没有被插入则输出全为X，程序代码如下：
+		#include <stdio.h>
+		#include <stdlib.h>
+
+		typedef struct node
+		{
+			bool vis;
+			char data[15];
+			struct node *s[2];
+		} stu,*ptr;
+
+		ptr root=NULL;
+		int max,datanum;
+		unsigned char stk[15];
+
+		ptr bulid(int num)
+		{
+			if (num==max) return NULL;
+			ptr now=(ptr)malloc(sizeof(stu));
+			now->vis=0;
+			now->s[0]=bulid(num+1);
+			now->s[1]=bulid(num+1);
+			return now;
+		}
+
+		bool add()
+		{
+			int num;
+			char tmps[3];
+			ptr now=root;
+			for (int i=0;i<max-1;i++)
+			{
+				if (scanf("%d",&num)==-1) return 0;
+				now=now->s[num];
+			}
+			now->vis=1;
+			getchar(),getchar(),getchar();
+			for (int i=0;i<datanum;i++)
+			{
+				if (scanf("%s",tmps)==-1) return 0;
+				if (tmps[0]=='X') tmps[0]='x';
+				now->data[i]=tmps[0];
+			}
+			return 1;
+		}
+
+		void dfs(ptr now,int num)
+		{
+			if (now==NULL) return;
+			if (num==max-1)
+			{
+				for (int i=0;i<max-1;i++)
+					printf("%d ",stk[i]);
+				for (int i=0;i<datanum;i++)
+					if (now->vis) printf("%c ",now->data[i]);
+					else printf("x ");
+				puts(""); return;
+			}
+			stk[num]=0;
+			dfs(now->s[0],num+1);
+			stk[num]=1;
+			dfs(now->s[1],num+1);
+			return;
+		}
+
+		int main()
+		{
+			scanf("%d %d",&max,&datanum);
+			max++,root=bulid(0);
+			while (add());
+			dfs(root,0);
+			return 0;
+		}
+		从而我们可以得到可粘贴在Logisim分析电路中的真值表，此外，由于Logisim的分析电路功能单次最大支持12个输出，我们需要将22个输出分两次生成，为此我们可以新建一个临时模块，将22个输出的前12个生成电路，将电路粘贴到目标模块中，然后从临时模块中删除当前模块，将22个输出的后10个生成电路，将电路粘贴到目标模块中，并对输入输出进行简单的修改，即可完成控制模块的设计，为便于阅读，生成的真值表见附录1。
+
+二、测试方案
+	（一）典型测试样例
+		根据指令的类型，主要构造了九个测试点，如下：
+		#1
+		test_allJ：主要测试四个跳转指令
+		包含的指令：add,addi,addiu,beq,j,jal,jalr,jr,slti,sw
+		#2
+		test_allB：主要测试六个条件跳转指令
+		包含的指令：addi,beq,bgez,bgtz,blez,bltz,bne,j,slti,sw
+		#3
+		test_allRP1：主要测试若干R类型的指令，有点多所以分了两个测试点
+		包含的指令：addi,addu,and,lw,nor,or,sllv,slt,sltu,srav,srlv,subu,sw,xor
+		#4
+		test_allRP2：主要测试若干R类型的指令，有点多所以分了两个测试点
+		包含的指令：add,addi,addu,and,lw,nor,or,sllv,slt,sltu,srav,srlv,sub,subu,sw,xor
+		#5
+		test_allLW：主要测试八个内存读写指令
+		包含的指令：addi,beq,j,lb,lbu,lh,lhu,lw,sb,sh,sw
+		#6
+		test_allIP1：主要测试若干I类型的指令，有点多所以分了两个测试点
+		包含的指令：addi,addiu,andi,ori,sll,srl,sw
+		#7
+		test_allIP2：主要测试若干I类型的指令，有点多所以分了两个测试点
+		包含的指令：addi,lui,slti,sltiu,sra,sw,xori
+		#8
+		test_narcissistic：实质是跑水仙花数，找个比较长的有意义的程序跑下试试
+		包含的指令：add,addi,beq,j,jal,jr,slt,slti,sw
+		#9
+		test_quicksort：实质是跑n=100的快排，找个有递归的有意义的程序跑下试试
+		包含的指令：add,addi,addiu,beq,bgez,bgtz,blez,bltz,bne,j,jal,jr,lw,sll,srl,sub,subi,sw
+		注：
+		1.考虑到5位最多可执行32条不同指令，非常不便于测试，因此采用24位IM地址和24为DM地址的CPU进行测试。
+		2.考虑到Mars得到的程序指令从0x3000开始，为便于测试和提交，此CPU支持任意指定指令的起始地址，只需要指定PC和IM中的两个常量即可，我们可以在测试时将其改成0x3000，在提交时将其改为0。
+		3.测试点较长，为方便阅读，将这些测试点的rom输入，ram输入和标准答案按顺序放在附录2，附录3，附录4。
+	（二）数据构造方法
+		覆盖所有测试功能正常进行的样例，极端情况的样例，以R指令的测试为例，我们对每个R指令，测试在两个输入分别为正正，负负，正负，负正，零零，正零，负零，正数负数分别包含如1、-1、2147483647,、-2147483648在内的数据和随机数，同时我们会测试ARB、BRA、ARA、BRB，其它测试点的构造类似，具体见MIPS汇编程序，考虑到汇编程序较长，为方便阅读，将这些测试点的汇编代码放在附录5。
+	（三）自动测试工具
+		显然面对上千的输出，肉眼将RAM中的结果与标准答案对比是不现实的，又因为Logisim导出的数据会存在a*x表示a个x，会忽略前导0，会一行多个输出，考虑用c语言将从RAM导出的数据进行格式化，从而在cmd中使用fc进行对比，这是一个平凡的字符串处理和bat批处理，代码如下：
+		#include <stdio.h>
+
+		char s[1111]; int tot;
+		unsigned int data[111111];
+
+		inline bool judge(char c)
+		{
+			if ('0'<=c && c<='9') return 1;
+			if ('a'<=c && c<='f') return 1;
+			return 0;
+		}
+
+		inline unsigned int change(char c)
+		{
+			if ('0'<=c && c<='9') return c-'0';
+			if ('a'<=c && c<='f') return c-'a'+10;
+			return 0;
+		}
+
+		inline int todigit(int num)
+		{
+			int ans;
+			char s[11];
+			sprintf(s,"%x",num);
+			sscanf(s,"%d",&ans);
+			return ans;
+		}
+
+		int main()
+		{
+			freopen("out.txt","w",stdout);
+			gets(s);
+			while (gets(s))
+			{
+				int rep=1;
+				unsigned int num=0;
+				for (int i=0;s[i];i++)
+				{
+					if (judge(s[i]))
+						num=(num<<4)+change(s[i]);
+					else if (s[i]=='*')
+						rep=todigit(num),num=0;
+					else if (s[i]==' ')
+					{
+						for (int j=0;j<rep;j++)
+							data[tot++]=num;
+						num=0,rep=1;
+					}
+				}
+				for (int j=0;j<rep;j++)
+					data[tot++]=num;
+			}
+			//printf("%d\n",tot);
+			for (int i=0;i<tot;i++)
+				printf("%08x\n",data[i]);
+			return 0;
+		}
+
+		@echo off
+		fc out.txt ans.txt
+		pause
+		:end
+
+三、思考题
+	（一）现在我们的模块中IM使用ROM，DM使用RAM，GRF使用Register，这种做法合理吗？请给出分析，若有改进意见也请一并给出。
+		我认为合理，ROM是只读存储器，考虑到指令存储器只需要输出指令而不需要写入指令，使用ROM进行存储是合理的。DM用来访问内存中的数据，这需要足够的存储空间且要求支持读写，因此仅RAM可以满足此要求。GRF需要足够快的存储速度，而不需要很大的空间(32*32)，因此采用寄存器搭建GRF是合理的。
+	（二）事实上，实现nop空指令，我们并不需要将它加入控制信号真值表，为什么？请给出你的理由。
+		因为nop指令的编码实质上是特殊的sll指令，即将0号寄存器中的值左移0位后存入0号寄存器，这和什么都没有做没有任何区别，由于此处理器已经完成了对sll指令的支持，我们并不需要将nop空指令加入控制信号真值表。
+	（三）上文提到，MARS不能导出PC与DM起始地址均为0的机器码。实际上，可以通过为DM增添片选信号，来避免手工修改的麻烦，请查阅相关资料进行了解，并阐释为了解决这个问题，你最终采用的方法。
+		题目可能有误，MARS中，我们选择了“Compact, Data at Address 0”，因此，“可以通过为DM增添片选信号”应为“可以通过为PC增添片选信号”，如上文中所述，我对PC和IM进行了修改，记PC初始化值为A，只要在IM的输入信号输入到ROM前将其减去A，就可以起到PC的起始地址为X的效果，我们可以任意修改X来满足不同的测试要求。
+	（四）除了编写程序进行测试外，还有一种验证CPU设计正确性的办法——形式验证。形式验证的含义是根据某个或某些形式规范或属性，使用数学的方法证明其正确性或非正确性。请搜索“形式验证”了解相关内容后，简要阐述相比于测试，形式验证的优劣之处。
+		形式验证的优点包括：形式验证是对指定描述的所有可能的情况进行验证，覆盖率达到了100%；形式验证技术是借用数学上的方法将待验证电路和功能描述或参考设计直接进行比较，不需要开发测试激励；形式验证的验证时间短，可以很快发现和改正电路设计中的错误，可以缩短设计周期。形式验证的不足包括无法分析一些动态的特性，无法有效验证电路性能，如电路的功耗和延迟等等。
+
+附录1：
+upper_six：
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x 0 x x x x x x x x x 0
+0 0 x x x x x x x x x 1
+x 0 1 0 0 0 1 1 0 0 x 0
+x 0 1 0 1 1 0 1 0 0 x 0
+x 0 1 0 1 1 1 1 0 0 x 0
+x 0 1 0 0 1 0 0 0 0 x 0
+0 0 0 0 0 0 1 0 0 1 0 1
+0 0 0 0 0 0 1 0 0 1 0 1
+0 0 0 0 0 1 1 1 0 1 0 1
+0 0 0 0 1 1 1 0 0 1 0 1
+0 0 0 0 0 0 0 0 0 1 0 1
+0 0 0 0 0 0 0 1 0 1 0 1
+0 0 0 0 0 0 1 1 0 1 0 1
+0 0 0 1 0 0 0 0 0 1 0 1
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+1 0 0 0 0 0 1 0 0 1 0 1
+1 0 0 0 0 0 1 0 0 1 0 1
+x x x x x x x x x x x x
+1 0 0 0 0 0 1 0 0 1 0 1
+1 0 0 0 0 0 1 0 0 1 0 1
+1 0 0 0 0 0 1 0 0 1 0 1
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x 1 0 0 0 0 1 0 0 1 x 0
+x 1 0 0 0 0 1 0 0 1 x 0
+x x x x x x x x x x x x
+x 1 0 0 0 0 1 0 0 1 x 0
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x 0 1 x x 0
+x x x x x 0 1 1 1 0
+x x x 0 0 0 0 x x 0
+x x x 0 0 0 0 x x 0
+x x x 0 0 0 0 x x 0
+x x x 0 0 0 0 x x 0
+x x x 0 0 0 0 0 0 1
+x x x 0 0 0 0 0 0 0
+x x x 0 0 0 0 0 0 0
+x x x 0 0 0 0 0 0 0
+x x x 0 1 0 0 0 0 0
+x x x 0 1 0 0 0 0 0
+x x x 0 1 0 0 0 0 0
+x x x 0 0 0 0 0 0 0
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+1 0 1 0 0 0 0 0 0 0
+0 1 1 0 0 0 0 0 0 0
+x x x x x x x x x x
+0 0 x 0 0 0 0 0 0 0
+1 0 0 0 0 0 0 0 0 0
+0 1 0 0 0 0 0 0 0 0
+x x x x x x x x x x
+x x x x x x x x x x
+1 0 x 0 0 0 0 x x 0
+0 1 x 0 0 0 0 x x 0
+x x x x x x x x x x
+0 0 x 0 0 0 0 x x 0
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+
+lower_six：
+0 0 0 0 1 0 0 1 1 0 1 1
+x x x x x x x x x x x x
+0 0 0 0 1 0 1 0 1 0 1 1
+0 0 0 0 1 0 1 1 1 0 1 1
+0 0 0 0 1 0 0 1 0 0 1 1
+x x x x x x x x x x x x
+0 0 0 0 1 0 1 0 0 0 1 1
+0 0 0 0 1 0 1 1 0 0 1 1
+x 0 x x x x x x x x x 0
+0 0 x x x x x x x x 1 1
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+0 0 0 0 0 0 1 0 0 0 1 1
+0 0 0 0 0 0 1 0 0 0 1 1
+0 0 0 0 0 1 1 0 0 0 1 1
+0 0 0 0 0 1 1 0 0 0 1 1
+0 0 0 0 0 0 0 0 0 0 1 1
+0 0 0 0 0 0 0 1 0 0 1 1
+0 0 0 0 0 0 1 1 0 0 1 1
+0 0 0 0 1 1 0 0 0 0 1 1
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+0 0 0 0 0 1 1 1 0 0 1 1
+0 0 0 0 1 1 1 0 0 0 1 1
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+
+x x x 1 0 0 0 0 0 0
+x x x x x x x x x x
+x x x 1 0 0 0 0 0 0
+x x x 1 0 0 0 0 0 0
+x x x x x 0 0 0 0 0
+x x x x x x x x x x
+x x x x x 0 0 0 0 0
+x x x x x 0 0 0 0 0
+x x x x x 1 0 x x 0
+x x x x x 1 0 1 0 0
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x 0 0 0 0 1
+x x x x x 0 0 0 0 0
+x x x x x 0 0 0 0 1
+x x x x x 0 0 0 0 0
+x x x x x 0 0 0 0 0
+x x x x x 0 0 0 0 0
+x x x x x 0 0 0 0 0
+x x x x x 0 0 0 0 0
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x 0 0 0 0 0
+x x x x x 0 0 0 0 0
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+
+middle_five：
+x 0 1 0 0 1 0 1 0 0 x 0
+x 0 1 0 1 0 0 0 0 0 x 0
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+x x x x x x x x x x x x
+
+x x x 0 0 0 0 x x 0
+x x x 0 0 0 0 x x 0
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+x x x x x x x x x x
+
+附录2：
+v2.0 raw
+20215b25
+20425b25
+20635b25
+20845b25
+20a55b25
+20c65b25
+20e75b25
+21085b25
+21295b25
+214a5b25
+216b5b25
+218c5b25
+21ad5b25
+21ce5b25
+21ef5b25
+22105b25
+22315b25
+22525b25
+22735b25
+22945b25
+22b55b25
+22d65b25
+22f75b25
+23185b25
+23395b25
+235a5b25
+237b5b25
+239c5b25
+23bd5b25
+23de5b25
+23ff5b25
+20110028
+20120000
+2005310c
+00055020
+01402009
+ae490000
+22520004
+2005311c
+00055020
+01402009
+ae490000
+22520004
+20053174
+00055020
+01402009
+ae490000
+22520004
+2005315c
+00055020
+01402009
+ae490000
+22520004
+200530f4
+00055020
+01402009
+ae490000
+22520004
+08000c63
+20090001
+00800008
+20090002
+00800008
+20090003
+00800008
+20090004
+00800008
+20090005
+00800008
+20090006
+00800008
+20090007
+00800008
+20090008
+00800008
+20090009
+00800008
+2009000a
+00800008
+2009000b
+00800008
+2009000c
+00800008
+2009000d
+00800008
+2009000e
+00800008
+2009000f
+00800008
+20090010
+00800008
+20090011
+00800008
+20090012
+00800008
+20090013
+00800008
+20090014
+00800008
+2004314c
+00055020
+01402009
+ae490000
+22520004
+2004312c
+00055020
+01402009
+ae490000
+22520004
+200430ec
+00055020
+01402009
+ae490000
+22520004
+2004316c
+00055020
+01402009
+ae490000
+22520004
+20043134
+00055020
+01402009
+ae490000
+22520004
+20100000
+08000c8a
+2008ffff
+ae480000
+22520004
+03e00008
+20080000
+ae480000
+22520004
+03e00008
+20080001
+ae480000
+22520004
+03e00008
+1211000e
+2a08001e
+11000006
+2a08000a
+11000002
+0c000c7e
+08000c95
+0c000c82
+08000c95
+0c000c86
+08000c95
+ae500000
+22520004
+22100001
+08000c8a
+20100000
+1211000e
+2a08001e
+11000006
+2a08000a
+11000002
+0c000caa
+08000ca5
+0c000cae
+08000ca5
+0c000cb2
+08000ca5
+ae500000
+22520004
+22100001
+08000c9a
+08000cb6
+2008ffff
+ae480000
+22520004
+03e00008
+20080000
+ae480000
+22520004
+03e00008
+20080001
+ae480000
+22520004
+03e00008
+20100000
+1211001d
+2a08001e
+08000cbe
+2008ffff
+ae480000
+22520004
+03e00008
+1100000b
+2a08000a
+11000007
+0c000cba
+08000cc7
+20080001
+ae480000
+22520004
+03e00008
+08000ccc
+0c000ccf
+08000ccc
+0c000cc3
+08000ccc
+ae500000
+22520004
+08000cd3
+20080000
+ae480000
+22520004
+03e00008
+22100001
+08000cb7
+08000ce6
+23e40000
+2008ffff
+ae480000
+22520004
+00800008
+23e40000
+20080000
+ae480000
+22520004
+00800008
+23e40000
+20080001
+ae480000
+22520004
+00800008
+20100000
+1211000e
+2a08001e
+11000006
+2a08000a
+11000002
+0c000cd6
+08000cf1
+0c000cdb
+08000cf1
+0c000ce0
+08000cf1
+ae500000
+22520004
+22100001
+08000ce6
+20100000
+1211000e
+2a08001e
+11000006
+2a08000a
+11000002
+0c000d06
+08000d01
+0c000d0b
+08000d01
+0c000d10
+08000d01
+ae500000
+22520004
+22100001
+08000cf6
+08000d15
+23e40000
+2008ffff
+ae480000
+22520004
+00800008
+23e40000
+20080000
+ae480000
+22520004
+00800008
+23e40000
+20080001
+ae480000
+22520004
+00800008
+20100000
+12110020
+2a08001e
+08000d1e
+23e40000
+2008ffff
+ae480000
+22520004
+00800008
+1100000c
+2a08000a
+11000008
+0c000d19
+08000d28
+23e40000
+20080001
+ae480000
+22520004
+00800008
+08000d2d
+0c000d30
+08000d2d
+0c000d23
+08000d2d
+ae500000
+22520004
+08000d35
+23e40000
+20080000
+ae480000
+22520004
+00800008
+22100001
+08000d16
+200a08ae
+ae2a0000
+22310004
+200a0d05
+ae2a0000
+22310004
+200a115c
+ae2a0000
+22310004
+
+v2.0 raw
+20215b25
+20425b25
+20635b25
+20845b25
+20a55b25
+20c65b25
+20e75b25
+21085b25
+21295b25
+214a5b25
+216b5b25
+218c5b25
+21ad5b25
+21ce5b25
+21ef5b25
+22105b25
+22315b25
+22525b25
+22735b25
+22945b25
+22b55b25
+22d65b25
+22f75b25
+23185b25
+23395b25
+235a5b25
+237b5b25
+239c5b25
+23bd5b25
+23de5b25
+23ff5b25
+20100000
+20120000
+20110028
+12110013
+2a08001e
+1100000a
+2a08000a
+11000004
+2008ffff
+ae480000
+22520004
+08000c32
+20080000
+ae480000
+22520004
+08000c32
+20080001
+ae480000
+22520004
+ae500000
+22520004
+22100001
+08000c22
+20110028
+20100000
+12110013
+2a08000a
+1500000a
+2a08001e
+15000004
+20080001
+ae480000
+22520004
+08000c48
+20080000
+ae480000
+22520004
+08000c48
+2008ffff
+ae480000
+22520004
+ae500000
+22520004
+22100001
+08000c38
+20100001
+20110001
+12110004
+20100001
+ae500000
+22520004
+08000c56
+2010ffff
+ae500000
+22520004
+20100001
+20110002
+12110004
+20100001
+ae500000
+22520004
+08000c60
+2010ffff
+ae500000
+22520004
+2010ffff
+2011ffff
+12110004
+20100001
+ae500000
+22520004
+08000c6a
+2010ffff
+ae500000
+22520004
+2010fffe
+2011fffd
+12110004
+20100001
+ae500000
+22520004
+08000c74
+2010ffff
+ae500000
+22520004
+20100001
+2011ffff
+12110004
+20100001
+ae500000
+22520004
+08000c7e
+2010ffff
+ae500000
+22520004
+2010ffff
+20110001
+12110004
+20100001
+ae500000
+22520004
+08000c88
+2010ffff
+ae500000
+22520004
+20100000
+20110001
+12110004
+20100001
+ae500000
+22520004
+08000c92
+2010ffff
+ae500000
+22520004
+20100000
+2011ffff
+12110004
+20100001
+ae500000
+22520004
+08000c9c
+2010ffff
+ae500000
+22520004
+20100001
+20110000
+12110004
+20100001
+ae500000
+22520004
+08000ca6
+2010ffff
+ae500000
+22520004
+2010ffff
+20110000
+12110004
+20100001
+ae500000
+22520004
+08000cb0
+2010ffff
+ae500000
+22520004
+20100000
+20110000
+12110004
+20100001
+ae500000
+22520004
+08000cba
+2010ffff
+ae500000
+22520004
+20100001
+20110001
+16110004
+20100001
+ae500000
+22520004
+08000cc4
+2010ffff
+ae500000
+22520004
+20100001
+20110002
+16110004
+20100001
+ae500000
+22520004
+08000cce
+2010ffff
+ae500000
+22520004
+2010ffff
+2011ffff
+16110004
+20100001
+ae500000
+22520004
+08000cd8
+2010ffff
+ae500000
+22520004
+2010fffe
+2011fffd
+16110004
+20100001
+ae500000
+22520004
+08000ce2
+2010ffff
+ae500000
+22520004
+20100001
+2011ffff
+16110004
+20100001
+ae500000
+22520004
+08000cec
+2010ffff
+ae500000
+22520004
+2010ffff
+20110001
+16110004
+20100001
+ae500000
+22520004
+08000cf6
+2010ffff
+ae500000
+22520004
+20100000
+20110001
+16110004
+20100001
+ae500000
+22520004
+08000d00
+2010ffff
+ae500000
+22520004
+20100000
+2011ffff
+16110004
+20100001
+ae500000
+22520004
+08000d0a
+2010ffff
+ae500000
+22520004
+20100001
+20110000
+16110004
+20100001
+ae500000
+22520004
+08000d14
+2010ffff
+ae500000
+22520004
+2010ffff
+20110000
+16110004
+20100001
+ae500000
+22520004
+08000d1e
+2010ffff
+ae500000
+22520004
+20100000
+20110000
+16110004
+20100001
+ae500000
+22520004
+08000d28
+2010ffff
+ae500000
+22520004
+20100001
+1e000004
+20100001
+ae500000
+22520004
+08000d31
+2010ffff
+ae500000
+22520004
+2010ffff
+1e000004
+20100001
+ae500000
+22520004
+08000d3a
+2010ffff
+ae500000
+22520004
+20107fff
+1e000004
+20108000
+ae500000
+22520004
+08000d43
+2010ffff
+ae500000
+22520004
+2010090b
+1e000004
+2010ee55
+ae500000
+22520004
+08000d4c
+2010ffff
+ae500000
+22520004
+20100000
+1e000004
+20100001
+ae500000
+22520004
+08000d55
+2010ffff
+ae500000
+22520004
+20100001
+06010004
+20100001
+ae500000
+22520004
+08000d5e
+2010ffff
+ae500000
+22520004
+2010ffff
+06010004
+20100001
+ae500000
+22520004
+08000d67
+2010ffff
+ae500000
+22520004
+20107fff
+06010004
+20108000
+ae500000
+22520004
+08000d70
+2010ffff
+ae500000
+22520004
+2010090b
+06010004
+2010ee55
+ae500000
+22520004
+08000d79
+2010ffff
+ae500000
+22520004
+20100000
+06010004
+20100001
+ae500000
+22520004
+08000d82
+2010ffff
+ae500000
+22520004
+20100001
+06000004
+20100001
+ae500000
+22520004
+08000d8b
+2010ffff
+ae500000
+22520004
+2010ffff
+06000004
+20100001
+ae500000
+22520004
+08000d94
+2010ffff
+ae500000
+22520004
+20107fff
+06000004
+20108000
+ae500000
+22520004
+08000d9d
+2010ffff
+ae500000
+22520004
+2010090b
+06000004
+2010ee55
+ae500000
+22520004
+08000da6
+2010ffff
+ae500000
+22520004
+20100000
+06000004
+20100001
+ae500000
+22520004
+08000daf
+2010ffff
+ae500000
+22520004
+20100001
+1a000004
+20100001
+ae500000
+22520004
+08000db8
+2010ffff
+ae500000
+22520004
+2010ffff
+1a000004
+20100001
+ae500000
+22520004
+08000dc1
+2010ffff
+ae500000
+22520004
+20107fff
+1a000004
+20108000
+ae500000
+22520004
+08000dca
+2010ffff
+ae500000
+22520004
+2010090b
+1a000004
+2010ee55
+ae500000
+22520004
+08000dd3
+2010ffff
+ae500000
+22520004
+20100000
+1a000004
+20100001
+ae500000
+22520004
+08000ddc
+2010ffff
+ae500000
+22520004
+200a08ae
+ae4a0000
+22520004
+200a0d05
+ae4a0000
+22520004
+200a115c
+ae4a0000
+22520004
+
+v2.0 raw
+20215b25
+20425b25
+20635b25
+20845b25
+20a55b25
+20c65b25
+20e75b25
+21085b25
+21295b25
+214a5b25
+216b5b25
+218c5b25
+21ad5b25
+21ce5b25
+21ef5b25
+22105b25
+22315b25
+22525b25
+22735b25
+22945b25
+22b55b25
+22d65b25
+22f75b25
+23185b25
+23395b25
+235a5b25
+237b5b25
+239c5b25
+23bd5b25
+23de5b25
+23ff5b25
+20100000
+8e110000
+22100004
+8e080000
+22100004
+8e090000
+22100004
+01095021
+ae2a0000
+22310004
+01285021
+ae2a0000
+22310004
+01085021
+ae2a0000
+22310004
+01295021
+ae2a0000
+22310004
+01095023
+ae2a0000
+22310004
+01285023
+ae2a0000
+22310004
+01085023
+ae2a0000
+22310004
+01295023
+ae2a0000
+22310004
+01095024
+ae2a0000
+22310004
+01285024
+ae2a0000
+22310004
+01085024
+ae2a0000
+22310004
+01295024
+ae2a0000
+22310004
+01095025
+ae2a0000
+22310004
+01285025
+ae2a0000
+22310004
+01085025
+ae2a0000
+22310004
+01295025
+ae2a0000
+22310004
+0109502a
+ae2a0000
+22310004
+0128502a
+ae2a0000
+22310004
+0108502a
+ae2a0000
+22310004
+0129502a
+ae2a0000
+22310004
+01095026
+ae2a0000
+22310004
+01285026
+ae2a0000
+22310004
+01085026
+ae2a0000
+22310004
+01295026
+ae2a0000
+22310004
+01095027
+ae2a0000
+22310004
+01285027
+ae2a0000
+22310004
+01085027
+ae2a0000
+22310004
+01295027
+ae2a0000
+22310004
+01285004
+ae2a0000
+22310004
+01095004
+ae2a0000
+22310004
+01085004
+ae2a0000
+22310004
+01295004
+ae2a0000
+22310004
+01285006
+ae2a0000
+22310004
+01095006
+ae2a0000
+22310004
+01085006
+ae2a0000
+22310004
+01295006
+ae2a0000
+22310004
+01285007
+ae2a0000
+22310004
+01095007
+ae2a0000
+22310004
+01085007
+ae2a0000
+22310004
+01295007
+ae2a0000
+22310004
+0109502b
+ae2a0000
+22310004
+0128502b
+ae2a0000
+22310004
+0108502b
+ae2a0000
+22310004
+0129502b
+ae2a0000
+22310004
+8e080000
+22100004
+8e090000
+22100004
+01095021
+ae2a0000
+22310004
+01285021
+ae2a0000
+22310004
+01085021
+ae2a0000
+22310004
+01295021
+ae2a0000
+22310004
+01095023
+ae2a0000
+22310004
+01285023
+ae2a0000
+22310004
+01085023
+ae2a0000
+22310004
+01295023
+ae2a0000
+22310004
+01095024
+ae2a0000
+22310004
+01285024
+ae2a0000
+22310004
+01085024
+ae2a0000
+22310004
+01295024
+ae2a0000
+22310004
+01095025
+ae2a0000
+22310004
+01285025
+ae2a0000
+22310004
+01085025
+ae2a0000
+22310004
+01295025
+ae2a0000
+22310004
+0109502a
+ae2a0000
+22310004
+0128502a
+ae2a0000
+22310004
+0108502a
+ae2a0000
+22310004
+0129502a
+ae2a0000
+22310004
+01095026
+ae2a0000
+22310004
+01285026
+ae2a0000
+22310004
+01085026
+ae2a0000
+22310004
+01295026
+ae2a0000
+22310004
+01095027
+ae2a0000
+22310004
+01285027
+ae2a0000
+22310004
+01085027
+ae2a0000
+22310004
+01295027
+ae2a0000
+22310004
+01285004
+ae2a0000
+22310004
+01095004
+ae2a0000
+22310004
+01085004
+ae2a0000
+22310004
+01295004
+ae2a0000
+22310004
+01285006
+ae2a0000
+22310004
+01095006
+ae2a0000
+22310004
+01085006
+ae2a0000
+22310004
+01295006
+ae2a0000
+22310004
+01285007
+ae2a0000
+22310004
+01095007
+ae2a0000
+22310004
+01085007
+ae2a0000
+22310004
+01295007
+ae2a0000
+22310004
+0109502b
+ae2a0000
+22310004
+0128502b
+ae2a0000
+22310004
+0108502b
+ae2a0000
+22310004
+0129502b
+ae2a0000
+22310004
+8e080000
+22100004
+8e090000
+22100004
+01095021
+ae2a0000
+22310004
+01285021
+ae2a0000
+22310004
+01085021
+ae2a0000
+22310004
+01295021
+ae2a0000
+22310004
+01095023
+ae2a0000
+22310004
+01285023
+ae2a0000
+22310004
+01085023
+ae2a0000
+22310004
+01295023
+ae2a0000
+22310004
+01095024
+ae2a0000
+22310004
+01285024
+ae2a0000
+22310004
+01085024
+ae2a0000
+22310004
+01295024
+ae2a0000
+22310004
+01095025
+ae2a0000
+22310004
+01285025
+ae2a0000
+22310004
+01085025
+ae2a0000
+22310004
+01295025
+ae2a0000
+22310004
+0109502a
+ae2a0000
+22310004
+0128502a
+ae2a0000
+22310004
+0108502a
+ae2a0000
+22310004
+0129502a
+ae2a0000
+22310004
+01095026
+ae2a0000
+22310004
+01285026
+ae2a0000
+22310004
+01085026
+ae2a0000
+22310004
+01295026
+ae2a0000
+22310004
+01095027
+ae2a0000
+22310004
+01285027
+ae2a0000
+22310004
+01085027
+ae2a0000
+22310004
+01295027
+ae2a0000
+22310004
+01285004
+ae2a0000
+22310004
+01095004
+ae2a0000
+22310004
+01085004
+ae2a0000
+22310004
+01295004
+ae2a0000
+22310004
+01285006
+ae2a0000
+22310004
+01095006
+ae2a0000
+22310004
+01085006
+ae2a0000
+22310004
+01295006
+ae2a0000
+22310004
+01285007
+ae2a0000
+22310004
+01095007
+ae2a0000
+22310004
+01085007
+ae2a0000
+22310004
+01295007
+ae2a0000
+22310004
+0109502b
+ae2a0000
+22310004
+0128502b
+ae2a0000
+22310004
+0108502b
+ae2a0000
+22310004
+0129502b
+ae2a0000
+22310004
+8e080000
+22100004
+8e090000
+22100004
+01095021
+ae2a0000
+22310004
+01285021
+ae2a0000
+22310004
+01085021
+ae2a0000
+22310004
+01295021
+ae2a0000
+22310004
+01095023
+ae2a0000
+22310004
+01285023
+ae2a0000
+22310004
+01085023
+ae2a0000
+22310004
+01295023
+ae2a0000
+22310004
+01095024
+ae2a0000
+22310004
+01285024
+ae2a0000
+22310004
+01085024
+ae2a0000
+22310004
+01295024
+ae2a0000
+22310004
+01095025
+ae2a0000
+22310004
+01285025
+ae2a0000
+22310004
+01085025
+ae2a0000
+22310004
+01295025
+ae2a0000
+22310004
+0109502a
+ae2a0000
+22310004
+0128502a
+ae2a0000
+22310004
+0108502a
+ae2a0000
+22310004
+0129502a
+ae2a0000
+22310004
+01095026
+ae2a0000
+22310004
+01285026
+ae2a0000
+22310004
+01085026
+ae2a0000
+22310004
+01295026
+ae2a0000
+22310004
+01095027
+ae2a0000
+22310004
+01285027
+ae2a0000
+22310004
+01085027
+ae2a0000
+22310004
+01295027
+ae2a0000
+22310004
+01285004
+ae2a0000
+22310004
+01095004
+ae2a0000
+22310004
+01085004
+ae2a0000
+22310004
+01295004
+ae2a0000
+22310004
+01285006
+ae2a0000
+22310004
+01095006
+ae2a0000
+22310004
+01085006
+ae2a0000
+22310004
+01295006
+ae2a0000
+22310004
+01285007
+ae2a0000
+22310004
+01095007
+ae2a0000
+22310004
+01085007
+ae2a0000
+22310004
+01295007
+ae2a0000
+22310004
+0109502b
+ae2a0000
+22310004
+0128502b
+ae2a0000
+22310004
+0108502b
+ae2a0000
+22310004
+0129502b
+ae2a0000
+22310004
+8e080000
+22100004
+8e090000
+22100004
+01095021
+ae2a0000
+22310004
+01285021
+ae2a0000
+22310004
+01085021
+ae2a0000
+22310004
+01295021
+ae2a0000
+22310004
+01095023
+ae2a0000
+22310004
+01285023
+ae2a0000
+22310004
+01085023
+ae2a0000
+22310004
+01295023
+ae2a0000
+22310004
+01095024
+ae2a0000
+22310004
+01285024
+ae2a0000
+22310004
+01085024
+ae2a0000
+22310004
+01295024
+ae2a0000
+22310004
+01095025
+ae2a0000
+22310004
+01285025
+ae2a0000
+22310004
+01085025
+ae2a0000
+22310004
+01295025
+ae2a0000
+22310004
+0109502a
+ae2a0000
+22310004
+0128502a
+ae2a0000
+22310004
+0108502a
+ae2a0000
+22310004
+0129502a
+ae2a0000
+22310004
+01095026
+ae2a0000
+22310004
+01285026
+ae2a0000
+22310004
+01085026
+ae2a0000
+22310004
+01295026
+ae2a0000
+22310004
+01095027
+ae2a0000
+22310004
+01285027
+ae2a0000
+22310004
+01085027
+ae2a0000
+22310004
+01295027
+ae2a0000
+22310004
+01285004
+ae2a0000
+22310004
+01095004
+ae2a0000
+22310004
+01085004
+ae2a0000
+22310004
+01295004
+ae2a0000
+22310004
+01285006
+ae2a0000
+22310004
+01095006
+ae2a0000
+22310004
+01085006
+ae2a0000
+22310004
+01295006
+ae2a0000
+22310004
+01285007
+ae2a0000
+22310004
+01095007
+ae2a0000
+22310004
+01085007
+ae2a0000
+22310004
+01295007
+ae2a0000
+22310004
+0109502b
+ae2a0000
+22310004
+0128502b
+ae2a0000
+22310004
+0108502b
+ae2a0000
+22310004
+0129502b
+ae2a0000
+22310004
+8e080000
+22100004
+8e090000
+22100004
+01095021
+ae2a0000
+22310004
+01285021
+ae2a0000
+22310004
+01085021
+ae2a0000
+22310004
+01295021
+ae2a0000
+22310004
+01095023
+ae2a0000
+22310004
+01285023
+ae2a0000
+22310004
+01085023
+ae2a0000
+22310004
+01295023
+ae2a0000
+22310004
+01095024
+ae2a0000
+22310004
+01285024
+ae2a0000
+22310004
+01085024
+ae2a0000
+22310004
+01295024
+ae2a0000
+22310004
+01095025
+ae2a0000
+22310004
+01285025
+ae2a0000
+22310004
+01085025
+ae2a0000
+22310004
+01295025
+ae2a0000
+22310004
+0109502a
+ae2a0000
+22310004
+0128502a
+ae2a0000
+22310004
+0108502a
+ae2a0000
+22310004
+0129502a
+ae2a0000
+22310004
+01095026
+ae2a0000
+22310004
+01285026
+ae2a0000
+22310004
+01085026
+ae2a0000
+22310004
+01295026
+ae2a0000
+22310004
+01095027
+ae2a0000
+22310004
+01285027
+ae2a0000
+22310004
+01085027
+ae2a0000
+22310004
+01295027
+ae2a0000
+22310004
+01285004
+ae2a0000
+22310004
+01095004
+ae2a0000
+22310004
+01085004
+ae2a0000
+22310004
+01295004
+ae2a0000
+22310004
+01285006
+ae2a0000
+22310004
+01095006
+ae2a0000
+22310004
+01085006
+ae2a0000
+22310004
+01295006
+ae2a0000
+22310004
+01285007
+ae2a0000
+22310004
+01095007
+ae2a0000
+22310004
+01085007
+ae2a0000
+22310004
+01295007
+ae2a0000
+22310004
+0109502b
+ae2a0000
+22310004
+0128502b
+ae2a0000
+22310004
+0108502b
+ae2a0000
+22310004
+0129502b
+ae2a0000
+22310004
+200a08ae
+ae2a0000
+22310004
+200a0d05
+ae2a0000
+22310004
+200a115c
+ae2a0000
+22310004
+
+v2.0 raw
+20215b25
+20425b25
+20635b25
+20845b25
+20a55b25
+20c65b25
+20e75b25
+21085b25
+21295b25
+214a5b25
+216b5b25
+218c5b25
+21ad5b25
+21ce5b25
+21ef5b25
+22105b25
+22315b25
+22525b25
+22735b25
+22945b25
+22b55b25
+22d65b25
+22f75b25
+23185b25
+23395b25
+235a5b25
+237b5b25
+239c5b25
+23bd5b25
+23de5b25
+23ff5b25
+20100000
+8e110000
+22100004
+8e080000
+22100004
+8e090000
+22100004
+01095020
+ae2a0000
+22310004
+01285020
+ae2a0000
+22310004
+01085020
+ae2a0000
+22310004
+01295020
+ae2a0000
+22310004
+01095021
+ae2a0000
+22310004
+01285021
+ae2a0000
+22310004
+01085021
+ae2a0000
+22310004
+01295021
+ae2a0000
+22310004
+01095022
+ae2a0000
+22310004
+01285022
+ae2a0000
+22310004
+01085022
+ae2a0000
+22310004
+01295022
+ae2a0000
+22310004
+01095023
+ae2a0000
+22310004
+01285023
+ae2a0000
+22310004
+01085023
+ae2a0000
+22310004
+01295023
+ae2a0000
+22310004
+01095024
+ae2a0000
+22310004
+01285024
+ae2a0000
+22310004
+01085024
+ae2a0000
+22310004
+01295024
+ae2a0000
+22310004
+01095025
+ae2a0000
+22310004
+01285025
+ae2a0000
+22310004
+01085025
+ae2a0000
+22310004
+01295025
+ae2a0000
+22310004
+0109502a
+ae2a0000
+22310004
+0128502a
+ae2a0000
+22310004
+0108502a
+ae2a0000
+22310004
+0129502a
+ae2a0000
+22310004
+01095026
+ae2a0000
+22310004
+01285026
+ae2a0000
+22310004
+01085026
+ae2a0000
+22310004
+01295026
+ae2a0000
+22310004
+01095027
+ae2a0000
+22310004
+01285027
+ae2a0000
+22310004
+01085027
+ae2a0000
+22310004
+01295027
+ae2a0000
+22310004
+01285004
+ae2a0000
+22310004
+01095004
+ae2a0000
+22310004
+01085004
+ae2a0000
+22310004
+01295004
+ae2a0000
+22310004
+01285006
+ae2a0000
+22310004
+01095006
+ae2a0000
+22310004
+01085006
+ae2a0000
+22310004
+01295006
+ae2a0000
+22310004
+01285007
+ae2a0000
+22310004
+01095007
+ae2a0000
+22310004
+01085007
+ae2a0000
+22310004
+01295007
+ae2a0000
+22310004
+0109502b
+ae2a0000
+22310004
+0128502b
+ae2a0000
+22310004
+0108502b
+ae2a0000
+22310004
+0129502b
+ae2a0000
+22310004
+8e080000
+22100004
+8e090000
+22100004
+01095020
+ae2a0000
+22310004
+01285020
+ae2a0000
+22310004
+01085020
+ae2a0000
+22310004
+01295020
+ae2a0000
+22310004
+01095021
+ae2a0000
+22310004
+01285021
+ae2a0000
+22310004
+01085021
+ae2a0000
+22310004
+01295021
+ae2a0000
+22310004
+01095022
+ae2a0000
+22310004
+01285022
+ae2a0000
+22310004
+01085022
+ae2a0000
+22310004
+01295022
+ae2a0000
+22310004
+01095023
+ae2a0000
+22310004
+01285023
+ae2a0000
+22310004
+01085023
+ae2a0000
+22310004
+01295023
+ae2a0000
+22310004
+01095024
+ae2a0000
+22310004
+01285024
+ae2a0000
+22310004
+01085024
+ae2a0000
+22310004
+01295024
+ae2a0000
+22310004
+01095025
+ae2a0000
+22310004
+01285025
+ae2a0000
+22310004
+01085025
+ae2a0000
+22310004
+01295025
+ae2a0000
+22310004
+0109502a
+ae2a0000
+22310004
+0128502a
+ae2a0000
+22310004
+0108502a
+ae2a0000
+22310004
+0129502a
+ae2a0000
+22310004
+01095026
+ae2a0000
+22310004
+01285026
+ae2a0000
+22310004
+01085026
+ae2a0000
+22310004
+01295026
+ae2a0000
+22310004
+01095027
+ae2a0000
+22310004
+01285027
+ae2a0000
+22310004
+01085027
+ae2a0000
+22310004
+01295027
+ae2a0000
+22310004
+01285004
+ae2a0000
+22310004
+01095004
+ae2a0000
+22310004
+01085004
+ae2a0000
+22310004
+01295004
+ae2a0000
+22310004
+01285006
+ae2a0000
+22310004
+01095006
+ae2a0000
+22310004
+01085006
+ae2a0000
+22310004
+01295006
+ae2a0000
+22310004
+01285007
+ae2a0000
+22310004
+01095007
+ae2a0000
+22310004
+01085007
+ae2a0000
+22310004
+01295007
+ae2a0000
+22310004
+0109502b
+ae2a0000
+22310004
+0128502b
+ae2a0000
+22310004
+0108502b
+ae2a0000
+22310004
+0129502b
+ae2a0000
+22310004
+8e080000
+22100004
+8e090000
+22100004
+01095020
+ae2a0000
+22310004
+01285020
+ae2a0000
+22310004
+01085020
+ae2a0000
+22310004
+01295020
+ae2a0000
+22310004
+01095021
+ae2a0000
+22310004
+01285021
+ae2a0000
+22310004
+01085021
+ae2a0000
+22310004
+01295021
+ae2a0000
+22310004
+01095022
+ae2a0000
+22310004
+01285022
+ae2a0000
+22310004
+01085022
+ae2a0000
+22310004
+01295022
+ae2a0000
+22310004
+01095023
+ae2a0000
+22310004
+01285023
+ae2a0000
+22310004
+01085023
+ae2a0000
+22310004
+01295023
+ae2a0000
+22310004
+01095024
+ae2a0000
+22310004
+01285024
+ae2a0000
+22310004
+01085024
+ae2a0000
+22310004
+01295024
+ae2a0000
+22310004
+01095025
+ae2a0000
+22310004
+01285025
+ae2a0000
+22310004
+01085025
+ae2a0000
+22310004
+01295025
+ae2a0000
+22310004
+0109502a
+ae2a0000
+22310004
+0128502a
+ae2a0000
+22310004
+0108502a
+ae2a0000
+22310004
+0129502a
+ae2a0000
+22310004
+01095026
+ae2a0000
+22310004
+01285026
+ae2a0000
+22310004
+01085026
+ae2a0000
+22310004
+01295026
+ae2a0000
+22310004
+01095027
+ae2a0000
+22310004
+01285027
+ae2a0000
+22310004
+01085027
+ae2a0000
+22310004
+01295027
+ae2a0000
+22310004
+01285004
+ae2a0000
+22310004
+01095004
+ae2a0000
+22310004
+01085004
+ae2a0000
+22310004
+01295004
+ae2a0000
+22310004
+01285006
+ae2a0000
+22310004
+01095006
+ae2a0000
+22310004
+01085006
+ae2a0000
+22310004
+01295006
+ae2a0000
+22310004
+01285007
+ae2a0000
+22310004
+01095007
+ae2a0000
+22310004
+01085007
+ae2a0000
+22310004
+01295007
+ae2a0000
+22310004
+0109502b
+ae2a0000
+22310004
+0128502b
+ae2a0000
+22310004
+0108502b
+ae2a0000
+22310004
+0129502b
+ae2a0000
+22310004
+8e080000
+22100004
+8e090000
+22100004
+01095020
+ae2a0000
+22310004
+01285020
+ae2a0000
+22310004
+01085020
+ae2a0000
+22310004
+01295020
+ae2a0000
+22310004
+01095022
+ae2a0000
+22310004
+01285022
+ae2a0000
+22310004
+01085022
+ae2a0000
+22310004
+01295022
+ae2a0000
+22310004
+8e080000
+22100004
+8e090000
+22100004
+01095020
+ae2a0000
+22310004
+01285020
+ae2a0000
+22310004
+01085020
+ae2a0000
+22310004
+01295020
+ae2a0000
+22310004
+01095022
+ae2a0000
+22310004
+01285022
+ae2a0000
+22310004
+01085022
+ae2a0000
+22310004
+01295022
+ae2a0000
+22310004
+8e080000
+22100004
+8e090000
+22100004
+01095020
+ae2a0000
+22310004
+01285020
+ae2a0000
+22310004
+01085020
+ae2a0000
+22310004
+01295020
+ae2a0000
+22310004
+01095022
+ae2a0000
+22310004
+01285022
+ae2a0000
+22310004
+01085022
+ae2a0000
+22310004
+01295022
+ae2a0000
+22310004
+8e080000
+22100004
+8e090000
+22100004
+01095020
+ae2a0000
+22310004
+01285020
+ae2a0000
+22310004
+01085020
+ae2a0000
+22310004
+01295020
+ae2a0000
+22310004
+01095022
+ae2a0000
+22310004
+01285022
+ae2a0000
+22310004
+01085022
+ae2a0000
+22310004
+01295022
+ae2a0000
+22310004
+8e080000
+22100004
+8e090000
+22100004
+01095020
+ae2a0000
+22310004
+01285020
+ae2a0000
+22310004
+01085020
+ae2a0000
+22310004
+01295020
+ae2a0000
+22310004
+01095022
+ae2a0000
+22310004
+01285022
+ae2a0000
+22310004
+01085022
+ae2a0000
+22310004
+01295022
+ae2a0000
+22310004
+8e080000
+22100004
+8e090000
+22100004
+01095020
+ae2a0000
+22310004
+01285020
+ae2a0000
+22310004
+01085020
+ae2a0000
+22310004
+01295020
+ae2a0000
+22310004
+01095022
+ae2a0000
+22310004
+01285022
+ae2a0000
+22310004
+01085022
+ae2a0000
+22310004
+01295022
+ae2a0000
+22310004
+200a08ae
+ae2a0000
+22310004
+200a0d05
+ae2a0000
+22310004
+200a115c
+ae2a0000
+22310004
+
+v2.0 raw
+20215b25
+20425b25
+20635b25
+20845b25
+20a55b25
+20c65b25
+20e75b25
+21085b25
+21295b25
+214a5b25
+216b5b25
+218c5b25
+21ad5b25
+21ce5b25
+21ef5b25
+22105b25
+22315b25
+22525b25
+22735b25
+22945b25
+22b55b25
+22d65b25
+22f75b25
+23185b25
+23395b25
+235a5b25
+237b5b25
+239c5b25
+23bd5b25
+23de5b25
+23ff5b25
+20100064
+20120000
+20110060
+12510005
+8e480000
+ae080000
+22100004
+22520004
+08000c22
+20120000
+20110060
+12510005
+86480000
+ae080000
+22100004
+22520002
+08000c2a
+20120000
+20110060
+12510005
+96480000
+ae080000
+22100004
+22520002
+08000c32
+20120000
+20110060
+12510005
+82480000
+ae080000
+22100004
+22520001
+08000c3a
+20120000
+20110060
+12510005
+92480000
+ae080000
+22100004
+22520001
+08000c42
+20120004
+20110060
+12510005
+8e48fffc
+ae080000
+22100004
+22520004
+08000c4a
+20120006
+20110060
+12510005
+8648fffa
+ae080000
+22100004
+22520002
+08000c52
+20120002
+20110060
+12510005
+9648fffe
+ae080000
+22100004
+22520002
+08000c5a
+20120005
+20110060
+12510005
+8248fffb
+ae080000
+22100004
+22520001
+08000c62
+20120003
+20110060
+12510005
+9248fffd
+ae080000
+22100004
+22520001
+08000c6a
+2012fffc
+20110060
+12510005
+8e480004
+ae080000
+22100004
+22520004
+08000c72
+2012fffa
+20110060
+12510005
+86480006
+ae080000
+22100004
+22520002
+08000c7a
+2012fffe
+20110060
+12510005
+96480002
+ae080000
+22100004
+22520002
+08000c82
+2012fffb
+20110060
+12510005
+82480005
+ae080000
+22100004
+22520001
+08000c8a
+2012fffd
+20110060
+12510005
+92480003
+ae080000
+22100004
+22520001
+08000c92
+20120000
+20110060
+22100008
+12510009
+8e480000
+ae08fffc
+22100004
+ae080000
+22100004
+ae080004
+22100004
+22520004
+08000c9b
+20120000
+20110060
+22100008
+12510011
+8e480000
+a608fffa
+22100004
+a608fffc
+22100004
+a608fffe
+22100004
+a6080000
+22100004
+a6080002
+22100004
+a6080004
+22100004
+a6080006
+22100004
+22520004
+08000ca8
+20120000
+20110060
+22100008
+12510019
+8e480000
+a208fffb
+22100004
+a208fffc
+22100004
+a208fffd
+22100004
+a208fffe
+22100004
+a208ffff
+22100004
+a2080000
+22100004
+a2080001
+22100004
+a2080002
+22100004
+a2080003
+22100004
+a2080004
+22100004
+a2080005
+22100004
+22520004
+08000cbd
+200a08ae
+ae0a0000
+22100004
+200a0d05
+ae0a0000
+22100004
+200a115c
+ae0a0000
+22100004
+
+v2.0 raw
+20215b25
+20425b25
+20635b25
+20845b25
+20a55b25
+20c65b25
+20e75b25
+21085b25
+21295b25
+214a5b25
+216b5b25
+218c5b25
+21ad5b25
+21ce5b25
+21ef5b25
+22105b25
+22315b25
+22525b25
+22735b25
+22945b25
+22b55b25
+22d65b25
+22f75b25
+23185b25
+23395b25
+235a5b25
+237b5b25
+239c5b25
+23bd5b25
+23de5b25
+23ff5b25
+20110000
+20090000
+312a0000
+ae2a0000
+22310004
+20090000
+312a0001
+ae2a0000
+22310004
+20090000
+3c01ffff
+3421ffff
+01215024
+ae2a0000
+22310004
+20090000
+3c017fff
+3421ffff
+01215024
+ae2a0000
+22310004
+20090000
+3c018000
+34210000
+01215024
+ae2a0000
+22310004
+20090000
+3c010002
+34210cb5
+01215024
+ae2a0000
+22310004
+20090000
+3c01fcdf
+3421e5bd
+01215024
+ae2a0000
+22310004
+20090001
+312a0000
+ae2a0000
+22310004
+20090001
+312a0001
+ae2a0000
+22310004
+20090001
+3c01ffff
+3421ffff
+01215024
+ae2a0000
+22310004
+20090001
+3c017fff
+3421ffff
+01215024
+ae2a0000
+22310004
+20090001
+3c018000
+34210000
+01215024
+ae2a0000
+22310004
+20090001
+3c010002
+34210cb5
+01215024
+ae2a0000
+22310004
+20090001
+3c01fcdf
+3421e5bd
+01215024
+ae2a0000
+22310004
+2009ffff
+312a0000
+ae2a0000
+22310004
+2009ffff
+312a0001
+ae2a0000
+22310004
+2009ffff
+3c01ffff
+3421ffff
+01215024
+ae2a0000
+22310004
+2009ffff
+3c017fff
+3421ffff
+01215024
+ae2a0000
+22310004
+2009ffff
+3c018000
+34210000
+01215024
+ae2a0000
+22310004
+2009ffff
+3c010002
+34210cb5
+01215024
+ae2a0000
+22310004
+2009ffff
+3c01fcdf
+3421e5bd
+01215024
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+312a0000
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+312a0001
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+3c01ffff
+3421ffff
+01215024
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+3c017fff
+3421ffff
+01215024
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+3c018000
+34210000
+01215024
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+3c010002
+34210cb5
+01215024
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+3c01fcdf
+3421e5bd
+01215024
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+312a0000
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+312a0001
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+3c01ffff
+3421ffff
+01215024
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+3c017fff
+3421ffff
+01215024
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+3c018000
+34210000
+01215024
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+3c010002
+34210cb5
+01215024
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+3c01fcdf
+3421e5bd
+01215024
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+312a0000
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+312a0001
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+3c01ffff
+3421ffff
+01215024
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+3c017fff
+3421ffff
+01215024
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+3c018000
+34210000
+01215024
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+3c010002
+34210cb5
+01215024
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+3c01fcdf
+3421e5bd
+01215024
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+312a0000
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+312a0001
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+3c01ffff
+3421ffff
+01215024
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+3c017fff
+3421ffff
+01215024
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+3c018000
+34210000
+01215024
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+3c010002
+34210cb5
+01215024
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+3c01fcdf
+3421e5bd
+01215024
+ae2a0000
+22310004
+20090000
+352a0000
+ae2a0000
+22310004
+20090000
+352a0001
+ae2a0000
+22310004
+20090000
+3c01ffff
+3421ffff
+01215025
+ae2a0000
+22310004
+20090000
+3c017fff
+3421ffff
+01215025
+ae2a0000
+22310004
+20090000
+3c018000
+34210000
+01215025
+ae2a0000
+22310004
+20090000
+3c010002
+34210cb5
+01215025
+ae2a0000
+22310004
+20090000
+3c01fcdf
+3421e5bd
+01215025
+ae2a0000
+22310004
+20090001
+352a0000
+ae2a0000
+22310004
+20090001
+352a0001
+ae2a0000
+22310004
+20090001
+3c01ffff
+3421ffff
+01215025
+ae2a0000
+22310004
+20090001
+3c017fff
+3421ffff
+01215025
+ae2a0000
+22310004
+20090001
+3c018000
+34210000
+01215025
+ae2a0000
+22310004
+20090001
+3c010002
+34210cb5
+01215025
+ae2a0000
+22310004
+20090001
+3c01fcdf
+3421e5bd
+01215025
+ae2a0000
+22310004
+2009ffff
+352a0000
+ae2a0000
+22310004
+2009ffff
+352a0001
+ae2a0000
+22310004
+2009ffff
+3c01ffff
+3421ffff
+01215025
+ae2a0000
+22310004
+2009ffff
+3c017fff
+3421ffff
+01215025
+ae2a0000
+22310004
+2009ffff
+3c018000
+34210000
+01215025
+ae2a0000
+22310004
+2009ffff
+3c010002
+34210cb5
+01215025
+ae2a0000
+22310004
+2009ffff
+3c01fcdf
+3421e5bd
+01215025
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+352a0000
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+352a0001
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+3c01ffff
+3421ffff
+01215025
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+3c017fff
+3421ffff
+01215025
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+3c018000
+34210000
+01215025
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+3c010002
+34210cb5
+01215025
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+3c01fcdf
+3421e5bd
+01215025
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+352a0000
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+352a0001
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+3c01ffff
+3421ffff
+01215025
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+3c017fff
+3421ffff
+01215025
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+3c018000
+34210000
+01215025
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+3c010002
+34210cb5
+01215025
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+3c01fcdf
+3421e5bd
+01215025
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+352a0000
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+352a0001
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+3c01ffff
+3421ffff
+01215025
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+3c017fff
+3421ffff
+01215025
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+3c018000
+34210000
+01215025
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+3c010002
+34210cb5
+01215025
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+3c01fcdf
+3421e5bd
+01215025
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+352a0000
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+352a0001
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+3c01ffff
+3421ffff
+01215025
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+3c017fff
+3421ffff
+01215025
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+3c018000
+34210000
+01215025
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+3c010002
+34210cb5
+01215025
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+3c01fcdf
+3421e5bd
+01215025
+ae2a0000
+22310004
+2009ffff
+252a0000
+ae2a0000
+22310004
+20090000
+252a0000
+ae2a0000
+22310004
+20090001
+252a0000
+ae2a0000
+22310004
+3c01fe10
+3421cd83
+00014820
+252a0000
+ae2a0000
+22310004
+3c010176
+3421618c
+00014820
+252a0000
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+252a0000
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+252a0000
+ae2a0000
+22310004
+2009ffff
+252a0001
+ae2a0000
+22310004
+20090000
+252a0001
+ae2a0000
+22310004
+20090001
+252a0001
+ae2a0000
+22310004
+3c01fe10
+3421cd83
+00014820
+252a0001
+ae2a0000
+22310004
+3c010176
+3421618c
+00014820
+252a0001
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+252a0001
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+252a0001
+ae2a0000
+22310004
+2009ffff
+252a0008
+ae2a0000
+22310004
+20090000
+252a0008
+ae2a0000
+22310004
+20090001
+252a0008
+ae2a0000
+22310004
+3c01fe10
+3421cd83
+00014820
+252a0008
+ae2a0000
+22310004
+3c010176
+3421618c
+00014820
+252a0008
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+252a0008
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+252a0008
+ae2a0000
+22310004
+2009ffff
+00095000
+ae2a0000
+22310004
+20090000
+00095000
+ae2a0000
+22310004
+20090001
+00095000
+ae2a0000
+22310004
+3c01fe10
+3421cd83
+00014820
+00095000
+ae2a0000
+22310004
+3c010176
+3421618c
+00014820
+00095000
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+00095000
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+00095000
+ae2a0000
+22310004
+2009ffff
+00095040
+ae2a0000
+22310004
+20090000
+00095040
+ae2a0000
+22310004
+20090001
+00095040
+ae2a0000
+22310004
+3c01fe10
+3421cd83
+00014820
+00095040
+ae2a0000
+22310004
+3c010176
+3421618c
+00014820
+00095040
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+00095040
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+00095040
+ae2a0000
+22310004
+2009ffff
+00095200
+ae2a0000
+22310004
+20090000
+00095200
+ae2a0000
+22310004
+20090001
+00095200
+ae2a0000
+22310004
+3c01fe10
+3421cd83
+00014820
+00095200
+ae2a0000
+22310004
+3c010176
+3421618c
+00014820
+00095200
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+00095200
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+00095200
+ae2a0000
+22310004
+2009ffff
+00095002
+ae2a0000
+22310004
+20090000
+00095002
+ae2a0000
+22310004
+20090001
+00095002
+ae2a0000
+22310004
+3c01fe10
+3421cd83
+00014820
+00095002
+ae2a0000
+22310004
+3c010176
+3421618c
+00014820
+00095002
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+00095002
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+00095002
+ae2a0000
+22310004
+2009ffff
+00095042
+ae2a0000
+22310004
+20090000
+00095042
+ae2a0000
+22310004
+20090001
+00095042
+ae2a0000
+22310004
+3c01fe10
+3421cd83
+00014820
+00095042
+ae2a0000
+22310004
+3c010176
+3421618c
+00014820
+00095042
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+00095042
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+00095042
+ae2a0000
+22310004
+2009ffff
+00095202
+ae2a0000
+22310004
+20090000
+00095202
+ae2a0000
+22310004
+20090001
+00095202
+ae2a0000
+22310004
+3c01fe10
+3421cd83
+00014820
+00095202
+ae2a0000
+22310004
+3c010176
+3421618c
+00014820
+00095202
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+00095202
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+00095202
+ae2a0000
+22310004
+200a08ae
+ae2a0000
+22310004
+200a0d05
+ae2a0000
+22310004
+200a115c
+ae2a0000
+22310004
+
+v2.0 raw
+20215b25
+20425b25
+20635b25
+20845b25
+20a55b25
+20c65b25
+20e75b25
+21085b25
+21295b25
+214a5b25
+216b5b25
+218c5b25
+21ad5b25
+21ce5b25
+21ef5b25
+22105b25
+22315b25
+22525b25
+22735b25
+22945b25
+22b55b25
+22d65b25
+22f75b25
+23185b25
+23395b25
+235a5b25
+237b5b25
+239c5b25
+23bd5b25
+23de5b25
+23ff5b25
+20110000
+20090000
+392a0000
+ae2a0000
+22310004
+20090000
+392a0001
+ae2a0000
+22310004
+20090000
+3c01ffff
+3421ffff
+01215026
+ae2a0000
+22310004
+20090000
+3c017fff
+3421ffff
+01215026
+ae2a0000
+22310004
+20090000
+3c018000
+34210000
+01215026
+ae2a0000
+22310004
+20090000
+3c010002
+34210cb5
+01215026
+ae2a0000
+22310004
+20090000
+3c01fcdf
+3421e5bd
+01215026
+ae2a0000
+22310004
+20090001
+392a0000
+ae2a0000
+22310004
+20090001
+392a0001
+ae2a0000
+22310004
+20090001
+3c01ffff
+3421ffff
+01215026
+ae2a0000
+22310004
+20090001
+3c017fff
+3421ffff
+01215026
+ae2a0000
+22310004
+20090001
+3c018000
+34210000
+01215026
+ae2a0000
+22310004
+20090001
+3c010002
+34210cb5
+01215026
+ae2a0000
+22310004
+20090001
+3c01fcdf
+3421e5bd
+01215026
+ae2a0000
+22310004
+2009ffff
+392a0000
+ae2a0000
+22310004
+2009ffff
+392a0001
+ae2a0000
+22310004
+2009ffff
+3c01ffff
+3421ffff
+01215026
+ae2a0000
+22310004
+2009ffff
+3c017fff
+3421ffff
+01215026
+ae2a0000
+22310004
+2009ffff
+3c018000
+34210000
+01215026
+ae2a0000
+22310004
+2009ffff
+3c010002
+34210cb5
+01215026
+ae2a0000
+22310004
+2009ffff
+3c01fcdf
+3421e5bd
+01215026
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+392a0000
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+392a0001
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+3c01ffff
+3421ffff
+01215026
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+3c017fff
+3421ffff
+01215026
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+3c018000
+34210000
+01215026
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+3c010002
+34210cb5
+01215026
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+3c01fcdf
+3421e5bd
+01215026
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+392a0000
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+392a0001
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+3c01ffff
+3421ffff
+01215026
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+3c017fff
+3421ffff
+01215026
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+3c018000
+34210000
+01215026
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+3c010002
+34210cb5
+01215026
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+3c01fcdf
+3421e5bd
+01215026
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+392a0000
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+392a0001
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+3c01ffff
+3421ffff
+01215026
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+3c017fff
+3421ffff
+01215026
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+3c018000
+34210000
+01215026
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+3c010002
+34210cb5
+01215026
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+3c01fcdf
+3421e5bd
+01215026
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+392a0000
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+392a0001
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+3c01ffff
+3421ffff
+01215026
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+3c017fff
+3421ffff
+01215026
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+3c018000
+34210000
+01215026
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+3c010002
+34210cb5
+01215026
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+3c01fcdf
+3421e5bd
+01215026
+ae2a0000
+22310004
+20090000
+292a0000
+ae2a0000
+22310004
+20090000
+292a0001
+ae2a0000
+22310004
+20090000
+292affff
+ae2a0000
+22310004
+20090000
+292a7fff
+ae2a0000
+22310004
+20090000
+292a8000
+ae2a0000
+22310004
+20090000
+292a3478
+ae2a0000
+22310004
+20090000
+292aeb85
+ae2a0000
+22310004
+20090001
+292a0000
+ae2a0000
+22310004
+20090001
+292a0001
+ae2a0000
+22310004
+20090001
+292affff
+ae2a0000
+22310004
+20090001
+292a7fff
+ae2a0000
+22310004
+20090001
+292a8000
+ae2a0000
+22310004
+20090001
+292a3478
+ae2a0000
+22310004
+20090001
+292aeb85
+ae2a0000
+22310004
+2009ffff
+292a0000
+ae2a0000
+22310004
+2009ffff
+292a0001
+ae2a0000
+22310004
+2009ffff
+292affff
+ae2a0000
+22310004
+2009ffff
+292a7fff
+ae2a0000
+22310004
+2009ffff
+292a8000
+ae2a0000
+22310004
+2009ffff
+292a3478
+ae2a0000
+22310004
+2009ffff
+292aeb85
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+292a0000
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+292a0001
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+292affff
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+292a7fff
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+292a8000
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+292a3478
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+292aeb85
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+292a0000
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+292a0001
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+292affff
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+292a7fff
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+292a8000
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+292a3478
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+292aeb85
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+292a0000
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+292a0001
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+292affff
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+292a7fff
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+292a8000
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+292a3478
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+292aeb85
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+292a0000
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+292a0001
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+292affff
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+292a7fff
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+292a8000
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+292a3478
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+292aeb85
+ae2a0000
+22310004
+20090000
+2d2a0000
+ae2a0000
+22310004
+20090000
+2d2a0001
+ae2a0000
+22310004
+20090000
+2d2affff
+ae2a0000
+22310004
+20090000
+2d2a7fff
+ae2a0000
+22310004
+20090000
+2d2a8000
+ae2a0000
+22310004
+20090000
+2d2a3478
+ae2a0000
+22310004
+20090000
+2d2aeb85
+ae2a0000
+22310004
+20090001
+2d2a0000
+ae2a0000
+22310004
+20090001
+2d2a0001
+ae2a0000
+22310004
+20090001
+2d2affff
+ae2a0000
+22310004
+20090001
+2d2a7fff
+ae2a0000
+22310004
+20090001
+2d2a8000
+ae2a0000
+22310004
+20090001
+2d2a3478
+ae2a0000
+22310004
+20090001
+2d2aeb85
+ae2a0000
+22310004
+2009ffff
+2d2a0000
+ae2a0000
+22310004
+2009ffff
+2d2a0001
+ae2a0000
+22310004
+2009ffff
+2d2affff
+ae2a0000
+22310004
+2009ffff
+2d2a7fff
+ae2a0000
+22310004
+2009ffff
+2d2a8000
+ae2a0000
+22310004
+2009ffff
+2d2a3478
+ae2a0000
+22310004
+2009ffff
+2d2aeb85
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+2d2a0000
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+2d2a0001
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+2d2affff
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+2d2a7fff
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+2d2a8000
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+2d2a3478
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+2d2aeb85
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+2d2a0000
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+2d2a0001
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+2d2affff
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+2d2a7fff
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+2d2a8000
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+2d2a3478
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+2d2aeb85
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+2d2a0000
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+2d2a0001
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+2d2affff
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+2d2a7fff
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+2d2a8000
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+2d2a3478
+ae2a0000
+22310004
+3c010002
+34210cb5
+00014820
+2d2aeb85
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+2d2a0000
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+2d2a0001
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+2d2affff
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+2d2a7fff
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+2d2a8000
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+2d2a3478
+ae2a0000
+22310004
+3c01fcdf
+3421e5bd
+00014820
+2d2aeb85
+ae2a0000
+22310004
+2009ffff
+00095003
+ae2a0000
+22310004
+20090000
+00095003
+ae2a0000
+22310004
+20090001
+00095003
+ae2a0000
+22310004
+3c01fe10
+3421cd83
+00014820
+00095003
+ae2a0000
+22310004
+3c010176
+3421618c
+00014820
+00095003
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+00095003
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+00095003
+ae2a0000
+22310004
+2009ffff
+00095043
+ae2a0000
+22310004
+20090000
+00095043
+ae2a0000
+22310004
+20090001
+00095043
+ae2a0000
+22310004
+3c01fe10
+3421cd83
+00014820
+00095043
+ae2a0000
+22310004
+3c010176
+3421618c
+00014820
+00095043
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+00095043
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+00095043
+ae2a0000
+22310004
+2009ffff
+00095203
+ae2a0000
+22310004
+20090000
+00095203
+ae2a0000
+22310004
+20090001
+00095203
+ae2a0000
+22310004
+3c01fe10
+3421cd83
+00014820
+00095203
+ae2a0000
+22310004
+3c010176
+3421618c
+00014820
+00095203
+ae2a0000
+22310004
+3c017fff
+3421ffff
+00014820
+00095203
+ae2a0000
+22310004
+3c018000
+34210000
+00014820
+00095203
+ae2a0000
+22310004
+3c0a0000
+ae2a0000
+22310004
+3c0a0001
+ae2a0000
+22310004
+3c0a110d
+ae2a0000
+22310004
+3c0a0e3f
+ae2a0000
+22310004
+3c0a0288
+ae2a0000
+22310004
+3c0a000f
+ae2a0000
+22310004
+3c0a04db
+ae2a0000
+22310004
+200a08ae
+ae2a0000
+22310004
+200a0d05
+ae2a0000
+22310004
+200a115c
+ae2a0000
+22310004
+
+v2.0 raw
+08000c2f
+21080001
+20090000
+200a0000
+20050000
+00b0202a
+10800003
+01505020
+20a50001
+08000c05
+20050000
+00b0202a
+10800003
+012a4820
+20a50001
+08000c0b
+200a0000
+20050000
+00b1202a
+10800003
+01515020
+20a50001
+08000c12
+20050000
+00b1202a
+10800003
+012a4820
+20a50001
+08000c18
+200a0000
+20050000
+00b2202a
+10800003
+01525020
+20a50001
+08000c1f
+20050000
+00b2202a
+10800003
+012a4820
+20a50001
+08000c25
+11090001
+03e00008
+acc90000
+20c60004
+03e00008
+20100001
+21080063
+2a04000a
+1080000d
+20110000
+2a24000a
+10800008
+20120000
+2a44000a
+10800003
+0c000c01
+22520001
+08000c37
+22310001
+08000c34
+22100001
+08000c31
+
+v2.0 raw
+241d2ffc
+24100064
+24110000
+20010001
+02019022
+0c000c07
+08000c86
+02324022
+0501007c
+02329820
+00139842
+00112080
+8c890000
+00122080
+8c8a0000
+012a4022
+1d000001
+08000c16
+00112080
+ac8a0000
+00122080
+ac890000
+00132080
+8c890000
+00122080
+8c8a0000
+012a4022
+1d000001
+08000c21
+00132080
+ac8a0000
+00122080
+ac890000
+00132080
+8c890000
+00112080
+8c8a0000
+012a4022
+1d000001
+08000c2c
+00132080
+ac8a0000
+00112080
+ac890000
+00116021
+00126821
+00112080
+8c8e0000
+118d0021
+000d2080
+8c880000
+010e4822
+05210001
+08000c3c
+018d4822
+05200001
+08000c3c
+20010001
+01a16822
+08000c31
+000c2080
+8c880000
+010e4822
+19200001
+08000c46
+018d4822
+05200001
+08000c46
+218c0001
+08000c3c
+018d4822
+05200001
+08000c30
+000c2080
+8c880000
+000d2080
+8c890000
+000c2080
+ac890000
+000d2080
+ac880000
+08000c30
+000c2080
+8c880000
+00112080
+ac880000
+000c2080
+ac8e0000
+000c9821
+000c6821
+01914022
+05000008
+000c2080
+8c880000
+00132080
+8c890000
+15090003
+20010001
+01816022
+08000c5a
+01b24022
+1d000007
+000d2080
+8c880000
+00132080
+8c890000
+15090002
+21ad0001
+08000c64
+afbf0000
+20010004
+03a1e822
+afad0000
+20010004
+03a1e822
+afb20000
+20010004
+03a1e822
+000c9021
+0c000c07
+23bd0004
+8fb20000
+23bd0004
+8fad0000
+23bd0004
+8fbf0000
+afbf0000
+20010004
+03a1e822
+000d8821
+0c000c07
+23bd0004
+8fbf0000
+03e00008
+24110190
+200a08ae
+ae2a0000
+22310004
+200a0d05
+ae2a0000
+22310004
+200a115c
+ae2a0000
+22310004
+
+附录3：
+v2.0 raw
+
+v2.0 raw
+00000050
+fffffff6
+fffffff7
+fffffff8
+fffffff9
+fffffffa
+fffffffb
+fffffffc
+fffffffd
+fffffffe
+ffffffff
+00000000
+00000001
+00000002
+00000003
+00000004
+00000005
+00000006
+00000007
+00000008
+00000009
+0000000a
+
+v2.0 raw
+00000050
+0000006f
+000000de
+80000000
+fffffe44
+7fffffff
+fffffd66
+ffffffff
+00000001
+00000000
+00000000
+7fffffff
+00000000
+00000000
+
+v2.0 raw
+00000050
+ffffffff
+00000000
+00000000
+00007f34
+00000000
+ffff2244
+0000006f
+000000de
+fffffeb3
+fffffe44
+00343fe8
+fffa8e64
+ffffffff
+00000001
+00000000
+00000000
+00000929
+00000000
+
+v2.0 raw
+00000050
+fffffff6
+fffffff7
+fffffff8
+fffffff9
+fffffffa
+fffffffb
+fffffffc
+fffffffd
+fffffffe
+ffffffff
+00000000
+00000001
+00000002
+00000003
+00000004
+00000005
+00000006
+00000007
+00000008
+00000009
+0000000a
+7fffffff
+80000000
+00000000
+
+v2.0 raw
+
+v2.0 raw
+
+v2.0 raw
+
+v2.0 raw
+00000032
+00000031
+00000030
+0000002f
+0000002e
+0000002d
+0000002c
+0000002b
+0000002a
+00000029
+00000028
+00000027
+00000026
+00000025
+00000024
+00000023
+00000022
+00000021
+00000020
+0000001f
+0000001e
+0000001d
+0000001c
+0000001b
+0000001a
+00000019
+00000018
+00000017
+00000016
+00000015
+00000014
+00000013
+00000012
+00000011
+00000010
+0000000f
+0000000e
+0000000d
+0000000c
+0000000b
+0000000a
+00000009
+00000008
+00000007
+00000006
+00000005
+00000004
+00000003
+00000002
+00000001
+00000064
+00000063
+00000062
+00000061
+00000060
+0000005f
+0000005e
+0000005d
+0000005c
+0000005b
+0000005a
+00000059
+00000058
+00000057
+00000056
+00000055
+00000054
+00000053
+00000052
+00000051
+00000050
+0000004f
+0000004e
+0000004d
+0000004c
+0000004b
+0000004a
+00000049
+00000048
+00000047
+00000046
+00000045
+00000044
+00000043
+00000042
+00000041
+00000040
+0000003f
+0000003e
+0000003d
+0000003c
+0000003b
+0000003a
+00000039
+00000038
+00000037
+00000036
+00000035
+00000034
+00000033
+
+附录4：
+00000005
+00000007
+00000012
+0000000f
+00000002
+00000002
+00000002
+00000002
+00000002
+00000002
+000008ae
+00000d05
+0000115c
+00000001
+ffffffff
+00000002
+ffffffff
+00000003
+ffffffff
+00000004
+ffffffff
+00000005
+ffffffff
+00000006
+ffffffff
+00000007
+ffffffff
+00000008
+ffffffff
+00000009
+00000000
+0000000a
+00000000
+0000000b
+00000000
+0000000c
+00000000
+0000000d
+00000000
+0000000e
+00000000
+0000000f
+00000000
+00000010
+00000000
+00000011
+00000000
+00000012
+00000000
+00000013
+00000000
+00000014
+00000000
+00000015
+00000000
+00000016
+00000000
+00000017
+00000000
+00000018
+00000000
+00000019
+00000000
+0000001a
+00000000
+0000001b
+00000000
+0000001c
+00000000
+0000001d
+00000001
+0000001e
+00000001
+0000001f
+00000001
+00000020
+00000001
+00000021
+00000001
+00000022
+00000001
+00000023
+00000001
+00000024
+00000001
+00000025
+00000001
+00000026
+00000001
+00000027
+ffffffff
+00000000
+ffffffff
+00000001
+ffffffff
+00000002
+ffffffff
+00000003
+ffffffff
+00000004
+ffffffff
+00000005
+ffffffff
+00000006
+ffffffff
+00000007
+ffffffff
+00000008
+ffffffff
+00000009
+00000000
+0000000a
+00000000
+0000000b
+00000000
+0000000c
+00000000
+0000000d
+00000000
+0000000e
+00000000
+0000000f
+00000000
+00000010
+00000000
+00000011
+00000000
+00000012
+00000000
+00000013
+00000000
+00000014
+00000000
+00000015
+00000000
+00000016
+00000000
+00000017
+00000000
+00000018
+00000000
+00000019
+00000000
+0000001a
+00000000
+0000001b
+00000000
+0000001c
+00000000
+0000001d
+00000001
+0000001e
+00000001
+0000001f
+00000001
+00000020
+00000001
+00000021
+00000001
+00000022
+00000001
+00000023
+00000001
+00000024
+00000001
+00000025
+00000001
+00000026
+00000001
+00000027
+ffffffff
+00000000
+ffffffff
+00000001
+ffffffff
+00000002
+ffffffff
+00000003
+ffffffff
+00000004
+ffffffff
+00000005
+ffffffff
+00000006
+ffffffff
+00000007
+ffffffff
+00000008
+ffffffff
+00000009
+00000000
+0000000a
+00000000
+0000000b
+00000000
+0000000c
+00000000
+0000000d
+00000000
+0000000e
+00000000
+0000000f
+00000000
+00000010
+00000000
+00000011
+00000000
+00000012
+00000000
+00000013
+00000000
+00000014
+00000000
+00000015
+00000000
+00000016
+00000000
+00000017
+00000000
+00000018
+00000000
+00000019
+00000000
+0000001a
+00000000
+0000001b
+00000000
+0000001c
+00000000
+0000001d
+00000001
+0000001e
+00000001
+0000001f
+00000001
+00000020
+00000001
+00000021
+00000001
+00000022
+00000001
+00000023
+00000001
+00000024
+00000001
+00000025
+00000001
+00000026
+00000001
+00000027
+ffffffff
+00000000
+ffffffff
+00000001
+ffffffff
+00000002
+ffffffff
+00000003
+ffffffff
+00000004
+ffffffff
+00000005
+ffffffff
+00000006
+ffffffff
+00000007
+ffffffff
+00000008
+ffffffff
+00000009
+00000000
+0000000a
+00000000
+0000000b
+00000000
+0000000c
+00000000
+0000000d
+00000000
+0000000e
+00000000
+0000000f
+00000000
+00000010
+00000000
+00000011
+00000000
+00000012
+00000000
+00000013
+00000000
+00000014
+00000000
+00000015
+00000000
+00000016
+00000000
+00000017
+00000000
+00000018
+00000000
+00000019
+00000000
+0000001a
+00000000
+0000001b
+00000000
+0000001c
+00000000
+0000001d
+00000001
+0000001e
+00000001
+0000001f
+00000001
+00000020
+00000001
+00000021
+00000001
+00000022
+00000001
+00000023
+00000001
+00000024
+00000001
+00000025
+00000001
+00000026
+00000001
+00000027
+ffffffff
+00000000
+ffffffff
+00000001
+ffffffff
+00000002
+ffffffff
+00000003
+ffffffff
+00000004
+ffffffff
+00000005
+ffffffff
+00000006
+ffffffff
+00000007
+ffffffff
+00000008
+ffffffff
+00000009
+00000000
+0000000a
+00000000
+0000000b
+00000000
+0000000c
+00000000
+0000000d
+00000000
+0000000e
+00000000
+0000000f
+00000000
+00000010
+00000000
+00000011
+00000000
+00000012
+00000000
+00000013
+00000000
+00000014
+00000000
+00000015
+00000000
+00000016
+00000000
+00000017
+00000000
+00000018
+00000000
+00000019
+00000000
+0000001a
+00000000
+0000001b
+00000000
+0000001c
+00000000
+0000001d
+00000001
+0000001e
+00000001
+0000001f
+00000001
+00000020
+00000001
+00000021
+00000001
+00000022
+00000001
+00000023
+00000001
+00000024
+00000001
+00000025
+00000001
+00000026
+00000001
+00000027
+
+ffffffff
+00000000
+ffffffff
+00000001
+ffffffff
+00000002
+ffffffff
+00000003
+ffffffff
+00000004
+ffffffff
+00000005
+ffffffff
+00000006
+ffffffff
+00000007
+ffffffff
+00000008
+ffffffff
+00000009
+00000000
+0000000a
+00000000
+0000000b
+00000000
+0000000c
+00000000
+0000000d
+00000000
+0000000e
+00000000
+0000000f
+00000000
+00000010
+00000000
+00000011
+00000000
+00000012
+00000000
+00000013
+00000000
+00000014
+00000000
+00000015
+00000000
+00000016
+00000000
+00000017
+00000000
+00000018
+00000000
+00000019
+00000000
+0000001a
+00000000
+0000001b
+00000000
+0000001c
+00000000
+0000001d
+00000001
+0000001e
+00000001
+0000001f
+00000001
+00000020
+00000001
+00000021
+00000001
+00000022
+00000001
+00000023
+00000001
+00000024
+00000001
+00000025
+00000001
+00000026
+00000001
+00000027
+ffffffff
+00000000
+ffffffff
+00000001
+ffffffff
+00000002
+ffffffff
+00000003
+ffffffff
+00000004
+ffffffff
+00000005
+ffffffff
+00000006
+ffffffff
+00000007
+ffffffff
+00000008
+ffffffff
+00000009
+00000000
+0000000a
+00000000
+0000000b
+00000000
+0000000c
+00000000
+0000000d
+00000000
+0000000e
+00000000
+0000000f
+00000000
+00000010
+00000000
+00000011
+00000000
+00000012
+00000000
+00000013
+00000000
+00000014
+00000000
+00000015
+00000000
+00000016
+00000000
+00000017
+00000000
+00000018
+00000000
+00000019
+00000000
+0000001a
+00000000
+0000001b
+00000000
+0000001c
+00000000
+0000001d
+00000001
+0000001e
+00000001
+0000001f
+00000001
+00000020
+00000001
+00000021
+00000001
+00000022
+00000001
+00000023
+00000001
+00000024
+00000001
+00000025
+00000001
+00000026
+00000001
+00000027
+ffffffff
+00000001
+ffffffff
+00000001
+00000001
+00000001
+00000001
+00000001
+00000001
+00000001
+ffffffff
+00000001
+ffffffff
+00000001
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+00000001
+ffffffff
+00000001
+ffffffff
+ffffffff
+00000001
+ffffffff
+00000001
+ffffffff
+ffffffff
+ffffffff
+00000001
+ffffffff
+ffff8000
+ffffee55
+00000001
+00000001
+ffffffff
+ffff8000
+ffffee55
+ffffffff
+000008ae
+00000d05
+0000115c
+
+00000050
+0000006f
+000000de
+80000000
+fffffe44
+7fffffff
+fffffd66
+ffffffff
+00000001
+00000000
+00000000
+7fffffff
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+0000014d
+0000014d
+000000de
+000001bc
+ffffff91
+0000006f
+00000000
+00000000
+0000004e
+0000004e
+0000006f
+000000de
+000000ff
+000000ff
+0000006f
+000000de
+00000001
+00000000
+00000000
+00000000
+000000b1
+000000b1
+00000000
+00000000
+ffffff00
+ffffff00
+ffffff90
+ffffff21
+c0000000
+006f0000
+00378000
+80000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000001
+00000000
+00000000
+00000000
+7ffffe44
+7ffffe44
+00000000
+fffffc88
+800001bc
+7ffffe44
+00000000
+00000000
+80000000
+80000000
+80000000
+fffffe44
+fffffe44
+fffffe44
+80000000
+fffffe44
+00000001
+00000000
+00000000
+00000000
+7ffffe44
+7ffffe44
+00000000
+00000000
+000001bb
+000001bb
+7fffffff
+000001bb
+00000000
+fffffe44
+80000000
+ffffe440
+08000000
+fffffe44
+80000000
+0fffffe4
+f8000000
+fffffe44
+80000000
+ffffffe4
+00000001
+00000000
+00000000
+00000000
+7ffffd65
+7ffffd65
+fffffffe
+fffffacc
+80000299
+7ffffd67
+00000000
+00000000
+7ffffd66
+7ffffd66
+7fffffff
+fffffd66
+ffffffff
+ffffffff
+7fffffff
+fffffd66
+00000000
+00000001
+00000000
+00000000
+80000299
+80000299
+00000000
+00000000
+00000000
+00000000
+80000000
+00000299
+ffffffc0
+00000000
+80000000
+ffff5980
+01ffffff
+00000001
+00000000
+03fffff5
+01ffffff
+ffffffff
+00000000
+fffffff5
+00000001
+00000000
+00000000
+00000000
+00000000
+00000000
+fffffffe
+00000002
+fffffffe
+00000002
+00000000
+00000000
+00000001
+00000001
+ffffffff
+00000001
+ffffffff
+ffffffff
+ffffffff
+00000001
+00000001
+00000000
+00000000
+00000000
+fffffffe
+fffffffe
+00000000
+00000000
+00000000
+00000000
+00000000
+fffffffe
+fffffffe
+80000000
+80000000
+00000002
+7fffffff
+00000000
+00000001
+00000000
+ffffffff
+00000000
+ffffffff
+00000000
+00000000
+00000001
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+7fffffff
+7fffffff
+fffffffe
+00000000
+7fffffff
+80000001
+00000000
+00000000
+00000000
+00000000
+7fffffff
+00000000
+7fffffff
+7fffffff
+7fffffff
+00000000
+00000000
+00000001
+00000000
+00000000
+7fffffff
+7fffffff
+00000000
+00000000
+80000000
+80000000
+80000000
+ffffffff
+7fffffff
+00000000
+80000000
+00000000
+7fffffff
+00000000
+00000000
+00000000
+7fffffff
+00000000
+00000000
+00000000
+00000000
+00000001
+00000000
+00000000
+000008ae
+00000d05
+0000115c
+
+00000050
+ffffffff
+00000000
+00000000
+00007f34
+00000000
+ffff2244
+0000006f
+000000de
+fffffeb3
+fffffe44
+00343fe8
+fffa8e64
+ffffffff
+00000001
+00000000
+00000000
+00000929
+00000000
+00000000
+ffffffff
+ffffffff
+fffffffe
+00000000
+ffffffff
+ffffffff
+fffffffe
+00000000
+ffffffff
+00000001
+00000000
+00000000
+ffffffff
+00000001
+00000000
+00000000
+00000000
+00000000
+ffffffff
+00000000
+ffffffff
+ffffffff
+ffffffff
+00000000
+00000001
+00000000
+00000000
+00000000
+ffffffff
+ffffffff
+00000000
+00000000
+00000000
+00000000
+00000000
+ffffffff
+ffffffff
+00000000
+80000000
+00000000
+ffffffff
+00000000
+00000001
+00000000
+ffffffff
+00000000
+ffffffff
+00000000
+00000000
+00000001
+00000000
+00000000
+00007f34
+00007f34
+00000000
+0000fe68
+00007f34
+00007f34
+00000000
+0000fe68
+ffff80cc
+00007f34
+00000000
+00000000
+ffff80cc
+00007f34
+00000000
+00000000
+00000000
+00000000
+00000000
+00007f34
+00007f34
+00007f34
+00000000
+00007f34
+00000001
+00000000
+00000000
+00000000
+00007f34
+00007f34
+00000000
+00000000
+ffff80cb
+ffff80cb
+ffffffff
+ffff80cb
+00000000
+00007f34
+00000000
+f3400000
+00000000
+00007f34
+00000000
+00000000
+00000000
+00007f34
+00000000
+00000000
+00000001
+00000000
+00000000
+00000000
+ffff2244
+ffff2244
+00000000
+fffe4488
+ffff2244
+ffff2244
+00000000
+fffe4488
+0000ddbc
+ffff2244
+00000000
+00000000
+0000ddbc
+ffff2244
+00000000
+00000000
+00000000
+00000000
+00000000
+ffff2244
+ffff2244
+ffff2244
+00000000
+ffff2244
+00000000
+00000001
+00000000
+00000000
+ffff2244
+ffff2244
+00000000
+00000000
+0000ddbb
+0000ddbb
+ffffffff
+0000ddbb
+00000000
+ffff2244
+00000000
+fff22440
+00000000
+ffff2244
+00000000
+0ffff224
+00000000
+ffff2244
+00000000
+fffff224
+00000001
+00000000
+00000000
+00000000
+0000014d
+0000014d
+000000de
+000001bc
+ffffff91
+0000006f
+00000000
+00000000
+fffffcf7
+fffffcf7
+fffffd66
+fffffc88
+0000006f
+ffffff91
+00000000
+00000000
+002ece4c
+002ece4c
+00687fd0
+fff51cc8
+0039b184
+ffc64e7c
+00000000
+00000000
+00000000
+00000000
+fffffffe
+00000002
+fffffffe
+00000002
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000929
+00000929
+00001252
+00000000
+00000929
+fffff6d7
+00000000
+00000000
+000008ae
+00000d05
+0000115c
+
+00000050
+fffffff6
+fffffff7
+fffffff8
+fffffff9
+fffffffa
+fffffffb
+fffffffc
+fffffffd
+fffffffe
+ffffffff
+00000000
+00000001
+00000002
+00000003
+00000004
+00000005
+00000006
+00000007
+00000008
+00000009
+0000000a
+7fffffff
+80000000
+00000000
+00000050
+fffffff6
+fffffff7
+fffffff8
+fffffff9
+fffffffa
+fffffffb
+fffffffc
+fffffffd
+fffffffe
+ffffffff
+00000000
+00000001
+00000002
+00000003
+00000004
+00000005
+00000006
+00000007
+00000008
+00000009
+0000000a
+7fffffff
+80000000
+00000050
+00000000
+fffffff6
+ffffffff
+fffffff7
+ffffffff
+fffffff8
+ffffffff
+fffffff9
+ffffffff
+fffffffa
+ffffffff
+fffffffb
+ffffffff
+fffffffc
+ffffffff
+fffffffd
+ffffffff
+fffffffe
+ffffffff
+ffffffff
+ffffffff
+00000000
+00000000
+00000001
+00000000
+00000002
+00000000
+00000003
+00000000
+00000004
+00000000
+00000005
+00000000
+00000006
+00000000
+00000007
+00000000
+00000008
+00000000
+00000009
+00000000
+0000000a
+00000000
+ffffffff
+00007fff
+00000000
+ffff8000
+00000050
+00000000
+0000fff6
+0000ffff
+0000fff7
+0000ffff
+0000fff8
+0000ffff
+0000fff9
+0000ffff
+0000fffa
+0000ffff
+0000fffb
+0000ffff
+0000fffc
+0000ffff
+0000fffd
+0000ffff
+0000fffe
+0000ffff
+0000ffff
+0000ffff
+00000000
+00000000
+00000001
+00000000
+00000002
+00000000
+00000003
+00000000
+00000004
+00000000
+00000005
+00000000
+00000006
+00000000
+00000007
+00000000
+00000008
+00000000
+00000009
+00000000
+0000000a
+00000000
+0000ffff
+00007fff
+00000000
+00008000
+00000050
+00000000
+00000000
+00000000
+fffffff6
+ffffffff
+ffffffff
+ffffffff
+fffffff7
+ffffffff
+ffffffff
+ffffffff
+fffffff8
+ffffffff
+ffffffff
+ffffffff
+fffffff9
+ffffffff
+ffffffff
+ffffffff
+fffffffa
+ffffffff
+ffffffff
+ffffffff
+fffffffb
+ffffffff
+ffffffff
+ffffffff
+fffffffc
+ffffffff
+ffffffff
+ffffffff
+fffffffd
+ffffffff
+ffffffff
+ffffffff
+fffffffe
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+00000000
+00000000
+00000000
+00000000
+00000001
+00000000
+00000000
+00000000
+00000002
+00000000
+00000000
+00000000
+00000003
+00000000
+00000000
+00000000
+00000004
+00000000
+00000000
+00000000
+00000005
+00000000
+00000000
+00000000
+00000006
+00000000
+00000000
+00000000
+00000007
+00000000
+00000000
+00000000
+00000008
+00000000
+00000000
+00000000
+00000009
+00000000
+00000000
+00000000
+0000000a
+00000000
+00000000
+00000000
+ffffffff
+ffffffff
+ffffffff
+0000007f
+00000000
+00000000
+00000000
+ffffff80
+00000050
+00000000
+00000000
+00000000
+000000f6
+000000ff
+000000ff
+000000ff
+000000f7
+000000ff
+000000ff
+000000ff
+000000f8
+000000ff
+000000ff
+000000ff
+000000f9
+000000ff
+000000ff
+000000ff
+000000fa
+000000ff
+000000ff
+000000ff
+000000fb
+000000ff
+000000ff
+000000ff
+000000fc
+000000ff
+000000ff
+000000ff
+000000fd
+000000ff
+000000ff
+000000ff
+000000fe
+000000ff
+000000ff
+000000ff
+000000ff
+000000ff
+000000ff
+000000ff
+00000000
+00000000
+00000000
+00000000
+00000001
+00000000
+00000000
+00000000
+00000002
+00000000
+00000000
+00000000
+00000003
+00000000
+00000000
+00000000
+00000004
+00000000
+00000000
+00000000
+00000005
+00000000
+00000000
+00000000
+00000006
+00000000
+00000000
+00000000
+00000007
+00000000
+00000000
+00000000
+00000008
+00000000
+00000000
+00000000
+00000009
+00000000
+00000000
+00000000
+0000000a
+00000000
+00000000
+00000000
+000000ff
+000000ff
+000000ff
+0000007f
+00000000
+00000000
+00000000
+00000080
+00000050
+fffffff6
+fffffff7
+fffffff8
+fffffff9
+fffffffa
+fffffffb
+fffffffc
+fffffffd
+fffffffe
+ffffffff
+00000000
+00000001
+00000002
+00000003
+00000004
+00000005
+00000006
+00000007
+00000008
+00000009
+0000000a
+7fffffff
+00000050
+00000000
+fffffff6
+ffffffff
+fffffff7
+ffffffff
+fffffff8
+ffffffff
+fffffff9
+ffffffff
+fffffffa
+ffffffff
+fffffffb
+ffffffff
+fffffffc
+ffffffff
+fffffffd
+ffffffff
+fffffffe
+ffffffff
+ffffffff
+ffffffff
+00000000
+00000000
+00000001
+00000000
+00000002
+00000000
+00000003
+00000000
+00000004
+00000000
+00000005
+00000000
+00000006
+00000000
+00000007
+00000000
+00000008
+00000000
+00000009
+00000000
+0000000a
+00000000
+ffffffff
+00000050
+00000000
+0000fff6
+0000ffff
+0000fff7
+0000ffff
+0000fff8
+0000ffff
+0000fff9
+0000ffff
+0000fffa
+0000ffff
+0000fffb
+0000ffff
+0000fffc
+0000ffff
+0000fffd
+0000ffff
+0000fffe
+0000ffff
+0000ffff
+0000ffff
+00000000
+00000000
+00000001
+00000000
+00000002
+00000000
+00000003
+00000000
+00000004
+00000000
+00000005
+00000000
+00000006
+00000000
+00000007
+00000000
+00000008
+00000000
+00000009
+00000000
+0000000a
+00000000
+0000ffff
+00007fff
+00000000
+00000050
+00000000
+00000000
+00000000
+fffffff6
+ffffffff
+ffffffff
+ffffffff
+fffffff7
+ffffffff
+ffffffff
+ffffffff
+fffffff8
+ffffffff
+ffffffff
+ffffffff
+fffffff9
+ffffffff
+ffffffff
+ffffffff
+fffffffa
+ffffffff
+ffffffff
+ffffffff
+fffffffb
+ffffffff
+ffffffff
+ffffffff
+fffffffc
+ffffffff
+ffffffff
+ffffffff
+fffffffd
+ffffffff
+ffffffff
+ffffffff
+fffffffe
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+00000000
+00000000
+00000000
+00000000
+00000001
+00000000
+00000000
+00000000
+00000002
+00000000
+00000000
+00000000
+00000003
+00000000
+00000000
+00000000
+00000004
+00000000
+00000000
+00000000
+00000005
+00000000
+00000000
+00000000
+00000006
+00000000
+00000000
+00000000
+00000007
+00000000
+00000000
+00000000
+00000008
+00000000
+00000000
+00000000
+00000009
+00000000
+00000000
+00000000
+0000000a
+00000000
+00000000
+00000000
+ffffffff
+ffffffff
+ffffffff
+00000050
+00000000
+00000000
+00000000
+000000f6
+000000ff
+000000ff
+000000ff
+000000f7
+000000ff
+000000ff
+000000ff
+000000f8
+000000ff
+000000ff
+000000ff
+000000f9
+000000ff
+000000ff
+000000ff
+000000fa
+000000ff
+000000ff
+000000ff
+000000fb
+000000ff
+000000ff
+000000ff
+000000fc
+000000ff
+000000ff
+000000ff
+000000fd
+000000ff
+000000ff
+000000ff
+000000fe
+000000ff
+000000ff
+000000ff
+000000ff
+000000ff
+000000ff
+000000ff
+00000000
+00000000
+00000000
+00000000
+00000001
+00000000
+00000000
+00000000
+00000002
+00000000
+00000000
+00000000
+00000003
+00000000
+00000000
+00000000
+00000004
+00000000
+00000000
+00000000
+00000005
+00000000
+00000000
+00000000
+00000006
+00000000
+00000000
+00000000
+00000007
+00000000
+00000000
+00000000
+00000008
+00000000
+00000000
+00000000
+00000009
+00000000
+00000000
+00000000
+0000000a
+00000000
+00000000
+00000000
+000000ff
+000000ff
+000000ff
+0000007f
+00000000
+00000050
+fffffff6
+fffffff7
+fffffff8
+fffffff9
+fffffffa
+fffffffb
+fffffffc
+fffffffd
+fffffffe
+ffffffff
+00000000
+00000001
+00000002
+00000003
+00000004
+00000005
+00000006
+00000007
+00000008
+00000009
+0000000a
+7fffffff
+80000000
+00000000
+00000050
+00000000
+fffffff6
+ffffffff
+fffffff7
+ffffffff
+fffffff8
+ffffffff
+fffffff9
+ffffffff
+fffffffa
+ffffffff
+fffffffb
+ffffffff
+fffffffc
+ffffffff
+fffffffd
+ffffffff
+fffffffe
+ffffffff
+ffffffff
+ffffffff
+00000000
+00000000
+00000001
+00000000
+00000002
+00000000
+00000003
+00000000
+00000004
+00000000
+00000005
+00000000
+00000006
+00000000
+00000007
+00000000
+00000008
+00000000
+00000009
+00000000
+0000000a
+00000000
+ffffffff
+00007fff
+00000000
+ffff8000
+00000000
+00000000
+00000050
+00000050
+00000000
+0000fff6
+0000ffff
+0000fff7
+0000ffff
+0000fff8
+0000ffff
+0000fff9
+0000ffff
+0000fffa
+0000ffff
+0000fffb
+0000ffff
+0000fffc
+0000ffff
+0000fffd
+0000ffff
+0000fffe
+0000ffff
+0000ffff
+0000ffff
+00000000
+00000000
+00000001
+00000000
+00000002
+00000000
+00000003
+00000000
+00000004
+00000000
+00000005
+00000000
+00000006
+00000000
+00000007
+00000000
+00000008
+00000000
+00000009
+00000000
+0000000a
+00000000
+0000ffff
+00007fff
+00000000
+00008000
+00000000
+00000050
+00000000
+00000000
+00000000
+fffffff6
+ffffffff
+ffffffff
+ffffffff
+fffffff7
+ffffffff
+ffffffff
+ffffffff
+fffffff8
+ffffffff
+ffffffff
+ffffffff
+fffffff9
+ffffffff
+ffffffff
+ffffffff
+fffffffa
+ffffffff
+ffffffff
+ffffffff
+fffffffb
+ffffffff
+ffffffff
+ffffffff
+fffffffc
+ffffffff
+ffffffff
+ffffffff
+fffffffd
+ffffffff
+ffffffff
+ffffffff
+fffffffe
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+00000000
+00000000
+00000000
+00000000
+00000001
+00000000
+00000000
+00000000
+00000002
+00000000
+00000000
+00000000
+00000003
+00000000
+00000000
+00000000
+00000004
+00000000
+00000000
+00000000
+00000005
+00000000
+00000000
+00000000
+00000006
+00000000
+00000000
+00000000
+00000007
+00000000
+00000000
+00000000
+00000008
+00000000
+00000000
+00000000
+00000009
+00000000
+00000000
+00000000
+0000000a
+00000000
+00000000
+00000000
+ffffffff
+ffffffff
+ffffffff
+0000007f
+00000000
+00000000
+00000000
+ffffff80
+00000000
+00000000
+00000000
+00000000
+00000050
+00000050
+00000000
+00000000
+00000000
+000000f6
+000000ff
+000000ff
+000000ff
+000000f7
+000000ff
+000000ff
+000000ff
+000000f8
+000000ff
+000000ff
+000000ff
+000000f9
+000000ff
+000000ff
+000000ff
+000000fa
+000000ff
+000000ff
+000000ff
+000000fb
+000000ff
+000000ff
+000000ff
+000000fc
+000000ff
+000000ff
+000000ff
+000000fd
+000000ff
+000000ff
+000000ff
+000000fe
+000000ff
+000000ff
+000000ff
+000000ff
+000000ff
+000000ff
+000000ff
+00000000
+00000000
+00000000
+00000000
+00000001
+00000000
+00000000
+00000000
+00000002
+00000000
+00000000
+00000000
+00000003
+00000000
+00000000
+00000000
+00000004
+00000000
+00000000
+00000000
+00000005
+00000000
+00000000
+00000000
+00000006
+00000000
+00000000
+00000000
+00000007
+00000000
+00000000
+00000000
+00000008
+00000000
+00000000
+00000000
+00000009
+00000000
+00000000
+00000000
+0000000a
+00000000
+00000000
+00000000
+000000ff
+000000ff
+000000ff
+0000007f
+00000000
+00000000
+00000000
+00000080
+00000000
+00000000
+00000000
+00000000
+00000050
+00000000
+00000050
+fffffff6
+00000050
+fffffff6
+fffffff7
+fffffff6
+fffffff7
+fffffff8
+fffffff7
+fffffff8
+fffffff9
+fffffff8
+fffffff9
+fffffffa
+fffffff9
+fffffffa
+fffffffb
+fffffffa
+fffffffb
+fffffffc
+fffffffb
+fffffffc
+fffffffd
+fffffffc
+fffffffd
+fffffffe
+fffffffd
+fffffffe
+ffffffff
+fffffffe
+ffffffff
+00000000
+ffffffff
+00000000
+00000001
+00000000
+00000001
+00000002
+00000001
+00000002
+00000003
+00000002
+00000003
+00000004
+00000003
+00000004
+00000005
+00000004
+00000005
+00000006
+00000005
+00000006
+00000007
+00000006
+00000007
+00000008
+00000007
+00000008
+00000009
+00000008
+00000009
+0000000a
+00000009
+0000000a
+7fffffff
+0000000a
+7fffffff
+80000000
+7fffffff
+80000000
+00000000
+00500000
+00000000
+00000050
+00500000
+00000000
+00000050
+00500000
+fff60000
+00000050
+0050fff6
+fff60000
+00000000
+0000fff6
+fff60000
+fff70000
+0000fff6
+fff6fff7
+fff70000
+00000000
+0000fff7
+fff70000
+fff80000
+0000fff7
+fff7fff8
+fff80000
+00000000
+0000fff8
+fff80000
+fff90000
+0000fff8
+fff8fff9
+fff90000
+00000000
+0000fff9
+fff90000
+fffa0000
+0000fff9
+fff9fffa
+fffa0000
+00000000
+0000fffa
+fffa0000
+fffb0000
+0000fffa
+fffafffb
+fffb0000
+00000000
+0000fffb
+fffb0000
+fffc0000
+0000fffb
+fffbfffc
+fffc0000
+00000000
+0000fffc
+fffc0000
+fffd0000
+0000fffc
+fffcfffd
+fffd0000
+00000000
+0000fffd
+fffd0000
+fffe0000
+0000fffd
+fffdfffe
+fffe0000
+00000000
+0000fffe
+fffe0000
+ffff0000
+0000fffe
+fffeffff
+ffff0000
+00000000
+0000ffff
+ffff0000
+00000000
+0000ffff
+ffff0000
+00000000
+00000000
+00000000
+00000000
+00010000
+00000000
+00000001
+00010000
+00000000
+00000001
+00010000
+00020000
+00000001
+00010002
+00020000
+00000000
+00000002
+00020000
+00030000
+00000002
+00020003
+00030000
+00000000
+00000003
+00030000
+00040000
+00000003
+00030004
+00040000
+00000000
+00000004
+00040000
+00050000
+00000004
+00040005
+00050000
+00000000
+00000005
+00050000
+00060000
+00000005
+00050006
+00060000
+00000000
+00000006
+00060000
+00070000
+00000006
+00060007
+00070000
+00000000
+00000007
+00070000
+00080000
+00000007
+00070008
+00080000
+00000000
+00000008
+00080000
+00090000
+00000008
+00080009
+00090000
+00000000
+00000009
+00090000
+000a0000
+00000009
+0009000a
+000a0000
+00000000
+0000000a
+000a0000
+ffff0000
+0000000a
+000affff
+ffff0000
+00000000
+0000ffff
+ffff0000
+00000000
+0000ffff
+ffff0000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+50000000
+00000000
+00000050
+00005000
+00500000
+50000000
+00000000
+00000050
+00005000
+00500000
+50000000
+f6000000
+00000050
+000050f6
+0000f600
+00f60000
+f6000000
+00000000
+000000f6
+0000f600
+00f60000
+f6000000
+f7000000
+000000f6
+0000f6f7
+0000f700
+00f70000
+f7000000
+00000000
+000000f7
+0000f700
+00f70000
+f7000000
+f8000000
+000000f7
+0000f7f8
+0000f800
+00f80000
+f8000000
+00000000
+000000f8
+0000f800
+00f80000
+f8000000
+f9000000
+000000f8
+0000f8f9
+0000f900
+00f90000
+f9000000
+00000000
+000000f9
+0000f900
+00f90000
+f9000000
+fa000000
+000000f9
+0000f9fa
+0000fa00
+00fa0000
+fa000000
+00000000
+000000fa
+0000fa00
+00fa0000
+fa000000
+fb000000
+000000fa
+0000fafb
+0000fb00
+00fb0000
+fb000000
+00000000
+000000fb
+0000fb00
+00fb0000
+fb000000
+fc000000
+000000fb
+0000fbfc
+0000fc00
+00fc0000
+fc000000
+00000000
+000000fc
+0000fc00
+00fc0000
+fc000000
+fd000000
+000000fc
+0000fcfd
+0000fd00
+00fd0000
+fd000000
+00000000
+000000fd
+0000fd00
+00fd0000
+fd000000
+fe000000
+000000fd
+0000fdfe
+0000fe00
+00fe0000
+fe000000
+00000000
+000000fe
+0000fe00
+00fe0000
+fe000000
+ff000000
+000000fe
+0000feff
+0000ff00
+00ff0000
+ff000000
+00000000
+000000ff
+0000ff00
+00ff0000
+ff000000
+00000000
+000000ff
+0000ff00
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+01000000
+00000000
+00000001
+00000100
+00010000
+01000000
+00000000
+00000001
+00000100
+00010000
+01000000
+02000000
+00000001
+00000102
+00000200
+00020000
+02000000
+00000000
+00000002
+00000200
+00020000
+02000000
+03000000
+00000002
+00000203
+00000300
+00030000
+03000000
+00000000
+00000003
+00000300
+00030000
+03000000
+04000000
+00000003
+00000304
+00000400
+00040000
+04000000
+00000000
+00000004
+00000400
+00040000
+04000000
+05000000
+00000004
+00000405
+00000500
+00050000
+05000000
+00000000
+00000005
+00000500
+00050000
+05000000
+06000000
+00000005
+00000506
+00000600
+00060000
+06000000
+00000000
+00000006
+00000600
+00060000
+06000000
+07000000
+00000006
+00000607
+00000700
+00070000
+07000000
+00000000
+00000007
+00000700
+00070000
+07000000
+08000000
+00000007
+00000708
+00000800
+00080000
+08000000
+00000000
+00000008
+00000800
+00080000
+08000000
+09000000
+00000008
+00000809
+00000900
+00090000
+09000000
+00000000
+00000009
+00000900
+00090000
+09000000
+0a000000
+00000009
+0000090a
+00000a00
+000a0000
+0a000000
+00000000
+0000000a
+00000a00
+000a0000
+0a000000
+ff000000
+0000000a
+00000aff
+0000ff00
+00ff0000
+ff000000
+00000000
+000000ff
+0000ff00
+00ff0000
+ff000000
+00000000
+000000ff
+0000ff00
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+000008ae
+00000d05
+0000115c
+
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000001
+00000001
+00000001
+00000000
+00000001
+00000001
+00000000
+00000001
+ffffffff
+7fffffff
+80000000
+00020cb5
+fcdfe5bd
+00000000
+00000001
+7fffffff
+7fffffff
+00000000
+00020cb5
+7cdfe5bd
+00000000
+00000000
+80000000
+00000000
+80000000
+00000000
+80000000
+00000000
+00000001
+00020cb5
+00020cb5
+00000000
+00020cb5
+000204b5
+00000000
+00000001
+fcdfe5bd
+7cdfe5bd
+80000000
+000204b5
+fcdfe5bd
+00000000
+00000001
+ffffffff
+7fffffff
+80000000
+00020cb5
+fcdfe5bd
+00000001
+00000001
+ffffffff
+7fffffff
+80000001
+00020cb5
+fcdfe5bd
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+7fffffff
+7fffffff
+ffffffff
+7fffffff
+ffffffff
+7fffffff
+ffffffff
+80000000
+80000001
+ffffffff
+ffffffff
+80000000
+80020cb5
+fcdfe5bd
+00020cb5
+00020cb5
+ffffffff
+7fffffff
+80020cb5
+00020cb5
+fcdfedbd
+fcdfe5bd
+fcdfe5bd
+ffffffff
+ffffffff
+fcdfe5bd
+fcdfedbd
+fcdfe5bd
+ffffffff
+00000000
+00000001
+fe10cd83
+0176618c
+7fffffff
+80000000
+00000000
+00000001
+00000002
+fe10cd84
+0176618d
+80000000
+80000001
+00000007
+00000008
+00000009
+fe10cd8b
+01766194
+80000007
+80000008
+ffffffff
+00000000
+00000001
+fe10cd83
+0176618c
+7fffffff
+80000000
+fffffffe
+00000000
+00000002
+fc219b06
+02ecc318
+fffffffe
+00000000
+ffffff00
+00000000
+00000100
+10cd8300
+76618c00
+ffffff00
+00000000
+ffffffff
+00000000
+00000001
+fe10cd83
+0176618c
+7fffffff
+80000000
+7fffffff
+00000000
+00000000
+7f0866c1
+00bb30c6
+3fffffff
+40000000
+00ffffff
+00000000
+00000000
+00fe10cd
+00017661
+007fffff
+00800000
+000008ae
+00000d05
+0000115c
+
+00000000
+00000001
+ffffffff
+7fffffff
+80000000
+00020cb5
+fcdfe5bd
+00000001
+00000000
+fffffffe
+7ffffffe
+80000001
+00020cb4
+fcdfe5bc
+ffffffff
+fffffffe
+00000000
+80000000
+7fffffff
+fffdf34a
+03201a42
+7fffffff
+7ffffffe
+80000000
+00000000
+ffffffff
+7ffdf34a
+83201a42
+80000000
+80000001
+7fffffff
+ffffffff
+00000000
+80020cb5
+7cdfe5bd
+00020cb5
+00020cb4
+fffdf34a
+7ffdf34a
+80020cb5
+00000000
+fcdde908
+fcdfe5bd
+fcdfe5bc
+03201a42
+83201a42
+7cdfe5bd
+fcdde908
+00000000
+00000000
+00000001
+00000000
+00000001
+00000000
+00000001
+00000000
+00000000
+00000000
+00000000
+00000001
+00000000
+00000001
+00000000
+00000001
+00000001
+00000000
+00000001
+00000000
+00000001
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000001
+00000001
+00000001
+00000001
+00000001
+00000001
+00000001
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000001
+00000001
+00000001
+00000001
+00000001
+00000001
+00000001
+00000000
+00000001
+00000001
+00000001
+00000001
+00000001
+00000001
+00000000
+00000000
+00000001
+00000001
+00000001
+00000001
+00000001
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000001
+00000000
+00000001
+00000000
+00000001
+00000000
+00000000
+00000001
+00000000
+00000001
+00000000
+00000001
+00000000
+00000000
+00000001
+00000000
+00000001
+00000000
+00000001
+00000000
+00000000
+00000001
+00000000
+00000001
+00000000
+00000001
+ffffffff
+00000000
+00000001
+fe10cd83
+0176618c
+7fffffff
+80000000
+ffffffff
+00000000
+00000000
+ff0866c1
+00bb30c6
+3fffffff
+c0000000
+ffffffff
+00000000
+00000000
+fffe10cd
+00017661
+007fffff
+ff800000
+00000000
+00010000
+110d0000
+0e3f0000
+02880000
+000f0000
+04db0000
+000008ae
+00000d05
+0000115c
+
+00000099
+00000172
+00000173
+00000197
+
+00000001
+00000002
+00000003
+00000004
+00000005
+00000006
+00000007
+00000008
+00000009
+0000000a
+0000000b
+0000000c
+0000000d
+0000000e
+0000000f
+00000010
+00000011
+00000012
+00000013
+00000014
+00000015
+00000016
+00000017
+00000018
+00000019
+0000001a
+0000001b
+0000001c
+0000001d
+0000001e
+0000001f
+00000020
+00000021
+00000022
+00000023
+00000024
+00000025
+00000026
+00000027
+00000028
+00000029
+0000002a
+0000002b
+0000002c
+0000002d
+0000002e
+0000002f
+00000030
+00000031
+00000032
+00000033
+00000034
+00000035
+00000036
+00000037
+00000038
+00000039
+0000003a
+0000003b
+0000003c
+0000003d
+0000003e
+0000003f
+00000040
+00000041
+00000042
+00000043
+00000044
+00000045
+00000046
+00000047
+00000048
+00000049
+0000004a
+0000004b
+0000004c
+0000004d
+0000004e
+0000004f
+00000050
+00000051
+00000052
+00000053
+00000054
+00000055
+00000056
+00000057
+00000058
+00000059
+0000005a
+0000005b
+0000005c
+0000005d
+0000005e
+0000005f
+00000060
+00000061
+00000062
+00000063
+00000064
+000008ae
+00000d05
+0000115c
+
+附录5：
+addi	$1,$1,23333
+addi	$2,$2,23333
+addi	$3,$3,23333
+addi	$4,$4,23333
+addi	$5,$5,23333
+addi	$6,$6,23333
+addi	$7,$7,23333
+addi	$8,$8,23333
+addi	$9,$9,23333
+addi	$10,$10,23333
+addi	$11,$11,23333
+addi	$12,$12,23333
+addi	$13,$13,23333
+addi	$14,$14,23333
+addi	$15,$15,23333
+addi	$16,$16,23333
+addi	$17,$17,23333
+addi	$18,$18,23333
+addi	$19,$19,23333
+addi	$20,$20,23333
+addi	$21,$21,23333
+addi	$22,$22,23333
+addi	$23,$23,23333
+addi	$24,$24,23333
+addi	$25,$25,23333
+addi	$26,$26,23333
+addi	$27,$27,23333
+addi	$28,$28,23333
+addi	$29,$29,23333
+addi	$30,$30,23333
+addi	$31,$31,23333
+
+addi	$s1,$0,40
+addi	$s2,$0,0
+
+la		$a1,TAG5
+add		$t2,$0,$a1
+jalr	$a0,$t2
+sw		$t1,0($s2)
+addi	$s2,$s2,4
+
+la		$a1,TAG7
+add		$t2,$0,$a1
+jalr	$a0,$t2
+sw		$t1,0($s2)
+addi	$s2,$s2,4
+
+la		$a1,TAG18
+add		$t2,$0,$a1
+jalr	$a0,$t2
+sw		$t1,0($s2)
+addi	$s2,$s2,4
+
+la		$a1,TAG15
+add		$t2,$0,$a1
+jalr	$a0,$t2
+sw		$t1,0($s2)
+addi	$s2,$s2,4
+
+la		$a1,TAG2
+add		$t2,$0,$a1
+jalr	$a0,$t2
+sw		$t1,0($s2)
+addi	$s2,$s2,4
+
+j		AFTER
+
+TAG1:
+addi	$t1,$0,1
+jr		$a0
+TAG2:
+addi	$t1,$0,2
+jr		$a0
+TAG3:
+addi	$t1,$0,3
+jr		$a0
+TAG4:
+addi	$t1,$0,4
+jr		$a0
+TAG5:
+addi	$t1,$0,5
+jr		$a0
+TAG6:
+addi	$t1,$0,6
+jr		$a0
+TAG7:
+addi	$t1,$0,7
+jr		$a0
+TAG8:
+addi	$t1,$0,8
+jr		$a0
+TAG9:
+addi	$t1,$0,9
+jr		$a0
+TAG10:
+addi	$t1,$0,10
+jr		$a0
+TAG11:
+addi	$t1,$0,11
+jr		$a0
+TAG12:
+addi	$t1,$0,12
+jr		$a0
+TAG13:
+addi	$t1,$0,13
+jr		$a0
+TAG14:
+addi	$t1,$0,14
+jr		$a0
+TAG15:
+addi	$t1,$0,15
+jr		$a0
+TAG16:
+addi	$t1,$0,16
+jr		$a0
+TAG17:
+addi	$t1,$0,17
+jr		$a0
+TAG18:
+addi	$t1,$0,18
+jr		$a0
+TAG19:
+addi	$t1,$0,19
+jr		$a0
+TAG20:
+addi	$t1,$0,20
+jr		$a0
+
+AFTER:
+
+la		$a0,TAG13
+add		$t2,$0,$a1
+jalr	$a0,$t2
+sw		$t1,0($s2)
+addi	$s2,$s2,4
+
+la		$a0,TAG9
+add		$t2,$0,$a1
+jalr	$a0,$t2
+sw		$t1,0($s2)
+addi	$s2,$s2,4
+
+la		$a0,TAG1
+add		$t2,$0,$a1
+jalr	$a0,$t2
+sw		$t1,0($s2)
+addi	$s2,$s2,4
+
+la		$a0,TAG17
+add		$t2,$0,$a1
+jalr	$a0,$t2
+sw		$t1,0($s2)
+addi	$s2,$s2,4
+
+la		$a0,TAG10
+add		$t2,$0,$a1
+jalr	$a0,$t2
+sw		$t1,0($s2)
+addi	$s2,$s2,4
+
+addi	$s0,$0,0
+j		LOOP_BGEIN1
+
+PRINT11:
+	addi	$t0,$0,-1
+	sw		$t0,0($s2)
+	addi	$s2,$s2,4
+	jr		$31
+PRINT12:
+	addi	$t0,$0,0
+	sw		$t0,0($s2)
+	addi	$s2,$s2,4
+	jr		$31
+PRINT13:
+	addi	$t0,$0,1
+	sw		$t0,0($s2)
+	addi	$s2,$s2,4
+	jr		$31
+
+LOOP_BGEIN1:
+	beq		$s0,$s1,END_LOOP1
+	slti	$t0,$s0,30
+	beq		$t0,$0,UPPER1
+	slti	$t0,$s0,10
+	beq		$t0,$0,MID1
+	LOWER1:
+		jal		PRINT11
+		j		OUT1
+	MID1:
+		jal		PRINT12
+		j		OUT1
+	UPPER1:
+		jal		PRINT13
+		j		OUT1
+	OUT1:
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	addi	$s0,$s0,1
+	j		LOOP_BGEIN1
+END_LOOP1:
+
+addi	$s0,$0,0
+
+LOOP_BGEIN2:
+	beq		$s0,$s1,END_LOOP2
+	slti	$t0,$s0,30
+	beq		$t0,$0,UPPER2
+	slti	$t0,$s0,10
+	beq		$t0,$0,MID2
+	LOWER2:
+		jal		PRINT21
+		j		OUT2
+	MID2:
+		jal		PRINT22
+		j		OUT2
+	UPPER2:
+		jal		PRINT23
+		j		OUT2
+	OUT2:
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	addi	$s0,$s0,1
+	j		LOOP_BGEIN2
+END_LOOP2:
+	j		TEST3
+
+PRINT21:
+	addi	$t0,$0,-1
+	sw		$t0,0($s2)
+	addi	$s2,$s2,4
+	jr		$31
+PRINT22:
+	addi	$t0,$0,0
+	sw		$t0,0($s2)
+	addi	$s2,$s2,4
+	jr		$31
+PRINT23:
+	addi	$t0,$0,1
+	sw		$t0,0($s2)
+	addi	$s2,$s2,4
+	jr		$31
+
+TEST3:
+
+addi	$s0,$0,0
+
+LOOP_BGEIN3:
+	beq		$s0,$s1,END_LOOP3
+	slti	$t0,$s0,30
+	j		SKIP1
+	PRINT31:
+		addi	$t0,$0,-1
+		sw		$t0,0($s2)
+		addi	$s2,$s2,4
+		jr		$31
+	SKIP1:
+	beq		$t0,$0,UPPER3
+	slti	$t0,$s0,10
+	beq		$t0,$0,MID3
+	LOWER3:
+		jal		PRINT31
+		j		SKIP3
+		PRINT33:
+			addi	$t0,$0,1
+			sw		$t0,0($s2)
+			addi	$s2,$s2,4
+			jr		$31
+		SKIP3:
+		j		OUT3
+	MID3:
+		jal		PRINT32
+		j		OUT3
+	UPPER3:
+		jal		PRINT33
+		j		OUT3
+	OUT3:
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		SKIP2
+	PRINT32:
+		addi	$t0,$0,0
+		sw		$t0,0($s2)
+		addi	$s2,$s2,4
+		jr		$31
+	SKIP2:
+	addi	$s0,$s0,1
+	j		LOOP_BGEIN3
+END_LOOP3:
+
+j		LOOP_BGEINN1
+
+PRINTN11:
+	addi	$a0,$31,0
+	addi	$t0,$0,-1
+	sw		$t0,0($s2)
+	addi	$s2,$s2,4
+	jr		$a0
+PRINTN12:
+	addi	$a0,$31,0
+	addi	$t0,$0,0
+	sw		$t0,0($s2)
+	addi	$s2,$s2,4
+	jr		$a0
+PRINTN13:
+	addi	$a0,$31,0
+	addi	$t0,$0,1
+	sw		$t0,0($s2)
+	addi	$s2,$s2,4
+	jr		$a0
+
+addi	$s0,$0,0
+
+LOOP_BGEINN1:
+	beq		$s0,$s1,END_LOOPN1
+	slti	$t0,$s0,30
+	beq		$t0,$0,UPPERN1
+	slti	$t0,$s0,10
+	beq		$t0,$0,MIDN1
+	LOWERN1:
+		jal		PRINTN11
+		j		OUTN1
+	MIDN1:
+		jal		PRINTN12
+		j		OUTN1
+	UPPERN1:
+		jal		PRINTN13
+		j		OUTN1
+	OUTN1:
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	addi	$s0,$s0,1
+	j		LOOP_BGEINN1
+END_LOOPN1:
+
+addi	$s0,$0,0
+
+LOOP_BGEINN2:
+	beq		$s0,$s1,END_LOOPN2
+	slti	$t0,$s0,30
+	beq		$t0,$0,UPPERN2
+	slti	$t0,$s0,10
+	beq		$t0,$0,MIDN2
+	LOWERN2:
+		jal		PRINTN21
+		j		OUTN2
+	MIDN2:
+		jal		PRINTN22
+		j		OUTN2
+	UPPERN2:
+		jal		PRINTN23
+		j		OUTN2
+	OUTN2:
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	addi	$s0,$s0,1
+	j		LOOP_BGEINN2
+END_LOOPN2:
+	j		TESTN3
+
+PRINTN21:
+	addi	$a0,$31,0
+	addi	$t0,$0,-1
+	sw		$t0,0($s2)
+	addi	$s2,$s2,4
+	jr		$a0
+PRINTN22:
+	addi	$a0,$31,0
+	addi	$t0,$0,0
+	sw		$t0,0($s2)
+	addi	$s2,$s2,4
+	jr		$a0
+PRINTN23:
+	addi	$a0,$31,0
+	addi	$t0,$0,1
+	sw		$t0,0($s2)
+	addi	$s2,$s2,4
+	jr		$a0
+
+TESTN3:
+
+addi	$s0,$0,0
+
+LOOP_BGEINN3:
+	beq		$s0,$s1,END_LOOPN3
+	slti	$t0,$s0,30
+	j		SKIPN1
+	PRINTN31:
+		addi	$a0,$31,0
+		addi	$t0,$0,-1
+		sw		$t0,0($s2)
+		addi	$s2,$s2,4
+		jr		$a0
+	SKIPN1:
+	beq		$t0,$0,UPPERN3
+	slti	$t0,$s0,10
+	beq		$t0,$0,MIDN3
+	LOWERN3:
+		jal		PRINTN31
+		j		SKIPN3
+		PRINTN33:
+			addi	$a0,$31,0
+			addi	$t0,$0,1
+			sw		$t0,0($s2)
+			addi	$s2,$s2,4
+			jr		$a0
+		SKIPN3:
+		j		OUTN3
+	MIDN3:
+		jal		PRINTN32
+		j		OUTN3
+	UPPERN3:
+		jal		PRINTN33
+		j		OUTN3
+	OUTN3:
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		SKIPN2
+	PRINTN32:
+		addi	$a0,$31,0
+		addi	$t0,$0,0
+		sw		$t0,0($s2)
+		addi	$s2,$s2,4
+		jr		$a0
+	SKIPN2:
+	addi	$s0,$s0,1
+	j		LOOP_BGEINN3
+END_LOOPN3:
+
+addi	$t2,$0,2222
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addi	$t2,$0,3333
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addi	$t2,$0,4444
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+------------------------------------------------
+li		$t2,80
+sw		$t2,0($0)
+li		$t2,-10
+sw		$t2,4($0)
+li		$t2,-9
+sw		$t2,8($0)
+li		$t2,-8
+sw		$t2,12($0)
+li		$t2,-7
+sw		$t2,16($0)
+li		$t2,-6
+sw		$t2,20($0)
+li		$t2,-5
+sw		$t2,24($0)
+li		$t2,-4
+sw		$t2,28($0)
+li		$t2,-3
+sw		$t2,32($0)
+li		$t2,-2
+sw		$t2,36($0)
+li		$t2,-1
+sw		$t2,40($0)
+li		$t2,0
+sw		$t2,44($0)
+li		$t2,1
+sw		$t2,48($0)
+li		$t2,2
+sw		$t2,52($0)
+li		$t2,3
+sw		$t2,56($0)
+li		$t2,4
+sw		$t2,60($0)
+li		$t2,5
+sw		$t2,64($0)
+li		$t2,6
+sw		$t2,68($0)
+li		$t2,7
+sw		$t2,72($0)
+li		$t2,8
+sw		$t2,76($0)
+li		$t2,9
+sw		$t2,80($0)
+li		$t2,10
+sw		$t2,84($0)
+
+#--------------------------------------------
+
+addi	$1,$1,23333
+addi	$2,$2,23333
+addi	$3,$3,23333
+addi	$4,$4,23333
+addi	$5,$5,23333
+addi	$6,$6,23333
+addi	$7,$7,23333
+addi	$8,$8,23333
+addi	$9,$9,23333
+addi	$10,$10,23333
+addi	$11,$11,23333
+addi	$12,$12,23333
+addi	$13,$13,23333
+addi	$14,$14,23333
+addi	$15,$15,23333
+addi	$16,$16,23333
+addi	$17,$17,23333
+addi	$18,$18,23333
+addi	$19,$19,23333
+addi	$20,$20,23333
+addi	$21,$21,23333
+addi	$22,$22,23333
+addi	$23,$23,23333
+addi	$24,$24,23333
+addi	$25,$25,23333
+addi	$26,$26,23333
+addi	$27,$27,23333
+addi	$28,$28,23333
+addi	$29,$29,23333
+addi	$30,$30,23333
+addi	$31,$31,23333
+
+addi	$s0,$0,0
+addi	$s2,$0,0
+addi	$s1,$0,40
+
+LOOP_BGEIN1:
+	beq		$s0,$s1,END_LOOP1
+	slti	$t0,$s0,30
+	beq		$t0,$0,UPPER1
+	slti	$t0,$s0,10
+	beq		$t0,$0,MID1
+	LOWER1:
+		addi	$t0,$0,-1
+		sw		$t0,0($s2)
+		addi	$s2,$s2,4
+		j		OUT1
+	MID1:
+		addi	$t0,$0,0
+		sw		$t0,0($s2)
+		addi	$s2,$s2,4
+		j		OUT1
+	UPPER1:
+		addi	$t0,$0,1
+		sw		$t0,0($s2)
+		addi	$s2,$s2,4
+	OUT1:
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	addi	$s0,$s0,1
+	j 		LOOP_BGEIN1
+
+END_LOOP1:
+
+addi	$s1,$0,40
+addi	$s0,$0,0
+
+LOOP_BGEIN2:
+	beq		$s0,$s1,END_LOOP2
+	slti	$t0,$s0,10
+	bne		$t0,$0,LOWER2
+	slti	$t0,$s0,30
+	bne		$t0,$0,MID2
+	UPPER2:
+		addi	$t0,$0,1
+		sw		$t0,0($s2)
+		addi	$s2,$s2,4
+		j		OUT2
+	MID2:
+		addi	$t0,$0,0
+		sw		$t0,0($s2)
+		addi	$s2,$s2,4
+		j		OUT2
+	LOWER2:
+		addi	$t0,$0,-1
+		sw		$t0,0($s2)
+		addi	$s2,$s2,4
+	OUT2:
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	addi	$s0,$s0,1
+	j 		LOOP_BGEIN2
+
+END_LOOP2:
+
+addi	$s0,$0,1
+addi	$s1,$0,1
+beq		$s0,$s1,FLASE1
+
+FRUE1:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		NEXT1
+FLASE1:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+NEXT1:
+
+addi	$s0,$0,1
+addi	$s1,$0,2
+beq		$s0,$s1,FLASE2
+
+FRUE2:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		NEXT2
+FLASE2:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+NEXT2:
+
+addi	$s0,$0,-1
+addi	$s1,$0,-1
+beq		$s0,$s1,FLASE3
+
+FRUE3:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		NEXT3
+FLASE3:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+NEXT3:
+
+addi	$s0,$0,-2
+addi	$s1,$0,-3
+beq		$s0,$s1,FLASE4
+
+FRUE4:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		NEXT4
+FLASE4:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+NEXT4:
+
+addi	$s0,$0,1
+addi	$s1,$0,-1
+beq		$s0,$s1,FLASE5
+
+FRUE5:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		NEXT5
+FLASE5:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+NEXT5:
+
+addi	$s0,$0,-1
+addi	$s1,$0,1
+beq		$s0,$s1,FLASE6
+
+FRUE6:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		NEXT6
+FLASE6:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+NEXT6:
+
+addi	$s0,$0,0
+addi	$s1,$0,1
+beq		$s0,$s1,FLASE7
+
+FRUE7:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		NEXT7
+FLASE7:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+NEXT7:
+
+addi	$s0,$0,0
+addi	$s1,$0,-1
+beq		$s0,$s1,FLASE8
+
+FRUE8:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		NEXT8
+FLASE8:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+NEXT8:
+
+addi	$s0,$0,1
+addi	$s1,$0,0
+beq		$s0,$s1,FLASE9
+
+FRUE9:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		NEXT9
+FLASE9:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+NEXT9:
+
+addi	$s0,$0,-1
+addi	$s1,$0,0
+beq		$s0,$s1,FLASE10
+
+FRUE10:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		NEXT10
+FLASE10:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+NEXT10:
+
+addi	$s0,$0,0
+addi	$s1,$0,0
+beq		$s0,$s1,FLASE11
+
+FRUE11:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		NEXT11
+FLASE11:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+NEXT11:
+
+#-------------------------------
+
+addi	$s0,$0,1
+addi	$s1,$0,1
+bne		$s0,$s1,NFLASE1
+
+NFRUE1:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		NNEXT1
+NFLASE1:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+NNEXT1:
+
+addi	$s0,$0,1
+addi	$s1,$0,2
+bne		$s0,$s1,NFLASE2
+
+NFRUE2:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		NNEXT2
+NFLASE2:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+NNEXT2:
+
+addi	$s0,$0,-1
+addi	$s1,$0,-1
+bne		$s0,$s1,NFLASE3
+
+NFRUE3:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		NNEXT3
+NFLASE3:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+NNEXT3:
+
+addi	$s0,$0,-2
+addi	$s1,$0,-3
+bne		$s0,$s1,NFLASE4
+
+NFRUE4:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		NNEXT4
+NFLASE4:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+NNEXT4:
+
+addi	$s0,$0,1
+addi	$s1,$0,-1
+bne		$s0,$s1,NFLASE5
+
+NFRUE5:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		NNEXT5
+NFLASE5:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+NNEXT5:
+
+addi	$s0,$0,-1
+addi	$s1,$0,1
+bne		$s0,$s1,NFLASE6
+
+NFRUE6:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		NNEXT6
+NFLASE6:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+NNEXT6:
+
+addi	$s0,$0,0
+addi	$s1,$0,1
+bne		$s0,$s1,NFLASE7
+
+NFRUE7:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		NNEXT7
+NFLASE7:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+NNEXT7:
+
+addi	$s0,$0,0
+addi	$s1,$0,-1
+bne		$s0,$s1,NFLASE8
+
+NFRUE8:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		NNEXT8
+NFLASE8:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+NNEXT8:
+
+addi	$s0,$0,1
+addi	$s1,$0,0
+bne		$s0,$s1,NFLASE9
+
+NFRUE9:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		NNEXT9
+NFLASE9:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+NNEXT9:
+
+addi	$s0,$0,-1
+addi	$s1,$0,0
+bne		$s0,$s1,NFLASE10
+
+NFRUE10:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		NNEXT10
+NFLASE10:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+NNEXT10:
+
+addi	$s0,$0,0
+addi	$s1,$0,0
+bne		$s0,$s1,NFLASE11
+
+NFRUE11:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		NNEXT11
+NFLASE11:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+NNEXT11:
+
+#-------------------------------
+
+addi	$s0,$0,1
+bgtz	$s0,GTFLASE1
+
+GTFRUE1:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		GTNEXT1
+GTFLASE1:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+GTNEXT1:
+
+addi	$s0,$0,-1
+bgtz	$s0,GTFLASE2
+
+GTFRUE2:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		GTNEXT2
+GTFLASE2:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+GTNEXT2:
+
+addi	$s0,$0,32767
+bgtz	$s0,GTFLASE3
+
+GTFRUE3:
+	addi	$s0,$0,-32768
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		GTNEXT3
+GTFLASE3:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+GTNEXT3:
+
+addi	$s0,$0,2315
+bgtz	$s0,GTFLASE4
+
+GTFRUE4:
+	addi	$s0,$0,-4523
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		GTNEXT4
+GTFLASE4:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+GTNEXT4:
+
+addi	$s0,$0,0
+bgtz	$s0,GTFLASE5
+
+GTFRUE5:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		GTNEXT5
+GTFLASE5:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+GTNEXT5:
+
+#-------------------------------
+
+addi	$s0,$0,1
+bgez	$s0,GEFLASE1
+
+GEFRUE1:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		GENEXT1
+GEFLASE1:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+GENEXT1:
+
+addi	$s0,$0,-1
+bgez	$s0,GEFLASE2
+
+GEFRUE2:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		GENEXT2
+GEFLASE2:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+GENEXT2:
+
+addi	$s0,$0,32767
+bgez	$s0,GEFLASE3
+
+GEFRUE3:
+	addi	$s0,$0,-32768
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		GENEXT3
+GEFLASE3:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+GENEXT3:
+
+addi	$s0,$0,2315
+bgez	$s0,GEFLASE4
+
+GEFRUE4:
+	addi	$s0,$0,-4523
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		GENEXT4
+GEFLASE4:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+GENEXT4:
+
+addi	$s0,$0,0
+bgez	$s0,GEFLASE5
+
+GEFRUE5:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		GENEXT5
+GEFLASE5:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+GENEXT5:
+
+#-------------------------------
+
+addi	$s0,$0,1
+bltz	$s0,LTFLASE1
+
+LTFRUE1:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		LTNEXT1
+LTFLASE1:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+LTNEXT1:
+
+addi	$s0,$0,-1
+bltz	$s0,LTFLASE2
+
+LTFRUE2:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		LTNEXT2
+LTFLASE2:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+LTNEXT2:
+
+addi	$s0,$0,32767
+bltz	$s0,LTFLASE3
+
+LTFRUE3:
+	addi	$s0,$0,-32768
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		LTNEXT3
+LTFLASE3:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+LTNEXT3:
+
+addi	$s0,$0,2315
+bltz	$s0,LTFLASE4
+
+LTFRUE4:
+	addi	$s0,$0,-4523
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		LTNEXT4
+LTFLASE4:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+LTNEXT4:
+
+addi	$s0,$0,0
+bltz	$s0,LTFLASE5
+
+LTFRUE5:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		LTNEXT5
+LTFLASE5:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+LTNEXT5:
+
+#-------------------------------
+
+addi	$s0,$0,1
+blez	$s0,LEFLASE1
+
+LEFRUE1:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		LENEXT1
+LEFLASE1:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+LENEXT1:
+
+addi	$s0,$0,-1
+blez	$s0,LEFLASE2
+
+LEFRUE2:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		LENEXT2
+LEFLASE2:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+LENEXT2:
+
+addi	$s0,$0,32767
+blez	$s0,LEFLASE3
+
+LEFRUE3:
+	addi	$s0,$0,-32768
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		LENEXT3
+LEFLASE3:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+LENEXT3:
+
+addi	$s0,$0,2315
+blez	$s0,LEFLASE4
+
+LEFRUE4:
+	addi	$s0,$0,-4523
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		LENEXT4
+LEFLASE4:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+LENEXT4:
+
+addi	$s0,$0,0
+blez	$s0,LEFLASE5
+
+LEFRUE5:
+	addi	$s0,$0,1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+	j		LENEXT5
+LEFLASE5:
+	addi	$s0,$0,-1
+	sw		$s0,0($s2)
+	addi	$s2,$s2,4
+LENEXT5:
+
+addi	$t2,$0,2222
+sw		$t2,0($s2)
+addi	$s2,$s2,4
+addi	$t2,$0,3333
+sw		$t2,0($s2)
+addi	$s2,$s2,4
+addi	$t2,$0,4444
+sw		$t2,0($s2)
+addi	$s2,$s2,4
+
+------------------------------------------------
+li		$t2,80
+sw		$t2,0($0)
+li		$t2,111
+sw		$t2,4($0)
+li		$t2,222
+sw		$t2,8($0)
+li		$t2,-2147483648
+sw		$t2,12($0)
+li		$t2,-444
+sw		$t2,16($0)
+li		$t2,2147483647
+sw		$t2,20($0)
+li		$t2,-666
+sw		$t2,24($0)
+li		$t2,-1
+sw		$t2,28($0)
+li		$t2,1
+sw		$t2,32($0)
+li		$t2,0
+sw		$t2,36($0)
+li		$t2,0
+sw		$t2,40($0)
+li		$t2,2147483647
+sw		$t2,44($0)
+li		$t2,0
+sw		$t2,48($0)
+
+#--------------------------------------
+
+addi	$1,$1,23333
+addi	$2,$2,23333
+addi	$3,$3,23333
+addi	$4,$4,23333
+addi	$5,$5,23333
+addi	$6,$6,23333
+addi	$7,$7,23333
+addi	$8,$8,23333
+addi	$9,$9,23333
+addi	$10,$10,23333
+addi	$11,$11,23333
+addi	$12,$12,23333
+addi	$13,$13,23333
+addi	$14,$14,23333
+addi	$15,$15,23333
+addi	$16,$16,23333
+addi	$17,$17,23333
+addi	$18,$18,23333
+addi	$19,$19,23333
+addi	$20,$20,23333
+addi	$21,$21,23333
+addi	$22,$22,23333
+addi	$23,$23,23333
+addi	$24,$24,23333
+addi	$25,$25,23333
+addi	$26,$26,23333
+addi	$27,$27,23333
+addi	$28,$28,23333
+addi	$29,$29,23333
+addi	$30,$30,23333
+addi	$31,$31,23333
+
+addi	$s0,$0,0
+lw		$s1,0($s0)
+addi	$s0,$s0,4
+
+#--------------------------------------
+lw		$t0,0($s0)
+addi	$s0,$s0,4
+lw		$t1,0($s0)
+addi	$s0,$s0,4
+
+addu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+subu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+and		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+or		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+slt		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+xor		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+nor		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sllv	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+srlv	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+srav	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sltu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#--------------------------------------
+lw		$t0,0($s0)
+addi	$s0,$s0,4
+lw		$t1,0($s0)
+addi	$s0,$s0,4
+
+addu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+subu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+and		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+or		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+slt		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+xor		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+nor		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sllv	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+srlv	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+srav	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sltu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#--------------------------------------
+lw		$t0,0($s0)
+addi	$s0,$s0,4
+lw		$t1,0($s0)
+addi	$s0,$s0,4
+
+addu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+subu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+and		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+or		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+slt		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+xor		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+nor		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sllv	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+srlv	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+srav	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sltu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#--------------------------------------
+lw		$t0,0($s0)
+addi	$s0,$s0,4
+lw		$t1,0($s0)
+addi	$s0,$s0,4
+
+addu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+subu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+and		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+or		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+slt		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+xor		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+nor		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sllv	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+srlv	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+srav	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sltu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#--------------------------------------
+lw		$t0,0($s0)
+addi	$s0,$s0,4
+lw		$t1,0($s0)
+addi	$s0,$s0,4
+
+addu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+subu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+and		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+or		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+slt		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+xor		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+nor		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sllv	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+srlv	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+srav	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sltu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#--------------------------------------
+lw		$t0,0($s0)
+addi	$s0,$s0,4
+lw		$t1,0($s0)
+addi	$s0,$s0,4
+
+addu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+subu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+and		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+or		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+slt		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+xor		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+nor		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sllv	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+srlv	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+srav	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sltu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t2,$0,2222
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addi	$t2,$0,3333
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addi	$t2,$0,4444
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+------------------------------------------------
+li		$t2,80
+sw		$t2,0($0)
+li		$t2,-1
+sw		$t2,4($0)
+li		$t2,0
+sw		$t2,8($0)
+li		$t2,0
+sw		$t2,12($0)
+li		$t2,32564
+sw		$t2,16($0)
+li		$t2,0
+sw		$t2,20($0)
+li		$t2,-56764
+sw		$t2,24($0)
+li		$t2,111
+sw		$t2,28($0)
+li		$t2,222
+sw		$t2,32($0)
+li		$t2,-333
+sw		$t2,36($0)
+li		$t2,-444
+sw		$t2,40($0)
+li		$t2,3424232
+sw		$t2,44($0)
+li		$t2,-356764
+sw		$t2,48($0)
+li		$t2,-1
+sw		$t2,52($0)
+li		$t2,1
+sw		$t2,56($0)
+li		$t2,0
+sw		$t2,60($0)
+li		$t2,0
+sw		$t2,64($0)
+li		$t2,2345
+sw		$t2,68($0)
+li		$t2,0
+sw		$t2,72($0)
+
+#--------------------------------------
+
+addi	$1,$1,23333
+addi	$2,$2,23333
+addi	$3,$3,23333
+addi	$4,$4,23333
+addi	$5,$5,23333
+addi	$6,$6,23333
+addi	$7,$7,23333
+addi	$8,$8,23333
+addi	$9,$9,23333
+addi	$10,$10,23333
+addi	$11,$11,23333
+addi	$12,$12,23333
+addi	$13,$13,23333
+addi	$14,$14,23333
+addi	$15,$15,23333
+addi	$16,$16,23333
+addi	$17,$17,23333
+addi	$18,$18,23333
+addi	$19,$19,23333
+addi	$20,$20,23333
+addi	$21,$21,23333
+addi	$22,$22,23333
+addi	$23,$23,23333
+addi	$24,$24,23333
+addi	$25,$25,23333
+addi	$26,$26,23333
+addi	$27,$27,23333
+addi	$28,$28,23333
+addi	$29,$29,23333
+addi	$30,$30,23333
+addi	$31,$31,23333
+
+addi	$s0,$0,0
+lw		$s1,0($s0)
+addi	$s0,$s0,4
+
+#--------------------------------------
+lw		$t0,0($s0)
+addi	$s0,$s0,4
+lw		$t1,0($s0)
+addi	$s0,$s0,4
+
+add		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sub		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+subu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+and		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+or		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+slt		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+xor		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+nor		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sllv	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+srlv	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+srav	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sltu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#--------------------------------------
+lw		$t0,0($s0)
+addi	$s0,$s0,4
+lw		$t1,0($s0)
+addi	$s0,$s0,4
+
+add		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sub		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+subu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+and		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+or		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+slt		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+xor		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+nor		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sllv	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+srlv	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+srav	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sltu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#--------------------------------------
+lw		$t0,0($s0)
+addi	$s0,$s0,4
+lw		$t1,0($s0)
+addi	$s0,$s0,4
+
+add		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sub		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+subu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+subu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+and		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+and		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+or		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+or		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+slt		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+slt		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+xor		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+xor		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+nor		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+nor		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sllv	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sllv	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+srlv	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srlv	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+srav	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+srav	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sltu	$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sltu	$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#--------------------------------------
+lw		$t0,0($s0)
+addi	$s0,$s0,4
+lw		$t1,0($s0)
+addi	$s0,$s0,4
+
+add		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sub		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#--------------------------------------
+lw		$t0,0($s0)
+addi	$s0,$s0,4
+lw		$t1,0($s0)
+addi	$s0,$s0,4
+
+add		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sub		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#--------------------------------------
+lw		$t0,0($s0)
+addi	$s0,$s0,4
+lw		$t1,0($s0)
+addi	$s0,$s0,4
+
+add		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sub		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#--------------------------------------
+lw		$t0,0($s0)
+addi	$s0,$s0,4
+lw		$t1,0($s0)
+addi	$s0,$s0,4
+
+add		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sub		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#--------------------------------------
+lw		$t0,0($s0)
+addi	$s0,$s0,4
+lw		$t1,0($s0)
+addi	$s0,$s0,4
+
+add		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sub		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#--------------------------------------
+lw		$t0,0($s0)
+addi	$s0,$s0,4
+lw		$t1,0($s0)
+addi	$s0,$s0,4
+
+add		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+add		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+sub		$t2,$t0,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t1,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t0,$t0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+sub		$t2,$t1,$t1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t2,$0,2222
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addi	$t2,$0,3333
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addi	$t2,$0,4444
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+------------------------------------------------
+li		$t2,80
+sw		$t2,0($0)
+li		$t2,-10
+sw		$t2,4($0)
+li		$t2,-9
+sw		$t2,8($0)
+li		$t2,-8
+sw		$t2,12($0)
+li		$t2,-7
+sw		$t2,16($0)
+li		$t2,-6
+sw		$t2,20($0)
+li		$t2,-5
+sw		$t2,24($0)
+li		$t2,-4
+sw		$t2,28($0)
+li		$t2,-3
+sw		$t2,32($0)
+li		$t2,-2
+sw		$t2,36($0)
+li		$t2,-1
+sw		$t2,40($0)
+li		$t2,0
+sw		$t2,44($0)
+li		$t2,1
+sw		$t2,48($0)
+li		$t2,2
+sw		$t2,52($0)
+li		$t2,3
+sw		$t2,56($0)
+li		$t2,4
+sw		$t2,60($0)
+li		$t2,5
+sw		$t2,64($0)
+li		$t2,6
+sw		$t2,68($0)
+li		$t2,7
+sw		$t2,72($0)
+li		$t2,8
+sw		$t2,76($0)
+li		$t2,9
+sw		$t2,80($0)
+li		$t2,10
+sw		$t2,84($0)
+li		$t2,2147483647
+sw		$t2,88($0)
+li		$t2,-2147483648
+sw		$t2,92($0)
+
+#-----------------------------------------
+
+addi	$1,$1,23333
+addi	$2,$2,23333
+addi	$3,$3,23333
+addi	$4,$4,23333
+addi	$5,$5,23333
+addi	$6,$6,23333
+addi	$7,$7,23333
+addi	$8,$8,23333
+addi	$9,$9,23333
+addi	$10,$10,23333
+addi	$11,$11,23333
+addi	$12,$12,23333
+addi	$13,$13,23333
+addi	$14,$14,23333
+addi	$15,$15,23333
+addi	$16,$16,23333
+addi	$17,$17,23333
+addi	$18,$18,23333
+addi	$19,$19,23333
+addi	$20,$20,23333
+addi	$21,$21,23333
+addi	$22,$22,23333
+addi	$23,$23,23333
+addi	$24,$24,23333
+addi	$25,$25,23333
+addi	$26,$26,23333
+addi	$27,$27,23333
+addi	$28,$28,23333
+addi	$29,$29,23333
+addi	$30,$30,23333
+addi	$31,$31,23333
+
+addi	$s0,$0,100
+addi	$s2,$0,0
+addi	$s1,$0,96
+
+LOOP_BEGIN1:
+	beq 	$s2,$s1,END_LOOP1
+	lw		$t0,0($s2)
+	sw		$t0,0($s0)
+	addi	$s0,$s0,4
+	addi	$s2,$s2,4
+	j		LOOP_BEGIN1
+END_LOOP1:
+
+addi	$s2,$0,0
+addi	$s1,$0,96
+
+LOOP_BEGIN2:
+	beq 	$s2,$s1,END_LOOP2
+	lh		$t0,0($s2)
+	sw		$t0,0($s0)
+	addi	$s0,$s0,4
+	addi	$s2,$s2,2
+	j		LOOP_BEGIN2
+END_LOOP2:
+
+addi	$s2,$0,0
+addi	$s1,$0,96
+
+LOOP_BEGIN3:
+	beq 	$s2,$s1,END_LOOP3
+	lhu		$t0,0($s2)
+	sw		$t0,0($s0)
+	addi	$s0,$s0,4
+	addi	$s2,$s2,2
+	j		LOOP_BEGIN3
+END_LOOP3:
+
+addi	$s2,$0,0
+addi	$s1,$0,96
+
+LOOP_BEGIN4:
+	beq 	$s2,$s1,END_LOOP4
+	lb		$t0,0($s2)
+	sw		$t0,0($s0)
+	addi	$s0,$s0,4
+	addi	$s2,$s2,1
+	j		LOOP_BEGIN4
+END_LOOP4:
+
+addi	$s2,$0,0
+addi	$s1,$0,96
+
+LOOP_BEGIN5:
+	beq 	$s2,$s1,END_LOOP5
+	lbu		$t0,0($s2)
+	sw		$t0,0($s0)
+	addi	$s0,$s0,4
+	addi	$s2,$s2,1
+	j		LOOP_BEGIN5
+END_LOOP5:
+
+addi	$s2,$0,4
+addi	$s1,$0,96
+
+LOOP_BEGINA1:
+	beq 	$s2,$s1,END_LOOPA1
+	lw		$t0,-4($s2)
+	sw		$t0,0($s0)
+	addi	$s0,$s0,4
+	addi	$s2,$s2,4
+	j		LOOP_BEGINA1
+END_LOOPA1:
+
+addi	$s2,$0,6
+addi	$s1,$0,96
+
+LOOP_BEGINA2:
+	beq 	$s2,$s1,END_LOOPA2
+	lh		$t0,-6($s2)
+	sw		$t0,0($s0)
+	addi	$s0,$s0,4
+	addi	$s2,$s2,2
+	j		LOOP_BEGINA2
+END_LOOPA2:
+
+addi	$s2,$0,2
+addi	$s1,$0,96
+
+LOOP_BEGINA3:
+	beq 	$s2,$s1,END_LOOPA3
+	lhu		$t0,-2($s2)
+	sw		$t0,0($s0)
+	addi	$s0,$s0,4
+	addi	$s2,$s2,2
+	j		LOOP_BEGINA3
+END_LOOPA3:
+
+addi	$s2,$0,5
+addi	$s1,$0,96
+
+LOOP_BEGINA4:
+	beq 	$s2,$s1,END_LOOPA4
+	lb		$t0,-5($s2)
+	sw		$t0,0($s0)
+	addi	$s0,$s0,4
+	addi	$s2,$s2,1
+	j		LOOP_BEGINA4
+END_LOOPA4:
+
+addi	$s2,$0,3
+addi	$s1,$0,96
+
+LOOP_BEGINA5:
+	beq 	$s2,$s1,END_LOOPA5
+	lbu		$t0,-3($s2)
+	sw		$t0,0($s0)
+	addi	$s0,$s0,4
+	addi	$s2,$s2,1
+	j		LOOP_BEGINA5
+END_LOOPA5:
+
+addi	$s2,$0,-4
+addi	$s1,$0,96
+
+LOOP_BEGINS1:
+	beq 	$s2,$s1,END_LOOPS1
+	lw		$t0,4($s2)
+	sw		$t0,0($s0)
+	addi	$s0,$s0,4
+	addi	$s2,$s2,4
+	j		LOOP_BEGINS1
+END_LOOPS1:
+
+addi	$s2,$0,-6
+addi	$s1,$0,96
+
+LOOP_BEGINS2:
+	beq 	$s2,$s1,END_LOOPS2
+	lh		$t0,6($s2)
+	sw		$t0,0($s0)
+	addi	$s0,$s0,4
+	addi	$s2,$s2,2
+	j		LOOP_BEGINS2
+END_LOOPS2:
+
+addi	$s2,$0,-2
+addi	$s1,$0,96
+
+LOOP_BEGINS3:
+	beq 	$s2,$s1,END_LOOPS3
+	lhu		$t0,2($s2)
+	sw		$t0,0($s0)
+	addi	$s0,$s0,4
+	addi	$s2,$s2,2
+	j		LOOP_BEGINS3
+END_LOOPS3:
+
+addi	$s2,$0,-5
+addi	$s1,$0,96
+
+LOOP_BEGINS4:
+	beq 	$s2,$s1,END_LOOPS4
+	lb		$t0,5($s2)
+	sw		$t0,0($s0)
+	addi	$s0,$s0,4
+	addi	$s2,$s2,1
+	j		LOOP_BEGINS4
+END_LOOPS4:
+
+addi	$s2,$0,-3
+addi	$s1,$0,96
+
+LOOP_BEGINS5:
+	beq 	$s2,$s1,END_LOOPS5
+	lbu		$t0,3($s2)
+	sw		$t0,0($s0)
+	addi	$s0,$s0,4
+	addi	$s2,$s2,1
+	j		LOOP_BEGINS5
+END_LOOPS5:
+
+#-----------------------------------------
+
+addi	$s2,$0,0
+addi	$s1,$0,96
+addi	$s0,$s0,8
+
+LOOP_BEGIN6:
+	beq 	$s2,$s1,END_LOOP6
+	lw		$t0,0($s2)
+	sw		$t0,-4($s0)
+	addi	$s0,$s0,4
+	sw		$t0,0($s0)
+	addi	$s0,$s0,4
+	sw		$t0,4($s0)
+	addi	$s0,$s0,4
+	addi	$s2,$s2,4
+	j		LOOP_BEGIN6
+END_LOOP6:
+
+addi	$s2,$0,0
+addi	$s1,$0,96
+addi	$s0,$s0,8
+
+LOOP_BEGIN7:
+	beq 	$s2,$s1,END_LOOP7
+	lw		$t0,0($s2)
+	sh		$t0,-6($s0)
+	addi	$s0,$s0,4
+	sh		$t0,-4($s0)
+	addi	$s0,$s0,4
+	sh		$t0,-2($s0)
+	addi	$s0,$s0,4
+	sh		$t0,0($s0)
+	addi	$s0,$s0,4
+	sh		$t0,2($s0)
+	addi	$s0,$s0,4
+	sh		$t0,4($s0)
+	addi	$s0,$s0,4
+	sh		$t0,6($s0)
+	addi	$s0,$s0,4
+	addi	$s2,$s2,4
+	j		LOOP_BEGIN7
+END_LOOP7:
+
+addi	$s2,$0,0
+addi	$s1,$0,96
+addi	$s0,$s0,8
+
+LOOP_BEGIN8:
+	beq 	$s2,$s1,END_LOOP8
+	lw		$t0,0($s2)
+	sb		$t0,-5($s0)
+	addi	$s0,$s0,4
+	sb		$t0,-4($s0)
+	addi	$s0,$s0,4
+	sb		$t0,-3($s0)
+	addi	$s0,$s0,4
+	sb		$t0,-2($s0)
+	addi	$s0,$s0,4
+	sb		$t0,-1($s0)
+	addi	$s0,$s0,4
+	sb		$t0,0($s0)
+	addi	$s0,$s0,4
+	sb		$t0,1($s0)
+	addi	$s0,$s0,4
+	sb		$t0,2($s0)
+	addi	$s0,$s0,4
+	sb		$t0,3($s0)
+	addi	$s0,$s0,4
+	sb		$t0,4($s0)
+	addi	$s0,$s0,4
+	sb		$t0,5($s0)
+	addi	$s0,$s0,4
+	addi	$s2,$s2,4
+	j		LOOP_BEGIN8
+END_LOOP8:
+
+addi	$t2,$0,2222
+sw		$t2,0($s0)
+addi	$s0,$s0,4
+addi	$t2,$0,3333
+sw		$t2,0($s0)
+addi	$s0,$s0,4
+addi	$t2,$0,4444
+sw		$t2,0($s0)
+addi	$s0,$s0,4
+
+------------------------------------------------
+addi	$1,$1,23333
+addi	$2,$2,23333
+addi	$3,$3,23333
+addi	$4,$4,23333
+addi	$5,$5,23333
+addi	$6,$6,23333
+addi	$7,$7,23333
+addi	$8,$8,23333
+addi	$9,$9,23333
+addi	$10,$10,23333
+addi	$11,$11,23333
+addi	$12,$12,23333
+addi	$13,$13,23333
+addi	$14,$14,23333
+addi	$15,$15,23333
+addi	$16,$16,23333
+addi	$17,$17,23333
+addi	$18,$18,23333
+addi	$19,$19,23333
+addi	$20,$20,23333
+addi	$21,$21,23333
+addi	$22,$22,23333
+addi	$23,$23,23333
+addi	$24,$24,23333
+addi	$25,$25,23333
+addi	$26,$26,23333
+addi	$27,$27,23333
+addi	$28,$28,23333
+addi	$29,$29,23333
+addi	$30,$30,23333
+addi	$31,$31,23333
+
+addi	$s1,$0,0
+
+addi	$t1,$0,0
+andi	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+andi	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+andi	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+andi	$t2,$t1,2147483647
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+andi	$t2,$t1,-2147483648
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+andi	$t2,$t1,134325
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+andi	$t2,$t1,-52435523
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+andi	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+andi	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+andi	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+andi	$t2,$t1,2147483647
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+andi	$t2,$t1,-2147483648
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+andi	$t2,$t1,134325
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+andi	$t2,$t1,-52435523
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+andi	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+andi	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+andi	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+andi	$t2,$t1,2147483647
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+andi	$t2,$t1,-2147483648
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+andi	$t2,$t1,134325
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+andi	$t2,$t1,-52435523
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+andi	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+andi	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+andi	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+andi	$t2,$t1,2147483647
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+andi	$t2,$t1,-2147483648
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+andi	$t2,$t1,134325
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+andi	$t2,$t1,-52435523
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+andi	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+andi	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+andi	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+andi	$t2,$t1,2147483647
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+andi	$t2,$t1,-2147483648
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+andi	$t2,$t1,134325
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+andi	$t2,$t1,-52435523
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+andi	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+andi	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+andi	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+andi	$t2,$t1,2147483647
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+andi	$t2,$t1,-2147483648
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+andi	$t2,$t1,134325
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+andi	$t2,$t1,-52435523
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+andi	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+andi	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+andi	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+andi	$t2,$t1,2147483647
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+andi	$t2,$t1,-2147483648
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+andi	$t2,$t1,134325
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+andi	$t2,$t1,-52435523
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#-----------------------------------------
+
+addi	$t1,$0,0
+ori		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+ori		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+ori		$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+ori		$t2,$t1,2147483647
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+ori		$t2,$t1,-2147483648
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+ori		$t2,$t1,134325
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+ori		$t2,$t1,-52435523
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+ori		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+ori		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+ori		$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+ori		$t2,$t1,2147483647
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+ori		$t2,$t1,-2147483648
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+ori		$t2,$t1,134325
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+ori		$t2,$t1,-52435523
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+ori		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+ori		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+ori		$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+ori		$t2,$t1,2147483647
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+ori		$t2,$t1,-2147483648
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+ori		$t2,$t1,134325
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+ori		$t2,$t1,-52435523
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+ori		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+ori		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+ori		$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+ori		$t2,$t1,2147483647
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+ori		$t2,$t1,-2147483648
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+ori		$t2,$t1,134325
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+ori		$t2,$t1,-52435523
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+ori		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+ori		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+ori		$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+ori		$t2,$t1,2147483647
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+ori		$t2,$t1,-2147483648
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+ori		$t2,$t1,134325
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+ori		$t2,$t1,-52435523
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+ori		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+ori		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+ori		$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+ori		$t2,$t1,2147483647
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+ori		$t2,$t1,-2147483648
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+ori		$t2,$t1,134325
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+ori		$t2,$t1,-52435523
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+ori		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+ori		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+ori		$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+ori		$t2,$t1,2147483647
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+ori		$t2,$t1,-2147483648
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+ori		$t2,$t1,134325
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+ori		$t2,$t1,-52435523
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#-----------------------------------------
+
+addi	$t1,$0,-1
+addiu	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+addiu	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+addiu	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-32453245
+addiu	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,24535436
+addiu	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+addiu	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+addiu	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+addiu	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+addiu	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+addiu	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-32453245
+addiu	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,24535436
+addiu	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+addiu	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+addiu	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+addiu	$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+addiu	$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+addiu	$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-32453245
+addiu	$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,24535436
+addiu	$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+addiu	$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+addiu	$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#-----------------------------------------
+
+addi	$t1,$0,-1
+sll		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+sll		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+sll		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-32453245
+sll		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,24535436
+sll		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+sll		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+sll		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+sll		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+sll		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+sll		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-32453245
+sll		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,24535436
+sll		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+sll		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+sll		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+sll		$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+sll		$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+sll		$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-32453245
+sll		$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,24535436
+sll		$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+sll		$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+sll		$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#-----------------------------------------
+
+addi	$t1,$0,-1
+srl		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+srl		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+srl		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-32453245
+srl		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,24535436
+srl		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+srl		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+srl		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+srl		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+srl		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+srl		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-32453245
+srl		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,24535436
+srl		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+srl		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+srl		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+srl		$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+srl		$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+srl		$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-32453245
+srl		$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,24535436
+srl		$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+srl		$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+srl		$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#-----------------------------------------
+
+addi	$t2,$0,2222
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addi	$t2,$0,3333
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addi	$t2,$0,4444
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+------------------------------------------------
+addi	$1,$1,23333
+addi	$2,$2,23333
+addi	$3,$3,23333
+addi	$4,$4,23333
+addi	$5,$5,23333
+addi	$6,$6,23333
+addi	$7,$7,23333
+addi	$8,$8,23333
+addi	$9,$9,23333
+addi	$10,$10,23333
+addi	$11,$11,23333
+addi	$12,$12,23333
+addi	$13,$13,23333
+addi	$14,$14,23333
+addi	$15,$15,23333
+addi	$16,$16,23333
+addi	$17,$17,23333
+addi	$18,$18,23333
+addi	$19,$19,23333
+addi	$20,$20,23333
+addi	$21,$21,23333
+addi	$22,$22,23333
+addi	$23,$23,23333
+addi	$24,$24,23333
+addi	$25,$25,23333
+addi	$26,$26,23333
+addi	$27,$27,23333
+addi	$28,$28,23333
+addi	$29,$29,23333
+addi	$30,$30,23333
+addi	$31,$31,23333
+
+addi	$s1,$0,0
+
+addi	$t1,$0,0
+xori	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+xori	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+xori	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+xori	$t2,$t1,2147483647
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+xori	$t2,$t1,-2147483648
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+xori	$t2,$t1,134325
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+xori	$t2,$t1,-52435523
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+xori	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+xori	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+xori	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+xori	$t2,$t1,2147483647
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+xori	$t2,$t1,-2147483648
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+xori	$t2,$t1,134325
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+xori	$t2,$t1,-52435523
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+xori	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+xori	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+xori	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+xori	$t2,$t1,2147483647
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+xori	$t2,$t1,-2147483648
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+xori	$t2,$t1,134325
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+xori	$t2,$t1,-52435523
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+xori	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+xori	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+xori	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+xori	$t2,$t1,2147483647
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+xori	$t2,$t1,-2147483648
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+xori	$t2,$t1,134325
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+xori	$t2,$t1,-52435523
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+xori	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+xori	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+xori	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+xori	$t2,$t1,2147483647
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+xori	$t2,$t1,-2147483648
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+xori	$t2,$t1,134325
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+xori	$t2,$t1,-52435523
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+xori	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+xori	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+xori	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+xori	$t2,$t1,2147483647
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+xori	$t2,$t1,-2147483648
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+xori	$t2,$t1,134325
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+xori	$t2,$t1,-52435523
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+xori	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+xori	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+xori	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+xori	$t2,$t1,2147483647
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+xori	$t2,$t1,-2147483648
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+xori	$t2,$t1,134325
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+xori	$t2,$t1,-52435523
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#-----------------------------------------
+
+addi	$t1,$0,0
+slti	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+slti	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+slti	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+slti	$t2,$t1,32767
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+slti	$t2,$t1,-32768
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+slti	$t2,$t1,13432
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+slti	$t2,$t1,-5243
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+slti	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+slti	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+slti	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+slti	$t2,$t1,32767
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+slti	$t2,$t1,-32768
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+slti	$t2,$t1,13432
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+slti	$t2,$t1,-5243
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+slti	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+slti	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+slti	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+slti	$t2,$t1,32767
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+slti	$t2,$t1,-32768
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+slti	$t2,$t1,13432
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+slti	$t2,$t1,-5243
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+slti	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+slti	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+slti	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+slti	$t2,$t1,32767
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+slti	$t2,$t1,-32768
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+slti	$t2,$t1,13432
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+slti	$t2,$t1,-5243
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+slti	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+slti	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+slti	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+slti	$t2,$t1,32767
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+slti	$t2,$t1,-32768
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+slti	$t2,$t1,13432
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+slti	$t2,$t1,-5243
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+slti	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+slti	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+slti	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+slti	$t2,$t1,32767
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+slti	$t2,$t1,-32768
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+slti	$t2,$t1,13432
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+slti	$t2,$t1,-5243
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+slti	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+slti	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+slti	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+slti	$t2,$t1,32767
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+slti	$t2,$t1,-32768
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+slti	$t2,$t1,13432
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+slti	$t2,$t1,-5243
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#-----------------------------------------
+
+addi	$t1,$0,0
+sltiu	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+sltiu	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+sltiu	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+sltiu	$t2,$t1,32767
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+sltiu	$t2,$t1,-32768
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+sltiu	$t2,$t1,13432
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+sltiu	$t2,$t1,-5243
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+sltiu	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+sltiu	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+sltiu	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+sltiu	$t2,$t1,32767
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+sltiu	$t2,$t1,-32768
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+sltiu	$t2,$t1,13432
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+sltiu	$t2,$t1,-5243
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+sltiu	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+sltiu	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+sltiu	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+sltiu	$t2,$t1,32767
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+sltiu	$t2,$t1,-32768
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+sltiu	$t2,$t1,13432
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+sltiu	$t2,$t1,-5243
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+sltiu	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+sltiu	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+sltiu	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+sltiu	$t2,$t1,32767
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+sltiu	$t2,$t1,-32768
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+sltiu	$t2,$t1,13432
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+sltiu	$t2,$t1,-5243
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+sltiu	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+sltiu	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+sltiu	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+sltiu	$t2,$t1,32767
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+sltiu	$t2,$t1,-32768
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+sltiu	$t2,$t1,13432
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+sltiu	$t2,$t1,-5243
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+sltiu	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+sltiu	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+sltiu	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+sltiu	$t2,$t1,32767
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+sltiu	$t2,$t1,-32768
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+sltiu	$t2,$t1,13432
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,134325
+sltiu	$t2,$t1,-5243
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+sltiu	$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+sltiu	$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+sltiu	$t2,$t1,-1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+sltiu	$t2,$t1,32767
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+sltiu	$t2,$t1,-32768
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+sltiu	$t2,$t1,13432
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-52435523
+sltiu	$t2,$t1,-5243
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#-----------------------------------------
+
+addi	$t1,$0,-1
+sra		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+sra		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+sra		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-32453245
+sra		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,24535436
+sra		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+sra		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+sra		$t2,$t1,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+sra		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+sra		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+sra		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-32453245
+sra		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,24535436
+sra		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+sra		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+sra		$t2,$t1,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-1
+sra		$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,0
+sra		$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,1
+sra		$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-32453245
+sra		$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,24535436
+sra		$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,2147483647
+sra		$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+addi	$t1,$0,-2147483648
+sra		$t2,$t1,8
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#-----------------------------------------
+
+lui		$t2,0
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+lui		$t2,1
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+lui		$t2,4365
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+lui		$t2,3647
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+lui		$t2,648
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+lui		$t2,15
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+lui		$t2,1243
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+#-----------------------------------------
+
+addi	$t2,$0,2222
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addi	$t2,$0,3333
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+addi	$t2,$0,4444
+sw		$t2,0($s1)
+addi	$s1,$s1,4
+
+------------------------------------------------
+j		MAIN
+
+SOLVE:
+	addi	$t0,$t0,1
+	addi	$t1,$0,0
+
+	addi	$t2,$0,0
+	addi	$a1,$0,0
+	LOOPSI0_BEGIN:
+		slt		$a0,$a1,$s0
+		beq		$a0,$0,END_LOOPSI0
+		add		$t2,$t2,$s0
+		addi	$a1,$a1,1
+		j		LOOPSI0_BEGIN
+	END_LOOPSI0:
+	addi	$a1,$0,0
+	LOOPSI1_BEGIN:
+		slt		$a0,$a1,$s0
+		beq		$a0,$0,END_LOOPSI1
+		add		$t1,$t1,$t2
+		addi	$a1,$a1,1
+		j		LOOPSI1_BEGIN
+	END_LOOPSI1:
+
+	addi	$t2,$0,0
+	addi	$a1,$0,0
+	LOOPSJ0_BEGIN:
+		slt		$a0,$a1,$s1
+		beq		$a0,$0,END_LOOPSJ0
+		add		$t2,$t2,$s1
+		addi	$a1,$a1,1
+		j		LOOPSJ0_BEGIN
+	END_LOOPSJ0:
+	addi	$a1,$0,0
+	LOOPSJ1_BEGIN:
+		slt		$a0,$a1,$s1
+		beq		$a0,$0,END_LOOPSJ1
+		add		$t1,$t1,$t2
+		addi	$a1,$a1,1
+		j		LOOPSJ1_BEGIN
+	END_LOOPSJ1:
+
+	addi	$t2,$0,0
+	addi	$a1,$0,0
+	LOOPSK0_BEGIN:
+		slt		$a0,$a1,$s2
+		beq		$a0,$0,END_LOOPSK0
+		add		$t2,$t2,$s2
+		addi	$a1,$a1,1
+		j		LOOPSK0_BEGIN
+	END_LOOPSK0:
+	addi	$a1,$0,0
+	LOOPSK1_BEGIN:
+		slt		$a0,$a1,$s2
+		beq		$a0,$0,END_LOOPSK1
+		add		$t1,$t1,$t2
+		addi	$a1,$a1,1
+		j		LOOPSK1_BEGIN
+	END_LOOPSK1:
+
+	beq		$t0,$t1,PRINT
+	jr		$31
+	PRINT:
+		sw		$t1,0($a2)
+		addi	$a2,$a2,4
+		jr		$31
+
+MAIN:
+addi	$s0,$0,1
+addi	$t0,$t0,99
+LOOPI_BEGIN:
+	slti	$a0,$s0,10
+	beq		$a0,$0,END_LOOPI
+	addi	$s1,$0,0
+	LOOPJ_BEGIN:
+		slti	$a0,$s1,10
+		beq		$a0,$0,END_LOOPJ
+		addi	$s2,$0,0
+		LOOPK_BEGIN:
+			slti	$a0,$s2,10
+			beq		$a0,$0,END_LOOPK
+			jal		SOLVE
+			addi	$s2,$s2,1
+			j		LOOPK_BEGIN
+		END_LOOPK:
+		addi	$s1,$s1,1
+		j		LOOPJ_BEGIN
+	END_LOOPJ:
+	addi	$s0,$s0,1
+	j		LOOPI_BEGIN
+END_LOOPI:
+
+------------------------------------------------
+.data
+	array:	.space 440
+
+.text
+	li		$t2,50
+	sw		$t2,0($0)
+	li		$t2,49
+	sw		$t2,4($0)
+	li		$t2,48
+	sw		$t2,8($0)
+	li		$t2,47
+	sw		$t2,12($0)
+	li		$t2,46
+	sw		$t2,16($0)
+	li		$t2,45
+	sw		$t2,20($0)
+	li		$t2,44
+	sw		$t2,24($0)
+	li		$t2,43
+	sw		$t2,28($0)
+	li		$t2,42
+	sw		$t2,32($0)
+	li		$t2,41
+	sw		$t2,36($0)
+	li		$t2,40
+	sw		$t2,40($0)
+	li		$t2,39
+	sw		$t2,44($0)
+	li		$t2,38
+	sw		$t2,48($0)
+	li		$t2,37
+	sw		$t2,52($0)
+	li		$t2,36
+	sw		$t2,56($0)
+	li		$t2,35
+	sw		$t2,60($0)
+	li		$t2,34
+	sw		$t2,64($0)
+	li		$t2,33
+	sw		$t2,68($0)
+	li		$t2,32
+	sw		$t2,72($0)
+	li		$t2,31
+	sw		$t2,76($0)
+	li		$t2,30
+	sw		$t2,80($0)
+	li		$t2,29
+	sw		$t2,84($0)
+	li		$t2,28
+	sw		$t2,88($0)
+	li		$t2,27
+	sw		$t2,92($0)
+	li		$t2,26
+	sw		$t2,96($0)
+	li		$t2,25
+	sw		$t2,100($0)
+	li		$t2,24
+	sw		$t2,104($0)
+	li		$t2,23
+	sw		$t2,108($0)
+	li		$t2,22
+	sw		$t2,112($0)
+	li		$t2,21
+	sw		$t2,116($0)
+	li		$t2,20
+	sw		$t2,120($0)
+	li		$t2,19
+	sw		$t2,124($0)
+	li		$t2,18
+	sw		$t2,128($0)
+	li		$t2,17
+	sw		$t2,132($0)
+	li		$t2,16
+	sw		$t2,136($0)
+	li		$t2,15
+	sw		$t2,140($0)
+	li		$t2,14
+	sw		$t2,144($0)
+	li		$t2,13
+	sw		$t2,148($0)
+	li		$t2,12
+	sw		$t2,152($0)
+	li		$t2,11
+	sw		$t2,156($0)
+	li		$t2,10
+	sw		$t2,160($0)
+	li		$t2,9
+	sw		$t2,164($0)
+	li		$t2,8
+	sw		$t2,168($0)
+	li		$t2,7
+	sw		$t2,172($0)
+	li		$t2,6
+	sw		$t2,176($0)
+	li		$t2,5
+	sw		$t2,180($0)
+	li		$t2,4
+	sw		$t2,184($0)
+	li		$t2,3
+	sw		$t2,188($0)
+	li		$t2,2
+	sw		$t2,192($0)
+	li		$t2,1
+	sw		$t2,196($0)
+	li		$t2,100
+	sw		$t2,200($0)
+	li		$t2,99
+	sw		$t2,204($0)
+	li		$t2,98
+	sw		$t2,208($0)
+	li		$t2,97
+	sw		$t2,212($0)
+	li		$t2,96
+	sw		$t2,216($0)
+	li		$t2,95
+	sw		$t2,220($0)
+	li		$t2,94
+	sw		$t2,224($0)
+	li		$t2,93
+	sw		$t2,228($0)
+	li		$t2,92
+	sw		$t2,232($0)
+	li		$t2,91
+	sw		$t2,236($0)
+	li		$t2,90
+	sw		$t2,240($0)
+	li		$t2,89
+	sw		$t2,244($0)
+	li		$t2,88
+	sw		$t2,248($0)
+	li		$t2,87
+	sw		$t2,252($0)
+	li		$t2,86
+	sw		$t2,256($0)
+	li		$t2,85
+	sw		$t2,260($0)
+	li		$t2,84
+	sw		$t2,264($0)
+	li		$t2,83
+	sw		$t2,268($0)
+	li		$t2,82
+	sw		$t2,272($0)
+	li		$t2,81
+	sw		$t2,276($0)
+	li		$t2,80
+	sw		$t2,280($0)
+	li		$t2,79
+	sw		$t2,284($0)
+	li		$t2,78
+	sw		$t2,288($0)
+	li		$t2,77
+	sw		$t2,292($0)
+	li		$t2,76
+	sw		$t2,296($0)
+	li		$t2,75
+	sw		$t2,300($0)
+	li		$t2,74
+	sw		$t2,304($0)
+	li		$t2,73
+	sw		$t2,308($0)
+	li		$t2,72
+	sw		$t2,312($0)
+	li		$t2,71
+	sw		$t2,316($0)
+	li		$t2,70
+	sw		$t2,320($0)
+	li		$t2,69
+	sw		$t2,324($0)
+	li		$t2,68
+	sw		$t2,328($0)
+	li		$t2,67
+	sw		$t2,332($0)
+	li		$t2,66
+	sw		$t2,336($0)
+	li		$t2,65
+	sw		$t2,340($0)
+	li		$t2,64
+	sw		$t2,344($0)
+	li		$t2,63
+	sw		$t2,348($0)
+	li		$t2,62
+	sw		$t2,352($0)
+	li		$t2,61
+	sw		$t2,356($0)
+	li		$t2,60
+	sw		$t2,360($0)
+	li		$t2,59
+	sw		$t2,364($0)
+	li		$t2,58
+	sw		$t2,368($0)
+	li		$t2,57
+	sw		$t2,372($0)
+	li		$t2,56
+	sw		$t2,376($0)
+	li		$t2,55
+	sw		$t2,380($0)
+	li		$t2,54
+	sw		$t2,384($0)
+	li		$t2,53
+	sw		$t2,388($0)
+	li		$t2,52
+	sw		$t2,392($0)
+	li		$t2,51
+	sw		$t2,396($0)
+	#-----------------------
+	li		$29,12284
+	li		$s0,100
+	li		$s1,0
+	subi	$s2,$s0,1
+	jal		QSORT
+	j		ENDED
+
+QSORT:
+	sub		$t0,$s1,$s2
+	bgez	$t0,BACK
+	add		$s3,$s1,$s2
+	srl		$s3,$s3,1
+	#-------------------------------
+	sll		$a0,$s1,2
+	lw		$t1,array($a0)
+	sll		$a0,$s2,2
+	lw		$t2,array($a0)
+	sub		$t0,$t1,$t2
+	bgtz	$t0,SWAPLR
+	j		AFTERSWAPLR
+	SWAPLR:
+		sll		$a0,$s1,2
+		sw		$t2,array($a0)
+		sll		$a0,$s2,2
+		sw		$t1,array($a0)
+	AFTERSWAPLR:
+	#-------------------------------
+	sll		$a0,$s3,2
+	lw		$t1,array($a0)
+	sll		$a0,$s2,2
+	lw		$t2,array($a0)
+	sub		$t0,$t1,$t2
+	bgtz	$t0,SWAPRMID
+	j		AFTERSWAPRMID
+	SWAPRMID:
+		sll		$a0,$s3,2
+		sw		$t2,array($a0)
+		sll		$a0,$s2,2
+		sw		$t1,array($a0)
+	AFTERSWAPRMID:
+	#-------------------------------
+	sll		$a0,$s3,2
+	lw		$t1,array($a0)
+	sll		$a0,$s1,2
+	lw		$t2,array($a0)
+	sub		$t0,$t1,$t2
+	bgtz	$t0,SWAPLMID
+	j		AFTERSWAPLMID
+	SWAPLMID:
+		sll		$a0,$s3,2
+		sw		$t2,array($a0)
+		sll		$a0,$s1,2
+		sw		$t1,array($a0)
+	AFTERSWAPLMID:
+	#-------------------------------
+	move		$t4,$s1
+	move		$t5,$s2
+	sll			$a0,$s1,2
+	lw			$t6,array($a0)
+	#-------------------------------
+	OUT_WHILE_BEGIN:
+		beq		$t4,$t5,OUT_WHILE_END
+		WHILE_J_BEGIN:
+			sll		$a0,$t5,2
+			lw		$t0,array($a0)
+			sub		$t1,$t0,$t6
+			bgez	$t1,JMAY_RIGHT
+			j		WHILE_J_END
+			JMAY_RIGHT:
+			sub		$t1,$t4,$t5
+			bltz	$t1,JIS_RIGHT
+			j		WHILE_J_END
+			JIS_RIGHT:
+			subi	$t5,$t5,1
+			j		WHILE_J_BEGIN
+		WHILE_J_END:
+		#---------------------------------
+		WHILE_I_BEGIN:
+			sll		$a0,$t4,2
+			lw		$t0,array($a0)
+			sub		$t1,$t0,$t6
+			blez	$t1,IMAY_RIGHT
+			j		WHILE_I_END
+			IMAY_RIGHT:
+			sub		$t1,$t4,$t5
+			bltz	$t1,IIS_RIGHT
+			j		WHILE_I_END
+			IIS_RIGHT:
+			addi	$t4,$t4,1
+			j		WHILE_I_BEGIN
+		WHILE_I_END:
+		#---------------------------------
+		sub		$t1,$t4,$t5
+		bltz	$t1,TO_SWAP
+		j		OUT_WHILE_BEGIN
+		TO_SWAP:
+			sll		$a0,$t4,2
+			lw		$t0,array($a0)
+			sll		$a0,$t5,2
+			lw		$t1,array($a0)
+			sll		$a0,$t4,2
+			sw		$t1,array($a0)
+			sll		$a0,$t5,2
+			sw		$t0,array($a0)
+		j		OUT_WHILE_BEGIN
+	OUT_WHILE_END:
+	sll		$a0,$t4,2
+	lw		$t0,array($a0)
+	sll		$a0,$s1,2
+	sw		$t0,array($a0)
+	sll		$a0,$t4,2
+	sw		$t6,array($a0)
+	move	$s3,$t4
+	move	$t5,$t4
+	#-------------------------------
+	WHILE_SUBI_BEGIN:
+		sub		$t0,$t4,$s1
+		bltz	$t0,WHILE_SUBI_END
+		sll		$a0,$t4,2
+		lw		$t0,array($a0)
+		sll		$a0,$s3,2
+		lw		$t1,array($a0)
+		bne		$t0,$t1,WHILE_SUBI_END
+		subi	$t4,$t4,1
+		j		WHILE_SUBI_BEGIN
+	WHILE_SUBI_END:
+	WHILE_ADDJ_BEGIN:
+		sub		$t0,$t5,$s2
+		bgtz	$t0,WHILE_ADDJ_END
+		sll		$a0,$t5,2
+		lw		$t0,array($a0)
+		sll		$a0,$s3,2
+		lw		$t1,array($a0)
+		bne		$t0,$t1,WHILE_ADDJ_END
+		addi	$t5,$t5,1
+		j		WHILE_ADDJ_BEGIN
+	WHILE_ADDJ_END:
+	#-------------------------------
+	sw		$31,0($sp)
+	subi	$sp,$sp,4
+	sw		$t5,0($sp)
+	subi	$sp,$sp,4
+	sw		$s2,0($sp)
+	subi	$sp,$sp,4
+	move	$s2,$t4
+	jal		QSORT
+	addi	$sp,$sp,4
+	lw		$s2,0($sp)
+	addi	$sp,$sp,4
+	lw		$t5,0($sp)
+	addi	$sp,$sp,4
+	lw		$31,0($sp)
+	#-------------------------------
+	sw		$31,0($sp)
+	subi	$sp,$sp,4
+	move	$s1,$t5
+	jal		QSORT
+	addi	$sp,$sp,4
+	lw		$31,0($sp)
+	BACK:
+	jr		$31
+
+ENDED:
+	li		$s1,400
+	addi	$t2,$0,2222
+	sw		$t2,0($s1)
+	addi	$s1,$s1,4
+	addi	$t2,$0,3333
+	sw		$t2,0($s1)
+	addi	$s1,$s1,4
+	addi	$t2,$0,4444
+	sw		$t2,0($s1)
+	addi	$s1,$s1,4

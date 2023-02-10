@@ -1,0 +1,6 @@
+xst -intstyle ise -ifn "E:/ISE/learn20210918/counting.xst" -ofn "E:/ISE/learn20210918/counting.syr" 
+xst -intstyle ise -ifn "E:/ISE/learn20210918/counting.xst" -ofn "E:/ISE/learn20210918/counting.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc6slx4-tqg144-2 counting.ngc counting.ngd  
+map -intstyle ise -p xc6slx4-tqg144-2 -w -logic_opt off -ol high -t 1 -xt 0 -register_duplication off -r 4 -global_opt off -mt off -ir off -pr off -lc off -power off -o counting_map.ncd counting.ngd counting.pcf 
+par -w -intstyle ise -ol high -mt off counting_map.ncd counting.ncd counting.pcf 
+trce -intstyle ise -v 3 -s 2 -n 3 -fastpaths -xml counting.twx counting.ncd -o counting.twr counting.pcf 

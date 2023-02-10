@@ -1,0 +1,28 @@
+Command line:
+   muxtwo_isim_beh.exe
+     -simmode  gui
+     -simrunnum  0
+     -socket  64989
+
+Thu Sep 16 23:54:44 2021
+
+
+ Elaboration Time: 0.046875 sec
+
+ Current Memory Usage: 5159.19 Meg
+
+ Total Signals          : 16
+ Total Nets             : 17
+ Total Signal Drivers   : 6
+ Total Blocks           : 2
+ Total Primitive Blocks : 2
+ Total Processes        : 8
+ Total Traceable Variables  : 19
+ Total Scalar Nets and Variables : 98
+
+ Total Simulation Time: 0.078125 sec
+
+ Current Memory Usage: 5159.19 Meg
+
+Thu Sep 16 23:54:49 2021
+

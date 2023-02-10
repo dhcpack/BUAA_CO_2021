@@ -1,0 +1,57 @@
+//! **************************************************************************
+// Written by: Map P.20131013 on Thu Dec 23 21:18:30 2021
+//! **************************************************************************
+
+SCHEMATIC START;
+COMP "led_light<11>" LOCATE = SITE "J3" LEVEL 1;
+COMP "led_light<12>" LOCATE = SITE "J5" LEVEL 1;
+COMP "led_light<20>" LOCATE = SITE "D11" LEVEL 1;
+COMP "led_light<13>" LOCATE = SITE "J2" LEVEL 1;
+COMP "led_light<21>" LOCATE = SITE "E10" LEVEL 1;
+COMP "led_light<14>" LOCATE = SITE "H5" LEVEL 1;
+COMP "led_light<22>" LOCATE = SITE "D14" LEVEL 1;
+COMP "led_light<30>" LOCATE = SITE "C16" LEVEL 1;
+COMP "led_light<15>" LOCATE = SITE "H1" LEVEL 1;
+COMP "led_light<23>" LOCATE = SITE "A15" LEVEL 1;
+COMP "led_light<31>" LOCATE = SITE "B18" LEVEL 1;
+COMP "led_light<16>" LOCATE = SITE "E9" LEVEL 1;
+COMP "led_light<24>" LOCATE = SITE "G16" LEVEL 1;
+COMP "led_light<17>" LOCATE = SITE "D10" LEVEL 1;
+COMP "led_light<25>" LOCATE = SITE "B14" LEVEL 1;
+COMP "led_light<18>" LOCATE = SITE "A11" LEVEL 1;
+COMP "led_light<26>" LOCATE = SITE "F15" LEVEL 1;
+COMP "led_light<19>" LOCATE = SITE "A10" LEVEL 1;
+COMP "led_light<27>" LOCATE = SITE "D15" LEVEL 1;
+COMP "led_light<28>" LOCATE = SITE "B16" LEVEL 1;
+COMP "led_light<29>" LOCATE = SITE "D16" LEVEL 1;
+COMP "led_light<0>" LOCATE = SITE "L9" LEVEL 1;
+COMP "led_light<1>" LOCATE = SITE "K9" LEVEL 1;
+COMP "led_light<2>" LOCATE = SITE "N1" LEVEL 1;
+COMP "led_light<3>" LOCATE = SITE "N2" LEVEL 1;
+COMP "led_light<4>" LOCATE = SITE "M1" LEVEL 1;
+COMP "led_light<5>" LOCATE = SITE "M3" LEVEL 1;
+COMP "led_light<6>" LOCATE = SITE "L8" LEVEL 1;
+COMP "led_light<7>" LOCATE = SITE "K7" LEVEL 1;
+COMP "led_light<8>" LOCATE = SITE "K6" LEVEL 1;
+COMP "led_light<9>" LOCATE = SITE "K3" LEVEL 1;
+COMP "sys_rstn" LOCATE = SITE "AC12" LEVEL 1;
+COMP "clk_in" LOCATE = SITE "AF13" LEVEL 1;
+PIN clk_in_pin<0> = BEL "clk_in" PINNAME PAD;
+PIN "clk_in_pin<0>" CLOCK_DEDICATED_ROUTE = FALSE;
+COMP "led_light<10>" LOCATE = SITE "J4" LEVEL 1;
+TIMEGRP clk_in = BEL "led_0" BEL "led_1" BEL "led_2" BEL "led_3" BEL "led_4"
+        BEL "led_5" BEL "led_6" BEL "led_7" BEL "led_8" BEL "led_9" BEL
+        "led_10" BEL "led_11" BEL "led_12" BEL "led_13" BEL "led_14" BEL
+        "led_15" BEL "led_16" BEL "led_17" BEL "led_18" BEL "led_19" BEL
+        "led_20" BEL "led_21" BEL "led_22" BEL "led_23" BEL "led_24" BEL
+        "led_25" BEL "led_26" BEL "led_27" BEL "led_28" BEL "led_29" BEL
+        "led_30" BEL "led_31" BEL "counter_1" BEL "counter_2" BEL "counter_3"
+        BEL "counter_4" BEL "counter_5" BEL "counter_6" BEL "counter_7" BEL
+        "counter_8" BEL "counter_9" BEL "counter_10" BEL "counter_11" BEL
+        "counter_12" BEL "counter_13" BEL "counter_14" BEL "counter_17" BEL
+        "counter_15" BEL "counter_16" BEL "counter_18" BEL "counter_19" BEL
+        "counter_20" BEL "counter_21" BEL "counter_22" BEL "counter_23" BEL
+        "counter_24" BEL "counter_0" BEL "clk_in_BUFGP/BUFG";
+TS_clk_in = PERIOD TIMEGRP "clk_in" 40 ns HIGH 50%;
+SCHEMATIC END;
+

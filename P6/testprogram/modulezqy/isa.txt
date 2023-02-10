@@ -1,0 +1,57 @@
+# ALU
+000000 xxxxx xxxxx xxxxx 00000 100000 : add
+001000 xxxxx xxxxx xxxxx xxxxx xxxxxx : addi
+000000 xxxxx xxxxx xxxxx 00000 100001 : addu
+001001 xxxxx xxxxx xxxxx xxxxx xxxxxx : addiu
+000000 xxxxx xxxxx xxxxx 00000 100010 : sub
+000000 xxxxx xxxxx xxxxx 00000 100011 : subu
+000000 00000 xxxxx xxxxx xxxxx 000000 : sll
+000000 xxxxx xxxxx xxxxx 00000 000100 : sllv
+000000 00000 xxxxx xxxxx xxxxx 000010 : srl
+000000 xxxxx xxxxx xxxxx 00000 000110 : srlv
+000000 00000 xxxxx xxxxx xxxxx 000011 : sra
+000000 xxxxx xxxxx xxxxx 00000 000111 : srav
+000000 xxxxx xxxxx xxxxx 00000 100100 : and
+001100 xxxxx xxxxx xxxxx xxxxx xxxxxx : andi
+000000 xxxxx xxxxx xxxxx 00000 100101 : or
+001101 xxxxx xxxxx xxxxx xxxxx xxxxxx : ori
+000000 xxxxx xxxxx xxxxx 00000 100111 : nor
+000000 xxxxx xxxxx xxxxx 00000 100110 : xor
+001110 xxxxx xxxxx xxxxx xxxxx xxxxxx : xori
+001111 00000 xxxxx xxxxx xxxxx xxxxxx : lui
+000000 xxxxx xxxxx xxxxx 00000 101010 : slt
+001010 xxxxx xxxxx xxxxx xxxxx xxxxxx : slti
+001011 xxxxx xxxxx xxxxx xxxxx xxxxxx : sltiu
+000000 xxxxx xxxxx xxxxx 00000 101011 : sltu
+
+# Branch
+000100 xxxxx xxxxx xxxxx xxxxx xxxxxx : beq
+000101 xxxxx xxxxx xxxxx xxxxx xxxxxx : bne
+000110 xxxxx 00000 xxxxx xxxxx xxxxxx : blez
+000001 xxxxx 00000 xxxxx xxxxx xxxxxx : bltz
+000001 xxxxx 00001 xxxxx xxxxx xxxxxx : bgez
+000111 xxxxx 00000 xxxxx xxxxx xxxxxx : bgtz
+000010 xxxxx xxxxx xxxxx xxxxx xxxxxx : j
+000011 xxxxx xxxxx xxxxx xxxxx xxxxxx : jal
+000000 xxxxx 00000 xxxxx 00000 001001 : jalr
+000000 xxxxx 00000 00000 00000 001000 : jr
+
+# DM
+100000 xxxxx xxxxx xxxxx xxxxx xxxxxx : lb
+100100 xxxxx xxxxx xxxxx xxxxx xxxxxx : lbu
+100001 xxxxx xxxxx xxxxx xxxxx xxxxxx : lh
+100101 xxxxx xxxxx xxxxx xxxxx xxxxxx : lhu
+100011 xxxxx xxxxx xxxxx xxxxx xxxxxx : lw
+101000 xxxxx xxxxx xxxxx xxxxx xxxxxx : sb
+101001 xxxxx xxxxx xxxxx xxxxx xxxxxx : sh
+101011 xxxxx xxxxx xxxxx xxxxx xxxxxx : sw
+
+# MultDiv
+000000 xxxxx xxxxx xxxxx 00000 011000 : mult
+000000 xxxxx xxxxx xxxxx 00000 011001 : multu
+000000 xxxxx xxxxx 00000 00000 011010 : div
+000000 xxxxx xxxxx 00000 00000 011011 : divu
+000000 00000 00000 xxxxx 00000 010000 : mfhi
+000000 00000 00000 xxxxx 00000 010010 : mflo
+000000 xxxxx 00000 00000 00000 010001 : mthi
+000000 xxxxx 00000 00000 00000 010011 : mtlo

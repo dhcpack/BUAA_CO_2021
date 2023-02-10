@@ -1,0 +1,28 @@
+Command line:
+   testmipsmine.exe
+     -simmode  tcl
+     -simrunnum  0
+     -socket  58613
+
+Tue Nov 30 18:46:06 2021
+
+
+ Elaboration Time: 0.046875 sec
+
+ Current Memory Usage: 5134.63 Meg
+
+ Total Signals          : 331
+ Total Nets             : 2005
+ Total Signal Drivers   : 123
+ Total Blocks           : 19
+ Total Primitive Blocks : 14
+ Total Processes        : 150
+ Total Traceable Variables  : 88
+ Total Scalar Nets and Variables : 266358
+
+ Total Simulation Time: 0.203125 sec
+
+ Current Memory Usage: 5143.02 Meg
+
+Tue Nov 30 18:46:07 2021
+

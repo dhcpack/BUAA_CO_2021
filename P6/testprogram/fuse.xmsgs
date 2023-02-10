@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- IMPORTANT: This is an internal file that has been generated
+     by the Xilinx ISE software.  Any direct editing or
+     changes made to this file may result in unpredictable
+     behavior or data corruption.  It is strongly advised that
+     users do not edit the contents of this file. -->
+<messages>
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mod_ALU.v" Line 20: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_ALU</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mod_Branch.v" Line 7: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_Branch</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mod_CMP.v" Line 12: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_CMP</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy/mod_PC.v" Line 3: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_PC</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy/mod_Splitter.v" Line 3: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_Splitter</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy/mod_ALU.v" Line 20: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_ALU</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy/mod_CMP.v" Line 12: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_CMP</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy/mod_EXT.v" Line 8: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_EXT</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy/mod_GRF.v" Line 3: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_RF</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy/mod_Branch.v" Line 7: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_Branch</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy/mod_Replacer.v" Line 3: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_Replacer</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy/mod_MultDiv.v" Line 14: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_MultDiv</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy/mod_DataExt.v" Line 11: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_DataExt</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy/mod_regIFID.v" Line 5: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_regFD</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy/mod_regIDEX.v" Line 6: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_regDE</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy/mod_regEXMem.v" Line 5: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_regEM</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy/mod_regMemWB.v" Line 5: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_regMW</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy/mod_Controller.v" Line 39: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_Controller</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mod_DataExt.v" Line 11: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_DataExt</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mod_EXT.v" Line 8: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_EXT</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mod_GRF.v" Line 3: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_RF</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mod_MultDiv.v" Line 14: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_MultDiv</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mod_PC.v" Line 3: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_PC</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mod_regEXMem.v" Line 5: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_regEM</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mod_regIDEX.v" Line 6: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_regDE</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mod_regIFID.v" Line 5: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_regFD</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mod_regMemWB.v" Line 5: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_regMW</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mod_Replacer.v" Line 3: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_Replacer</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mod_Splitter.v" Line 3: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">mod_Splitter</arg>&gt;.
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1016" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mips.v" Line 72: Port <arg fmt="%s" index="1">oPC</arg> is not connected to this instance
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1016" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mips.v" Line 81: Port <arg fmt="%s" index="1">opcode</arg> is not connected to this instance
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1016" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mips.v" Line 88: Port <arg fmt="%s" index="1">oEn</arg> is not connected to this instance
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1016" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mips.v" Line 92: Port <arg fmt="%s" index="1">oEn</arg> is not connected to this instance
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1016" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mips.v" Line 97: Port <arg fmt="%s" index="1">oEn</arg> is not connected to this instance
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1016" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mips.v" Line 101: Port <arg fmt="%s" index="1">oEn</arg> is not connected to this instance
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1016" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mips.v" Line 107: Port <arg fmt="%s" index="1">oResult</arg> is not connected to this instance
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1016" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mips.v" Line 117: Port <arg fmt="%s" index="1">o32</arg> is not connected to this instance
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1016" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mips.v" Line 148: Port <arg fmt="%s" index="1">oResultSince</arg> is not connected to this instance
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1016" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mips.v" Line 176: Port <arg fmt="%s" index="1">oEn</arg> is not connected to this instance
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1016" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mips.v" Line 180: Port <arg fmt="%s" index="1">oEn</arg> is not connected to this instance
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1016" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mips.v" Line 185: Port <arg fmt="%s" index="1">oEn</arg> is not connected to this instance
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1016" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mips.v" Line 189: Port <arg fmt="%s" index="1">oEn</arg> is not connected to this instance
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1016" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mips.v" Line 199: Port <arg fmt="%s" index="1">oResult</arg> is not connected to this instance
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1016" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mips.v" Line 206: Port <arg fmt="%s" index="1">oHi</arg> is not connected to this instance
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1016" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mips.v" Line 223: Port <arg fmt="%s" index="1">oResultSince</arg> is not connected to this instance
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1016" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mips.v" Line 265: Port <arg fmt="%s" index="1">oEn</arg> is not connected to this instance
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1016" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mips.v" Line 284: Port <arg fmt="%s" index="1">oDMWriteData</arg> is not connected to this instance
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1016" delta="unknown" >"E:\1-Project\P6\testprogram\modulezqy\mips.v" Line 312: Port <arg fmt="%s" index="1">oPC</arg> is not connected to this instance
+</msg>
+
+<msg type="warning" file="Simulator" num="0" delta="unknown" >Unable to copy libPortabilityNOSH.dll to the simulation executable directory: <arg fmt="%s" index="1">boost::filesystem::copy_file: ￏﾵￍﾳￕￒﾲﾻﾵﾽￖﾸﾶﾨﾵￄￂﾷﾾﾶﾡﾣ, &quot;isim\testmipszqy.exe.sim\libPortability.dll&quot;</arg>.
+</msg>
+
+</messages>
+

@@ -1,0 +1,41 @@
+#! /c/Source/iverilog-install/bin/vvp
+:ivl_version "12.0 (devel)" "(s20150603-1110-g18392a46)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision + 0;
+:vpi_module "D:\iverilog\iverilog\lib\ivl\system.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\vhdl_sys.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\vhdl_textio.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\v2005_math.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\va_math.vpi";
+S_0000017a81789580 .scope module, "practice" "practice" 2 1;
+ .timescale 0 0;
+    .port_info 0 /OUTPUT 1 "c";
+L_0000017a817a3180 .functor AND 1, v0000017a81789710_0, v0000017a817a30e0_0, C4<1>, C4<1>;
+v0000017a81789710_0 .var "a", 0 0;
+v0000017a817a30e0_0 .var "b", 0 0;
+v0000017a8178e0c0_0 .net "c", 0 0, L_0000017a817a3180;  1 drivers
+    .scope S_0000017a81789580;
+T_0 ;
+    %vpi_call 2 8 "$dumpfile", "practice.vcd" {0 0 0};
+    %vpi_call 2 9 "$dumpvars", 32'sb00000000000000000000000000000000, S_0000017a81789580 {0 0 0};
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0000017a81789710_0, 0;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0000017a817a30e0_0, 0;
+    %delay 6000, 0;
+    %vpi_call 2 12 "$finish" {0 0 0};
+    %end;
+    .thread T_0;
+    .scope S_0000017a81789580;
+T_1 ;
+    %delay 20, 0;
+    %load/vec4 v0000017a81789710_0;
+    %inv;
+    %store/vec4 v0000017a81789710_0, 0, 1;
+    %jmp T_1;
+    .thread T_1;
+# The file index is used to find the file name in the following table.
+:file_names 3;
+    "N/A";
+    "<interactive>";
+    "practice.v";

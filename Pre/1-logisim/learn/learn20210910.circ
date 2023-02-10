@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project source="2.7.1" version="1.0">
+This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
+<lib desc="#Wiring" name="0"/>
+  <lib desc="#Gates" name="1"/>
+  <lib desc="#Plexers" name="2"/>
+  <lib desc="#Arithmetic" name="3"/>
+  <lib desc="#Memory" name="4">
+    <tool name="ROM">
+      <a name="contents">addr/data: 8 8
+0
+</a>
+    </tool>
+  </lib>
+  <lib desc="#I/O" name="5"/>
+  <lib desc="#Base" name="6">
+    <tool name="Text Tool">
+      <a name="text" val=""/>
+      <a name="font" val="SansSerif plain 12"/>
+      <a name="halign" val="center"/>
+      <a name="valign" val="base"/>
+    </tool>
+  </lib>
+  <main name="main"/>
+  <options>
+    <a name="gateUndefined" val="ignore"/>
+    <a name="simlimit" val="1000"/>
+    <a name="simrand" val="0"/>
+  </options>
+  <mappings>
+    <tool lib="6" map="Button2" name="Menu Tool"/>
+    <tool lib="6" map="Button3" name="Menu Tool"/>
+    <tool lib="6" map="Ctrl Button1" name="Menu Tool"/>
+  </mappings>
+  <toolbar>
+    <tool lib="6" name="Poke Tool"/>
+    <tool lib="6" name="Edit Tool"/>
+    <tool lib="6" name="Text Tool">
+      <a name="text" val=""/>
+      <a name="font" val="SansSerif plain 12"/>
+      <a name="halign" val="center"/>
+      <a name="valign" val="base"/>
+    </tool>
+    <sep/>
+    <tool lib="0" name="Pin">
+      <a name="tristate" val="false"/>
+    </tool>
+    <tool lib="0" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="labelloc" val="east"/>
+    </tool>
+    <tool lib="1" name="NOT Gate"/>
+    <tool lib="1" name="AND Gate"/>
+    <tool lib="1" name="OR Gate"/>
+  </toolbar>
+  <circuit name="main">
+    <a name="circuit" val="main"/>
+    <a name="clabel" val=""/>
+    <a name="clabelup" val="east"/>
+    <a name="clabelfont" val="SansSerif plain 12"/>
+    <wire from="(280,720)" to="(330,720)"/>
+    <wire from="(280,700)" to="(330,700)"/>
+    <wire from="(310,370)" to="(310,380)"/>
+    <wire from="(330,870)" to="(330,880)"/>
+    <wire from="(290,430)" to="(290,450)"/>
+    <wire from="(320,820)" to="(320,840)"/>
+    <wire from="(320,880)" to="(320,900)"/>
+    <wire from="(460,420)" to="(460,450)"/>
+    <wire from="(270,730)" to="(270,760)"/>
+    <wire from="(200,450)" to="(240,450)"/>
+    <wire from="(320,270)" to="(360,270)"/>
+    <wire from="(260,410)" to="(300,410)"/>
+    <wire from="(290,860)" to="(330,860)"/>
+    <wire from="(300,780)" to="(330,780)"/>
+    <wire from="(300,920)" to="(330,920)"/>
+    <wire from="(300,270)" to="(320,270)"/>
+    <wire from="(310,800)" to="(330,800)"/>
+    <wire from="(300,780)" to="(300,820)"/>
+    <wire from="(290,890)" to="(300,890)"/>
+    <wire from="(320,820)" to="(330,820)"/>
+    <wire from="(320,900)" to="(330,900)"/>
+    <wire from="(260,100)" to="(320,100)"/>
+    <wire from="(260,140)" to="(320,140)"/>
+    <wire from="(410,270)" to="(470,270)"/>
+    <wire from="(260,370)" to="(310,370)"/>
+    <wire from="(260,390)" to="(310,390)"/>
+    <wire from="(200,710)" to="(250,710)"/>
+    <wire from="(330,840)" to="(330,850)"/>
+    <wire from="(300,410)" to="(300,430)"/>
+    <wire from="(460,390)" to="(460,410)"/>
+    <wire from="(370,120)" to="(470,120)"/>
+    <wire from="(360,390)" to="(460,390)"/>
+    <wire from="(300,890)" to="(300,920)"/>
+    <wire from="(310,800)" to="(310,830)"/>
+    <wire from="(320,260)" to="(360,260)"/>
+    <wire from="(290,850)" to="(330,850)"/>
+    <wire from="(290,870)" to="(330,870)"/>
+    <wire from="(250,280)" to="(280,280)"/>
+    <wire from="(260,430)" to="(290,430)"/>
+    <wire from="(290,840)" to="(320,840)"/>
+    <wire from="(290,880)" to="(320,880)"/>
+    <wire from="(300,260)" to="(320,260)"/>
+    <wire from="(290,450)" to="(310,450)"/>
+    <wire from="(290,830)" to="(310,830)"/>
+    <wire from="(270,900)" to="(270,940)"/>
+    <wire from="(300,430)" to="(310,430)"/>
+    <wire from="(290,820)" to="(300,820)"/>
+    <wire from="(320,210)" to="(320,260)"/>
+    <wire from="(380,450)" to="(460,450)"/>
+    <wire from="(320,270)" to="(320,330)"/>
+    <wire from="(480,400)" to="(550,400)"/>
+    <comp lib="6" loc="(245,250)" name="Text">
+      <a name="text" val="从右向左排号，从零排位"/>
+    </comp>
+    <comp lib="0" loc="(330,880)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="6" loc="(558,817)" name="Text">
+      <a name="text" val="译码器：将二进制编码转化为独热码(只含有一个1其余都是0)，从下往上读"/>
+    </comp>
+    <comp lib="0" loc="(240,450)" name="Splitter">
+      <a name="fanout" val="8"/>
+      <a name="incoming" val="8"/>
+    </comp>
+    <comp lib="0" loc="(330,840)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(260,140)" name="Pin">
+      <a name="width" val="3"/>
+      <a name="tristate" val="false"/>
+    </comp>
+    <comp lib="0" loc="(200,450)" name="Pin">
+      <a name="width" val="8"/>
+    </comp>
+    <comp lib="1" loc="(410,270)" name="AND Gate">
+      <a name="width" val="4"/>
+    </comp>
+    <comp lib="2" loc="(280,570)" name="Multiplexer"/>
+    <comp lib="0" loc="(330,780)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(330,920)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="6" loc="(296,294)" name="Text">
+      <a name="text" val="split end"/>
+    </comp>
+    <comp lib="0" loc="(250,280)" name="Pin">
+      <a name="width" val="8"/>
+      <a name="tristate" val="false"/>
+    </comp>
+    <comp lib="0" loc="(480,400)" name="Splitter">
+      <a name="facing" val="west"/>
+    </comp>
+    <comp lib="0" loc="(550,400)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="2"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(470,120)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="3"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(200,710)" name="Pin">
+      <a name="width" val="2"/>
+      <a name="tristate" val="false"/>
+    </comp>
+    <comp lib="0" loc="(330,720)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="2"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(280,280)" name="Splitter">
+      <a name="incoming" val="8"/>
+      <a name="bit1" val="0"/>
+      <a name="bit2" val="0"/>
+      <a name="bit3" val="0"/>
+      <a name="bit4" val="1"/>
+      <a name="bit5" val="1"/>
+      <a name="bit6" val="1"/>
+      <a name="bit7" val="1"/>
+    </comp>
+    <comp lib="0" loc="(260,100)" name="Pin">
+      <a name="width" val="3"/>
+      <a name="tristate" val="false"/>
+    </comp>
+    <comp lib="0" loc="(270,940)" name="Pin">
+      <a name="facing" val="north"/>
+      <a name="width" val="3"/>
+      <a name="tristate" val="false"/>
+    </comp>
+    <comp lib="6" loc="(267,536)" name="Text">
+      <a name="text" val="多路选择器，用于处理多个信号，选择其中一个作为输出"/>
+    </comp>
+    <comp lib="6" loc="(309,675)" name="Text">
+      <a name="text" val="多路分配器，与多路选择器功能恰好相反。能够根据需要传送到多个输出端的任何一个输出端"/>
+    </comp>
+    <comp lib="0" loc="(270,760)" name="Pin">
+      <a name="facing" val="north"/>
+      <a name="tristate" val="false"/>
+    </comp>
+    <comp lib="1" loc="(380,450)" name="XNOR Gate"/>
+    <comp lib="0" loc="(330,700)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="2"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="6" loc="(386,886)" name="Text">
+      <a name="text" val="00100000"/>
+    </comp>
+    <comp lib="0" loc="(330,820)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(320,330)" name="Probe">
+      <a name="facing" val="north"/>
+    </comp>
+    <comp lib="2" loc="(250,710)" name="Demultiplexer">
+      <a name="width" val="2"/>
+    </comp>
+    <comp lib="0" loc="(330,800)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="1" loc="(360,390)" name="AND Gate"/>
+    <comp lib="0" loc="(320,210)" name="Probe">
+      <a name="facing" val="south"/>
+    </comp>
+    <comp lib="0" loc="(330,860)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="1" loc="(370,120)" name="AND Gate">
+      <a name="width" val="3"/>
+    </comp>
+    <comp lib="6" loc="(200,391)" name="Text">
+      <a name="text" val="读数往上看"/>
+    </comp>
+    <comp lib="2" loc="(270,900)" name="Decoder">
+      <a name="select" val="3"/>
+    </comp>
+    <comp lib="0" loc="(330,900)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="6" loc="(337,75)" name="Text">
+      <a name="text" val="位宽要匹配"/>
+    </comp>
+    <comp lib="6" loc="(198,314)" name="Text">
+      <a name="text" val="combine end"/>
+    </comp>
+    <comp lib="0" loc="(470,270)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="4"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+  </circuit>
+</project>

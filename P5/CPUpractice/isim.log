@@ -1,0 +1,29 @@
+ISim log file
+Running: E:\1-Project\P5\CPUpractice\mips_tb_isim_beh.exe -intstyle ise -gui -tclbatch isim.cmd -wdb E:/1-Project/P5/CPUpractice/mips_tb_isim_beh.wdb 
+ISim P.20131013 (signature 0x7708f090)
+This is a Full version of ISim.
+WARNING: File "E:/1-Project/P5/CPUpractice/D.v" Line 11.  For instance maind/maincontroller/, width 1 of formal port rfrd1_D is not equal to width 32 of actual signal rfrd1_D.
+WARNING: File "E:/1-Project/P5/CPUpractice/D.v" Line 11.  For instance maind/maincontroller/, width 1 of formal port rfrd2_D is not equal to width 32 of actual signal rfrd2_D.
+Time resolution is 1 ps
+# onerror resume
+# wave add /
+# run 1000 ns
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+                  11@00003000: $ 8 <= 00000001
+                  13@00003004: $ 9 <= 00000001
+                  17@00003008: $31 <= 00003010
+                  21@00003010: $10 <= 00000002
+                  29@0000301c: $11 <= 00000004
+ISim P.20131013 (signature 0x7708f090)
+This is a Full version of ISim.
+WARNING: File "E:/1-Project/P5/CPUpractice/D.v" Line 11.  For instance maind/maincontroller/, width 1 of formal port rfrd1_D is not equal to width 32 of actual signal rfrd1_D.
+WARNING: File "E:/1-Project/P5/CPUpractice/D.v" Line 11.  For instance maind/maincontroller/, width 1 of formal port rfrd2_D is not equal to width 32 of actual signal rfrd2_D.
+# run 1000 ns
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+                  11@00003000: $ 8 <= 00000001
+                  13@00003004: $ 9 <= 00000001
+                  17@00003008: $31 <= 00003010
+                  21@00003010: $10 <= 00000002
+                  29@0000301c: $11 <= 00000004

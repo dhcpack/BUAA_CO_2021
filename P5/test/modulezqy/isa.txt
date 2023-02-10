@@ -1,0 +1,11 @@
+000000 xxxxx xxxxx xxxxx 00000 100001 : addu
+000000 xxxxx xxxxx xxxxx 00000 100011 : subu
+001101 xxxxx xxxxx xxxxx xxxxx xxxxxx : ori
+100011 xxxxx xxxxx xxxxx xxxxx xxxxxx : lw
+101011 xxxxx xxxxx xxxxx xxxxx xxxxxx : sw
+000100 xxxxx xxxxx xxxxx xxxxx xxxxxx : beq
+001111 00000 xxxxx xxxxx xxxxx xxxxxx : lui
+000010 xxxxx xxxxx xxxxx xxxxx xxxxxx : j
+000011 xxxxx xxxxx xxxxx xxxxx xxxxxx : jal
+000000 xxxxx 00000 xxxxx 00000 001001 : jalr
+000000 xxxxx 00000 00000 00000 001000 : jr

@@ -1,0 +1,5 @@
+xst -intstyle ise -ifn "E:/ISE/learn/learn20211015/practice2.xst" -ofn "E:/ISE/learn/learn20211015/practice2.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc6slx4-tqg144-2 practice2.ngc practice2.ngd  
+map -intstyle ise -p xc6slx4-tqg144-2 -w -logic_opt off -ol high -t 1 -xt 0 -register_duplication off -r 4 -global_opt off -mt off -ir off -pr off -lc off -power off -o practice2_map.ncd practice2.ngd practice2.pcf 
+par -w -intstyle ise -ol high -mt off practice2_map.ncd practice2.ncd practice2.pcf 
+trce -intstyle ise -v 3 -s 2 -n 3 -fastpaths -xml practice2.twx practice2.ncd -o practice2.twr practice2.pcf 

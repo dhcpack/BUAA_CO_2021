@@ -1,0 +1,3 @@
+xst -intstyle ise -ifn "E:/ISE/Pre/learn/learn20211203/practice.xst" -ofn "E:/ISE/Pre/learn/learn20211203/practice.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc6slx4-tqg144-2 practice.ngc practice.ngd  
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc6slx4-tqg144-2 practice.ngc practice.ngd  

@@ -1,0 +1,299 @@
+#! /c/Source/iverilog-install/bin/vvp
+:ivl_version "12.0 (devel)" "(s20150603-1110-g18392a46)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision + 0;
+:vpi_module "D:\iverilog\iverilog\lib\ivl\system.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\vhdl_sys.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\vhdl_textio.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\v2005_math.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\va_math.vpi";
+S_0000018c64f93080 .scope module, "RiskSolveUnit" "RiskSolveUnit" 2 3;
+ .timescale 0 0;
+    .port_info 0 /INPUT 1 "rfwe_E";
+    .port_info 1 /INPUT 1 "rfwe_M";
+    .port_info 2 /INPUT 1 "rfwe_W";
+    .port_info 3 /INPUT 5 "read1addr_D";
+    .port_info 4 /INPUT 5 "read2addr_D";
+    .port_info 5 /INPUT 5 "read1addr_E";
+    .port_info 6 /INPUT 5 "read2addr_E";
+    .port_info 7 /INPUT 5 "read2addr_M";
+    .port_info 8 /INPUT 5 "writeaddr_E";
+    .port_info 9 /INPUT 5 "writeaddr_M";
+    .port_info 10 /INPUT 5 "writeaddr_W";
+    .port_info 11 /INPUT 5 "command_type";
+    .port_info 12 /OUTPUT 1 "forward_DM_M";
+    .port_info 13 /OUTPUT 2 "forward_ALUa_E";
+    .port_info 14 /OUTPUT 2 "forward_ALUb_E";
+    .port_info 15 /INPUT 2 "tuse_Drs";
+    .port_info 16 /INPUT 2 "tuse_Drt";
+    .port_info 17 /INPUT 2 "tnew_E";
+    .port_info 18 /INPUT 2 "tnew_M";
+    .port_info 19 /OUTPUT 1 "stall_F";
+    .port_info 20 /OUTPUT 1 "stall_D";
+    .port_info 21 /OUTPUT 1 "fulsh_E";
+o0000018c64fd0f88 .functor BUFZ 5, C4<zzzzz>; HiZ drive
+v0000018c64f93640_0 .net "command_type", 4 0, o0000018c64fd0f88;  0 drivers
+v0000018c64f93380_0 .var "forward_ALUa_E", 1 0;
+v0000018c64fc3e80_0 .var "forward_ALUb_E", 1 0;
+v0000018c64fc3f20_0 .var "forward_DM_M", 0 0;
+v0000018c64fc3fc0_0 .var "fulsh_E", 0 0;
+o0000018c64fd1078 .functor BUFZ 5, C4<zzzzz>; HiZ drive
+v0000018c64fc4060_0 .net "read1addr_D", 4 0, o0000018c64fd1078;  0 drivers
+o0000018c64fd10a8 .functor BUFZ 5, C4<zzzzz>; HiZ drive
+v0000018c64fc4100_0 .net "read1addr_E", 4 0, o0000018c64fd10a8;  0 drivers
+o0000018c64fd10d8 .functor BUFZ 5, C4<zzzzz>; HiZ drive
+v0000018c64fc41a0_0 .net "read2addr_D", 4 0, o0000018c64fd10d8;  0 drivers
+o0000018c64fd1108 .functor BUFZ 5, C4<zzzzz>; HiZ drive
+v0000018c64fc4240_0 .net "read2addr_E", 4 0, o0000018c64fd1108;  0 drivers
+o0000018c64fd1138 .functor BUFZ 5, C4<zzzzz>; HiZ drive
+v0000018c64fc46f0_0 .net "read2addr_M", 4 0, o0000018c64fd1138;  0 drivers
+o0000018c64fd1168 .functor BUFZ 1, C4<z>; HiZ drive
+v0000018c65016010_0 .net "rfwe_E", 0 0, o0000018c64fd1168;  0 drivers
+o0000018c64fd1198 .functor BUFZ 1, C4<z>; HiZ drive
+v0000018c650160b0_0 .net "rfwe_M", 0 0, o0000018c64fd1198;  0 drivers
+o0000018c64fd11c8 .functor BUFZ 1, C4<z>; HiZ drive
+v0000018c65016150_0 .net "rfwe_W", 0 0, o0000018c64fd11c8;  0 drivers
+v0000018c650161f0_0 .var "stall_D", 0 0;
+v0000018c65016290_0 .var "stall_F", 0 0;
+o0000018c64fd1258 .functor BUFZ 2, C4<zz>; HiZ drive
+v0000018c65016330_0 .net "tnew_E", 1 0, o0000018c64fd1258;  0 drivers
+o0000018c64fd1288 .functor BUFZ 2, C4<zz>; HiZ drive
+v0000018c65016f60_0 .net "tnew_M", 1 0, o0000018c64fd1288;  0 drivers
+o0000018c64fd12b8 .functor BUFZ 2, C4<zz>; HiZ drive
+v0000018c65016e20_0 .net "tuse_Drs", 1 0, o0000018c64fd12b8;  0 drivers
+o0000018c64fd12e8 .functor BUFZ 2, C4<zz>; HiZ drive
+v0000018c650167e0_0 .net "tuse_Drt", 1 0, o0000018c64fd12e8;  0 drivers
+o0000018c64fd1318 .functor BUFZ 5, C4<zzzzz>; HiZ drive
+v0000018c65016d80_0 .net "writeaddr_E", 4 0, o0000018c64fd1318;  0 drivers
+o0000018c64fd1348 .functor BUFZ 5, C4<zzzzz>; HiZ drive
+v0000018c650170a0_0 .net "writeaddr_M", 4 0, o0000018c64fd1348;  0 drivers
+o0000018c64fd1378 .functor BUFZ 5, C4<zzzzz>; HiZ drive
+v0000018c65017280_0 .net "writeaddr_W", 4 0, o0000018c64fd1378;  0 drivers
+E_0000018c64fb4a70/0 .event anyedge, v0000018c650160b0_0, v0000018c64fc4100_0, v0000018c650170a0_0, v0000018c65016150_0;
+E_0000018c64fb4a70/1 .event anyedge, v0000018c65017280_0, v0000018c64fc4240_0, v0000018c64fc46f0_0, v0000018c64fc4060_0;
+E_0000018c64fb4a70/2 .event anyedge, v0000018c65016d80_0, v0000018c65016330_0, v0000018c65016e20_0, v0000018c64fc41a0_0;
+E_0000018c64fb4a70/3 .event anyedge, v0000018c650167e0_0, v0000018c65016010_0, v0000018c65016f60_0;
+E_0000018c64fb4a70 .event/or E_0000018c64fb4a70/0, E_0000018c64fb4a70/1, E_0000018c64fb4a70/2, E_0000018c64fb4a70/3;
+    .scope S_0000018c64f93080;
+T_0 ;
+    %wait E_0000018c64fb4a70;
+    %load/vec4 v0000018c650160b0_0;
+    %pad/u 32;
+    %pushi/vec4 1, 0, 32;
+    %cmp/e;
+    %flag_get/vec4 4;
+    %load/vec4 v0000018c64fc4100_0;
+    %load/vec4 v0000018c650170a0_0;
+    %cmp/e;
+    %flag_get/vec4 4;
+    %and;
+    %load/vec4 v0000018c64fc4100_0;
+    %pad/u 32;
+    %pushi/vec4 0, 0, 32;
+    %cmp/ne;
+    %flag_get/vec4 4;
+    %and;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.0, 8;
+    %pushi/vec4 2, 0, 2;
+    %store/vec4 v0000018c64f93380_0, 0, 2;
+    %jmp T_0.1;
+T_0.0 ;
+    %load/vec4 v0000018c65016150_0;
+    %pad/u 32;
+    %pushi/vec4 1, 0, 32;
+    %cmp/e;
+    %flag_get/vec4 4;
+    %load/vec4 v0000018c64fc4100_0;
+    %load/vec4 v0000018c65017280_0;
+    %cmp/e;
+    %flag_get/vec4 4;
+    %and;
+    %load/vec4 v0000018c64fc4100_0;
+    %pad/u 32;
+    %pushi/vec4 0, 0, 32;
+    %cmp/ne;
+    %flag_get/vec4 4;
+    %and;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.2, 8;
+    %pushi/vec4 1, 0, 2;
+    %store/vec4 v0000018c64f93380_0, 0, 2;
+    %jmp T_0.3;
+T_0.2 ;
+    %pushi/vec4 0, 0, 2;
+    %store/vec4 v0000018c64f93380_0, 0, 2;
+T_0.3 ;
+T_0.1 ;
+    %load/vec4 v0000018c650160b0_0;
+    %pad/u 32;
+    %pushi/vec4 1, 0, 32;
+    %cmp/e;
+    %flag_get/vec4 4;
+    %load/vec4 v0000018c64fc4240_0;
+    %load/vec4 v0000018c650170a0_0;
+    %cmp/e;
+    %flag_get/vec4 4;
+    %and;
+    %load/vec4 v0000018c64fc4240_0;
+    %pad/u 32;
+    %pushi/vec4 0, 0, 32;
+    %cmp/ne;
+    %flag_get/vec4 4;
+    %and;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.4, 8;
+    %pushi/vec4 2, 0, 2;
+    %store/vec4 v0000018c64fc3e80_0, 0, 2;
+    %jmp T_0.5;
+T_0.4 ;
+    %load/vec4 v0000018c65016150_0;
+    %pad/u 32;
+    %pushi/vec4 1, 0, 32;
+    %cmp/e;
+    %flag_get/vec4 4;
+    %load/vec4 v0000018c64fc4240_0;
+    %load/vec4 v0000018c65017280_0;
+    %cmp/e;
+    %flag_get/vec4 4;
+    %and;
+    %load/vec4 v0000018c64fc4240_0;
+    %pad/u 32;
+    %pushi/vec4 0, 0, 32;
+    %cmp/ne;
+    %flag_get/vec4 4;
+    %and;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.6, 8;
+    %pushi/vec4 1, 0, 2;
+    %store/vec4 v0000018c64fc3e80_0, 0, 2;
+    %jmp T_0.7;
+T_0.6 ;
+    %pushi/vec4 0, 0, 2;
+    %store/vec4 v0000018c64fc3e80_0, 0, 2;
+T_0.7 ;
+T_0.5 ;
+    %load/vec4 v0000018c65016150_0;
+    %pad/u 32;
+    %pushi/vec4 1, 0, 32;
+    %cmp/e;
+    %flag_get/vec4 4;
+    %load/vec4 v0000018c64fc46f0_0;
+    %load/vec4 v0000018c65017280_0;
+    %cmp/e;
+    %flag_get/vec4 4;
+    %and;
+    %load/vec4 v0000018c64fc46f0_0;
+    %pad/u 32;
+    %pushi/vec4 0, 0, 32;
+    %cmp/ne;
+    %flag_get/vec4 4;
+    %and;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.8, 8;
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v0000018c64fc3f20_0, 0, 1;
+    %jmp T_0.9;
+T_0.8 ;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0000018c64fc3f20_0, 0, 1;
+T_0.9 ;
+    %load/vec4 v0000018c64fc4060_0;
+    %load/vec4 v0000018c65016d80_0;
+    %cmp/e;
+    %flag_get/vec4 4;
+    %load/vec4 v0000018c65016e20_0;
+    %load/vec4 v0000018c65016330_0;
+    %cmp/u;
+    %flag_get/vec4 5;
+    %and;
+    %flag_set/vec4 8;
+    %load/vec4 v0000018c64fc41a0_0;
+    %load/vec4 v0000018c65016d80_0;
+    %cmp/e;
+    %flag_get/vec4 4;
+    %load/vec4 v0000018c650167e0_0;
+    %load/vec4 v0000018c65016330_0;
+    %cmp/u;
+    %flag_get/vec4 5;
+    %and;
+    %load/vec4 v0000018c65016d80_0;
+    %pad/u 32;
+    %pushi/vec4 0, 0, 32;
+    %cmp/ne;
+    %flag_get/vec4 4;
+    %and;
+    %load/vec4 v0000018c65016010_0;
+    %pad/u 32;
+    %pushi/vec4 1, 0, 32;
+    %cmp/e;
+    %flag_get/vec4 4;
+    %and;
+    %flag_set/vec4 9;
+    %flag_or 9, 8;
+    %jmp/0xz  T_0.10, 9;
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v0000018c65016290_0, 0, 1;
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v0000018c650161f0_0, 0, 1;
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v0000018c64fc3fc0_0, 0, 1;
+    %jmp T_0.11;
+T_0.10 ;
+    %load/vec4 v0000018c64fc4060_0;
+    %load/vec4 v0000018c650170a0_0;
+    %cmp/e;
+    %flag_get/vec4 4;
+    %load/vec4 v0000018c65016e20_0;
+    %load/vec4 v0000018c65016f60_0;
+    %cmp/u;
+    %flag_get/vec4 5;
+    %and;
+    %flag_set/vec4 8;
+    %load/vec4 v0000018c64fc41a0_0;
+    %load/vec4 v0000018c650170a0_0;
+    %cmp/e;
+    %flag_get/vec4 4;
+    %load/vec4 v0000018c650167e0_0;
+    %load/vec4 v0000018c65016f60_0;
+    %cmp/u;
+    %flag_get/vec4 5;
+    %and;
+    %load/vec4 v0000018c650170a0_0;
+    %pad/u 32;
+    %pushi/vec4 0, 0, 32;
+    %cmp/ne;
+    %flag_get/vec4 4;
+    %and;
+    %load/vec4 v0000018c650160b0_0;
+    %pad/u 32;
+    %pushi/vec4 1, 0, 32;
+    %cmp/e;
+    %flag_get/vec4 4;
+    %and;
+    %flag_set/vec4 9;
+    %flag_or 9, 8;
+    %jmp/0xz  T_0.12, 9;
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v0000018c65016290_0, 0, 1;
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v0000018c650161f0_0, 0, 1;
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v0000018c64fc3fc0_0, 0, 1;
+    %jmp T_0.13;
+T_0.12 ;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0000018c65016290_0, 0, 1;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0000018c650161f0_0, 0, 1;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0000018c64fc3fc0_0, 0, 1;
+T_0.13 ;
+T_0.11 ;
+    %jmp T_0;
+    .thread T_0, $push;
+# The file index is used to find the file name in the following table.
+:file_names 3;
+    "N/A";
+    "<interactive>";
+    "RiskSolveUnit.v";

@@ -1,0 +1,1 @@
+xst -intstyle ise -ifn "E:/ISE/P1/P1_L0_ALU/alu.xst" -ofn "E:/ISE/P1/P1_L0_ALU/alu.syr" 

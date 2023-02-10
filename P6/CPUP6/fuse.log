@@ -1,0 +1,54 @@
+Running: D:\ISESetup\14.7\ISE_DS\ISE\bin\nt64\unwrapped\fuse.exe -intstyle ise -incremental -lib unisims_ver -lib unimacro_ver -lib xilinxcorelib_ver -lib secureip -o E:/1-Project/P6/CPUP6/mips_txt_isim_beh.exe -prj E:/1-Project/P6/CPUP6/mips_txt_beh.prj work.mips_txt work.glbl 
+ISim P.20131013 (signature 0x7708f090)
+Number of CPUs detected in this system: 12
+Turning on mult-threading, number of parallel sub-compilation jobs: 24 
+Determining compilation order of HDL files
+Analyzing Verilog file "E:/1-Project/P6/CPUP6/RF.v" into library work
+Analyzing Verilog file "E:/1-Project/P6/CPUP6/PC.v" into library work
+Analyzing Verilog file "E:/1-Project/P6/CPUP6/NPC.v" into library work
+Analyzing Verilog file "E:/1-Project/P6/CPUP6/multdiv.v" into library work
+Analyzing Verilog file "E:/1-Project/P6/CPUP6/EXT.v" into library work
+Analyzing Verilog file "E:/1-Project/P6/CPUP6/controller.v" into library work
+Analyzing Verilog file "E:/1-Project/P6/CPUP6/CMP.v" into library work
+Analyzing Verilog file "E:/1-Project/P6/CPUP6/ALU.v" into library work
+Analyzing Verilog file "E:/1-Project/P6/CPUP6/RiskSolveUnit.v" into library work
+Analyzing Verilog file "E:/1-Project/P6/CPUP6/M.v" into library work
+Analyzing Verilog file "E:/1-Project/P6/CPUP6/FlowReg_W.v" into library work
+Analyzing Verilog file "E:/1-Project/P6/CPUP6/FlowReg_M.v" into library work
+Analyzing Verilog file "E:/1-Project/P6/CPUP6/FlowReg_E.v" into library work
+Analyzing Verilog file "E:/1-Project/P6/CPUP6/FlowReg_D.v" into library work
+Analyzing Verilog file "E:/1-Project/P6/CPUP6/F.v" into library work
+Analyzing Verilog file "E:/1-Project/P6/CPUP6/E.v" into library work
+Analyzing Verilog file "E:/1-Project/P6/CPUP6/D.v" into library work
+Analyzing Verilog file "E:/1-Project/P6/CPUP6/mips.v" into library work
+Analyzing Verilog file "E:/1-Project/P6/CPUP6/mips_tb.v" into library work
+Analyzing Verilog file "D:/ISESetup/14.7/ISE_DS/ISE//verilog/src/glbl.v" into library work
+Starting static elaboration
+Completed static elaboration
+Compiling module PC
+Compiling module F
+Compiling module FlowReg_D
+Compiling module controller
+Compiling module EXT
+Compiling module RF
+Compiling module CMP
+Compiling module NPC
+Compiling module D
+Compiling module FlowReg_E
+Compiling module ALU
+Compiling module multdiv
+Compiling module E
+Compiling module FlowReg_M
+Compiling module M
+Compiling module FlowReg_W
+Compiling module RiskSolveUnit
+Compiling module mips
+Compiling module mips_txt
+Compiling module glbl
+Time Resolution for simulation is 1ps.
+Waiting for 1 sub-compilation(s) to finish...
+WARNING:Simulator - Unable to copy libPortabilityNOSH.dll to the simulation executable directory: boost::filesystem::copy_file: 系统找不到指定的路径。, "isim\mips_txt_isim_beh.exe.sim\libPortability.dll".
+Compiled 20 Verilog Units
+Built simulation executable E:/1-Project/P6/CPUP6/mips_txt_isim_beh.exe
+Fuse Memory Usage: 33200 KB
+Fuse CPU Usage: 655 ms

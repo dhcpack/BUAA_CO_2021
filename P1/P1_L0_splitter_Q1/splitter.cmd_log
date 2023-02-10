@@ -1,0 +1,1 @@
+xst -intstyle ise -ifn "E:/ISE/P1/P1_L0_splitter/splitter.xst" -ofn "E:/ISE/P1/P1_L0_splitter/splitter.syr" 

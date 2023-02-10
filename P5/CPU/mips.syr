@@ -1,0 +1,204 @@
+Release 14.7 - xst P.20131013 (nt64)
+Copyright (c) 1995-2013 Xilinx, Inc.  All rights reserved.
+--> Parameter TMPDIR set to xst/projnav.tmp
+
+
+Total REAL time to Xst completion: 0.00 secs
+Total CPU time to Xst completion: 0.11 secs
+ 
+--> Parameter xsthdpdir set to xst
+
+
+Total REAL time to Xst completion: 0.00 secs
+Total CPU time to Xst completion: 0.11 secs
+ 
+--> Reading design: mips.prj
+
+TABLE OF CONTENTS
+  1) Synthesis Options Summary
+  2) HDL Parsing
+  3) HDL Elaboration
+  4) HDL Synthesis
+       4.1) HDL Synthesis Report
+  5) Advanced HDL Synthesis
+       5.1) Advanced HDL Synthesis Report
+  6) Low Level Synthesis
+  7) Partition Report
+  8) Design Summary
+       8.1) Primitive and Black Box Usage
+       8.2) Device utilization summary
+       8.3) Partition Resource Summary
+       8.4) Timing Report
+            8.4.1) Clock Information
+            8.4.2) Asynchronous Control Signals Information
+            8.4.3) Timing Summary
+            8.4.4) Timing Details
+            8.4.5) Cross Clock Domains Report
+
+
+=========================================================================
+*                      Synthesis Options Summary                        *
+=========================================================================
+---- Source Parameters
+Input File Name                    : "mips.prj"
+Ignore Synthesis Constraint File   : NO
+
+---- Target Parameters
+Output File Name                   : "mips"
+Output Format                      : NGC
+Target Device                      : xc6slx4-2-tqg144
+
+---- Source Options
+Top Module Name                    : mips
+Automatic FSM Extraction           : YES
+FSM Encoding Algorithm             : Auto
+Safe Implementation                : No
+FSM Style                          : LUT
+RAM Extraction                     : Yes
+RAM Style                          : Auto
+ROM Extraction                     : Yes
+Shift Register Extraction          : YES
+ROM Style                          : Auto
+Resource Sharing                   : YES
+Asynchronous To Synchronous        : NO
+Shift Register Minimum Size        : 2
+Use DSP Block                      : Auto
+Automatic Register Balancing       : No
+
+---- Target Options
+LUT Combining                      : Auto
+Reduce Control Sets                : Auto
+Add IO Buffers                     : YES
+Global Maximum Fanout              : 100000
+Add Generic Clock Buffer(BUFG)     : 16
+Register Duplication               : YES
+Optimize Instantiated Primitives   : NO
+Use Clock Enable                   : Auto
+Use Synchronous Set                : Auto
+Use Synchronous Reset              : Auto
+Pack IO Registers into IOBs        : Auto
+Equivalent register Removal        : YES
+
+---- General Options
+Optimization Goal                  : Speed
+Optimization Effort                : 1
+Power Reduction                    : NO
+Keep Hierarchy                     : No
+Netlist Hierarchy                  : As_Optimized
+RTL Output                         : Yes
+Global Optimization                : AllClockNets
+Read Cores                         : YES
+Write Timing Constraints           : NO
+Cross Clock Analysis               : NO
+Hierarchy Separator                : /
+Bus Delimiter                      : <>
+Case Specifier                     : Maintain
+Slice Utilization Ratio            : 100
+BRAM Utilization Ratio             : 100
+DSP48 Utilization Ratio            : 100
+Auto BRAM Packing                  : NO
+Slice Utilization Ratio Delta      : 5
+
+=========================================================================
+
+
+=========================================================================
+*                          HDL Parsing                                  *
+=========================================================================
+Analyzing Verilog file "E:\1-Project\P5\CPU\RF.v" into library work
+Parsing module <RF>.
+Analyzing Verilog file "E:\1-Project\P5\CPU\PC.v" into library work
+Parsing module <PC>.
+Analyzing Verilog file "E:\1-Project\P5\CPU\NPC.v" into library work
+Parsing module <NPC>.
+Analyzing Verilog file "E:\1-Project\P5\CPU\IM.v" into library work
+Parsing module <IM>.
+Analyzing Verilog file "E:\1-Project\P5\CPU\EXT.v" into library work
+Parsing module <EXT>.
+Analyzing Verilog file "E:\1-Project\P5\CPU\DM.v" into library work
+Parsing module <DM>.
+Analyzing Verilog file "E:\1-Project\P5\CPU\controller.v" into library work
+Parsing verilog file "constant.v" included at line 1.
+Parsing module <controller>.
+Analyzing Verilog file "E:\1-Project\P5\CPU\CMP.v" into library work
+Parsing verilog file "constant.v" included at line 1.
+Parsing module <CMP>.
+Analyzing Verilog file "E:\1-Project\P5\CPU\ALU.v" into library work
+Parsing verilog file "constant.v" included at line 1.
+Parsing module <ALU>.
+Analyzing Verilog file "E:\1-Project\P5\CPU\RiskSolveUnit.v" into library work
+Parsing verilog file "constant.v" included at line 1.
+Parsing module <RiskSolveUnit>.
+Analyzing Verilog file "E:\1-Project\P5\CPU\M.v" into library work
+Parsing module <M>.
+Analyzing Verilog file "E:\1-Project\P5\CPU\FlowReg_W.v" into library work
+Parsing module <FlowReg_W>.
+Analyzing Verilog file "E:\1-Project\P5\CPU\FlowReg_M.v" into library work
+Parsing module <FlowReg_M>.
+Analyzing Verilog file "E:\1-Project\P5\CPU\FlowReg_E.v" into library work
+Parsing module <FlowReg_E>.
+Analyzing Verilog file "E:\1-Project\P5\CPU\FlowReg_D.v" into library work
+Parsing module <FlowReg_D>.
+Analyzing Verilog file "E:\1-Project\P5\CPU\F.v" into library work
+Parsing module <F>.
+Analyzing Verilog file "E:\1-Project\P5\CPU\E.v" into library work
+Parsing module <E>.
+Analyzing Verilog file "E:\1-Project\P5\CPU\D.v" into library work
+Parsing module <D>.
+Analyzing Verilog file "E:\1-Project\P5\CPU\mips.v" into library work
+Parsing module <mips>.
+
+=========================================================================
+*                            HDL Elaboration                            *
+=========================================================================
+
+Elaborating module <mips>.
+
+Elaborating module <F>.
+
+Elaborating module <PC>.
+
+Elaborating module <IM>.
+ERROR:HDLCompiler:990 - "E:\1-Project\P5\CPU\IM.v" Line 13: Cannot open file code.txt
+Module IM remains a blackbox, due to errors in its contents
+WARNING:HDLCompiler:1499 - "E:\1-Project\P5\CPU\IM.v" Line 1: Empty module <IM> remains a black box.
+
+Elaborating module <FlowReg_D>.
+
+Elaborating module <D>.
+
+Elaborating module <controller>.
+
+Elaborating module <EXT>.
+
+Elaborating module <RF>.
+"E:\1-Project\P5\CPU\RF.v" Line 33. $display  32'b................................ 5'b..... 32'b................................
+
+Elaborating module <CMP>.
+
+Elaborating module <NPC>.
+
+Elaborating module <FlowReg_E>.
+
+Elaborating module <E>.
+
+Elaborating module <ALU>.
+
+Elaborating module <FlowReg_M>.
+
+Elaborating module <M>.
+
+Elaborating module <DM>.
+"E:\1-Project\P5\CPU\DM.v" Line 48. $display  32'b................................ 32'b................................ 32'b................................
+
+Elaborating module <FlowReg_W>.
+
+Elaborating module <RiskSolveUnit>.
+--> 
+
+Total memory usage is 6246156 kilobytes
+
+Number of errors   :    1 (   0 filtered)
+Number of warnings :    1 (   0 filtered)
+Number of infos    :    0 (   0 filtered)
+

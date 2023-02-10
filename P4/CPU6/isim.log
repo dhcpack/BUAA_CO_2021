@@ -1,0 +1,129 @@
+ISim log file
+Running: E:\1-Project\CPU\mips_tb_isim_beh.exe -intstyle ise -gui -tclbatch isim.cmd -wdb E:/1-Project/CPU/mips_tb_isim_beh.wdb 
+ISim P.20131013 (signature 0x7708f090)
+This is a Full version of ISim.
+Time resolution is 1 ps
+# onerror resume
+# wave add /
+# run 1000 ns
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+@00003000: $ 8 <= 0000000a
+@00003004: $ 9 <= 0000000b
+@00003008: $10 <= 00000001
+ISim P.20131013 (signature 0x7708f090)
+This is a Full version of ISim.
+# run 1000 ns
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+Stopped at time : 1 ns : File "E:/1-Project/CPU/RF.v" Line 33
+# run all
+Stopped at time : 1 ns : File "E:/1-Project/CPU/RF.v" Line 33
+# run all
+Stopped at time : 1 ns : File "E:/1-Project/CPU/RF.v" Line 34
+# run all
+Stopped at time : 1 ns : File "E:/1-Project/CPU/RF.v" Line 35
+# run all
+@00003000: $ 8 <= 0000000a
+Stopped at time : 3 ns : File "E:/1-Project/CPU/RF.v" Line 33
+# run all
+Stopped at time : 3 ns : File "E:/1-Project/CPU/RF.v" Line 33
+# run all
+Stopped at time : 3 ns : File "E:/1-Project/CPU/RF.v" Line 34
+# run all
+Stopped at time : 3 ns : File "E:/1-Project/CPU/RF.v" Line 35
+# run all
+@00003004: $ 9 <= 0000000b
+Stopped at time : 5 ns : File "E:/1-Project/CPU/RF.v" Line 33
+# run all
+Stopped at time : 5 ns : File "E:/1-Project/CPU/RF.v" Line 33
+# run all
+Stopped at time : 5 ns : File "E:/1-Project/CPU/RF.v" Line 34
+# run all
+Stopped at time : 5 ns : File "E:/1-Project/CPU/RF.v" Line 35
+# run all
+@00003008: $10 <= 00000001
+Stopped at time : 2047 ns : File "E:/1-Project/CPU/RF.v" Line 33
+# run all
+Stopped at time : 2047 ns : File "E:/1-Project/CPU/RF.v" Line 33
+# run all
+Stopped at time : 2047 ns : File "E:/1-Project/CPU/RF.v" Line 34
+# run all
+Stopped at time : 2047 ns : File "E:/1-Project/CPU/RF.v" Line 35
+# run all
+@00004000: $ 8 <= 0000000a
+Stopped at time : 2049 ns : File "E:/1-Project/CPU/RF.v" Line 33
+# run all
+Stopped at time : 2049 ns : File "E:/1-Project/CPU/RF.v" Line 33
+# run all
+Stopped at time : 2049 ns : File "E:/1-Project/CPU/RF.v" Line 34
+# run all
+Stopped at time : 2049 ns : File "E:/1-Project/CPU/RF.v" Line 35
+# run all
+@00004004: $ 9 <= 0000000b
+Stopped at time : 2051 ns : File "E:/1-Project/CPU/RF.v" Line 33
+# run all
+Stopped at time : 2051 ns : File "E:/1-Project/CPU/RF.v" Line 33
+# run all
+Stopped at time : 2051 ns : File "E:/1-Project/CPU/RF.v" Line 34
+# run all
+Stopped at time : 2051 ns : File "E:/1-Project/CPU/RF.v" Line 35
+# run all
+@00004008: $10 <= 00000001
+Stopped at time : 4093 ns : File "E:/1-Project/CPU/RF.v" Line 33
+# run all
+Stopped at time : 4093 ns : File "E:/1-Project/CPU/RF.v" Line 33
+# run all
+Stopped at time : 4093 ns : File "E:/1-Project/CPU/RF.v" Line 34
+# run all
+Stopped at time : 4093 ns : File "E:/1-Project/CPU/RF.v" Line 35
+# run all
+@00005000: $ 8 <= 0000000a
+Stopped at time : 4095 ns : File "E:/1-Project/CPU/RF.v" Line 33
+# run all
+Stopped at time : 4095 ns : File "E:/1-Project/CPU/RF.v" Line 33
+# run all
+Stopped at time : 4095 ns : File "E:/1-Project/CPU/RF.v" Line 34
+# run all
+Stopped at time : 4095 ns : File "E:/1-Project/CPU/RF.v" Line 35
+# run all
+@00005004: $ 9 <= 0000000b
+Stopped at time : 4097 ns : File "E:/1-Project/CPU/RF.v" Line 33
+# run all
+Stopped at time : 4097 ns : File "E:/1-Project/CPU/RF.v" Line 33
+# run all
+Stopped at time : 4097 ns : File "E:/1-Project/CPU/RF.v" Line 34
+# run all
+Stopped at time : 4097 ns : File "E:/1-Project/CPU/RF.v" Line 35
+# run all
+@00005008: $10 <= 00000001
+Stopped at time : 6139 ns : File "E:/1-Project/CPU/RF.v" Line 33
+# run all
+Stopped at time : 6139 ns : File "E:/1-Project/CPU/RF.v" Line 33
+# run all
+Stopped at time : 6139 ns : File "E:/1-Project/CPU/RF.v" Line 34
+# run all
+Stopped at time : 6139 ns : File "E:/1-Project/CPU/RF.v" Line 35
+# run all
+@00006000: $ 8 <= 0000000a
+Stopped at time : 6141 ns : File "E:/1-Project/CPU/RF.v" Line 33
+# run all
+Stopped at time : 6141 ns : File "E:/1-Project/CPU/RF.v" Line 33
+ISim P.20131013 (signature 0x7708f090)
+This is a Full version of ISim.
+# run 1000 ns
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+@00003000: $ 8 <= 0000000a
+@00003004: $ 9 <= 0000000b
+@00003008: $10 <= 00000001
+ISim P.20131013 (signature 0x7708f090)
+This is a Full version of ISim.
+# run 1000 ns
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+@00003000: $ 8 <= 0000000a
+@00003004: $ 9 <= 0000000b
+@00003008: $10 <= 00000001
+@00003014: $12 <= 00000000
+@0000301c: $13 <= 0000000c

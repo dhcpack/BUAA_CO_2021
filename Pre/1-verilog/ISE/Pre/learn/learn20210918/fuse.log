@@ -1,0 +1,12 @@
+Running: D:\ISESetup\14.7\ISE_DS\ISE\bin\nt64\unwrapped\fuse.exe -intstyle ise -incremental -lib unisims_ver -lib unimacro_ver -lib xilinxcorelib_ver -lib secureip -o E:/ISE/learn20210918/TEST_gate_isim_beh.exe -prj E:/ISE/learn20210918/TEST_gate_beh.prj work.TEST_gate work.glbl 
+ISim P.20131013 (signature 0x7708f090)
+Number of CPUs detected in this system: 12
+Turning on mult-threading, number of parallel sub-compilation jobs: 24 
+Determining compilation order of HDL files
+Analyzing Verilog file "E:/ISE/learn20210918/sx_tb.v" into library work
+ERROR:HDLCompiler:806 - "E:/ISE/learn20210918/sx_tb.v" Line 6: Syntax error near "<".
+ERROR:HDLCompiler:806 - "E:/ISE/learn20210918/sx_tb.v" Line 7: Syntax error near "<".
+ERROR:HDLCompiler:806 - "E:/ISE/learn20210918/sx_tb.v" Line 8: Syntax error near "<".
+ERROR:HDLCompiler:1059 - "E:/ISE/learn20210918/sx_tb.v" Line 11: module_name is an unknown type
+ERROR:HDLCompiler:598 - "E:/ISE/learn20210918/sx_tb.v" Line 5: Module <TEST_gate> ignored due to previous errors.
+Verilog file E:/ISE/learn20210918/sx_tb.v ignored due to errors

@@ -1,0 +1,44 @@
+ISim log file
+Running: E:\1-Project\P4\CPU\mips_tb_isim_beh.exe -intstyle ise -gui -tclbatch isim.cmd -wdb E:/1-Project/P4/CPU/mips_tb_isim_beh.wdb 
+ISim P.20131013 (signature 0x7708f090)
+This is a Full version of ISim.
+Time resolution is 1 ps
+# onerror resume
+# wave add /
+# run 1000 ns
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+@00003000: $ 8 <= 0000000a
+@00003004: $ 8 <= 00000028
+@00003008: $ 9 <= ffff0000
+@0000300c: $ 9 <= ffff0064
+@00003010: $10 <= fff80320
+@00003014: *00000000 <= 00000028
+@00003018: *00000004 <= ffff0064
+@0000301c: *00000008 <= fff80320
+ISim P.20131013 (signature 0x7708f090)
+This is a Full version of ISim.
+# run 1000 ns
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+@00003000: $ 8 <= 0000000a
+@00003004: $ 8 <= 00000028
+@00003008: $ 9 <= ffff0000
+@0000300c: $ 9 <= ffff0064
+@00003010: $10 <= fff80320
+@00003014: *00000000 <= 00000028
+@00003018: *00000004 <= ffff0064
+@0000301c: *00000008 <= fff80320
+ISim P.20131013 (signature 0x7708f090)
+This is a Full version of ISim.
+# run 1000 ns
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+@00003000: $ 8 <= 0000000a
+@00003004: $ 8 <= 00000028
+@00003008: $ 9 <= ffff0000
+@0000300c: $ 9 <= ffff0064
+@00003010: $10 <= fff80320
+@00003014: *00000000 <= 00000028
+@00003018: *00000004 <= ffff0064
+@0000301c: *00000008 <= fff80320

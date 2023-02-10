@@ -1,0 +1,10 @@
+.directory
+*.out
+*.aux
+*.log
+*.pdf
+*.toc
+*swp
+*~
+*save
+_minted-guide-book

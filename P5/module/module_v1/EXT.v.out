@@ -1,0 +1,51 @@
+#! /c/Source/iverilog-install/bin/vvp
+:ivl_version "12.0 (devel)" "(s20150603-1110-g18392a46)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision + 0;
+:vpi_module "D:\iverilog\iverilog\lib\ivl\system.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\vhdl_sys.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\vhdl_textio.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\v2005_math.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\va_math.vpi";
+S_00000211587a6260 .scope module, "EXT" "EXT" 2 1;
+ .timescale 0 0;
+    .port_info 0 /INPUT 16 "immoffset";
+    .port_info 1 /INPUT 2 "extop";
+    .port_info 2 /OUTPUT 32 "out";
+L_000002115883fff8 .functor BUFT 1, C4<00>, C4<0>, C4<0>, C4<0>;
+v00000211587a6df0_0 .net/2u *"_ivl_0", 1 0, L_000002115883fff8;  1 drivers
+v00000211587aecb0_0 .net *"_ivl_10", 0 0, L_00000211587f1d30;  1 drivers
+v00000211587aed50_0 .net *"_ivl_13", 0 0, L_00000211587f0e30;  1 drivers
+v00000211587aedf0_0 .net *"_ivl_14", 15 0, L_00000211587f1970;  1 drivers
+v00000211587aee90_0 .net *"_ivl_16", 31 0, L_00000211587f0f70;  1 drivers
+L_00000211588400d0 .functor BUFT 1, C4<11111111111111111111111111111111>, C4<0>, C4<0>, C4<0>;
+v00000211587aef30_0 .net/2u *"_ivl_18", 31 0, L_00000211588400d0;  1 drivers
+v00000211587a63f0_0 .net *"_ivl_2", 0 0, L_00000211587f10b0;  1 drivers
+v00000211587a6490_0 .net *"_ivl_20", 31 0, L_00000211587f1150;  1 drivers
+L_0000021158840040 .functor BUFT 1, C4<0000000000000000>, C4<0>, C4<0>, C4<0>;
+v00000211587a6530_0 .net/2u *"_ivl_4", 15 0, L_0000021158840040;  1 drivers
+v00000211587a6660_0 .net *"_ivl_6", 31 0, L_00000211587f1510;  1 drivers
+L_0000021158840088 .functor BUFT 1, C4<01>, C4<0>, C4<0>, C4<0>;
+v00000211587f0d40_0 .net/2u *"_ivl_8", 1 0, L_0000021158840088;  1 drivers
+o00000211587f7188 .functor BUFZ 2, C4<zz>; HiZ drive
+v00000211587f1010_0 .net "extop", 1 0, o00000211587f7188;  0 drivers
+o00000211587f71b8 .functor BUFZ 16, C4<zzzzzzzzzzzzzzzz>; HiZ drive
+v00000211587f1a10_0 .net "immoffset", 15 0, o00000211587f71b8;  0 drivers
+v00000211587f1790_0 .net "out", 31 0, L_00000211587f15b0;  1 drivers
+L_00000211587f10b0 .cmp/eq 2, o00000211587f7188, L_000002115883fff8;
+L_00000211587f1510 .concat [ 16 16 0 0], o00000211587f71b8, L_0000021158840040;
+L_00000211587f1d30 .cmp/eq 2, o00000211587f7188, L_0000021158840088;
+L_00000211587f0e30 .part o00000211587f71b8, 15, 1;
+LS_00000211587f1970_0_0 .concat [ 1 1 1 1], L_00000211587f0e30, L_00000211587f0e30, L_00000211587f0e30, L_00000211587f0e30;
+LS_00000211587f1970_0_4 .concat [ 1 1 1 1], L_00000211587f0e30, L_00000211587f0e30, L_00000211587f0e30, L_00000211587f0e30;
+LS_00000211587f1970_0_8 .concat [ 1 1 1 1], L_00000211587f0e30, L_00000211587f0e30, L_00000211587f0e30, L_00000211587f0e30;
+LS_00000211587f1970_0_12 .concat [ 1 1 1 1], L_00000211587f0e30, L_00000211587f0e30, L_00000211587f0e30, L_00000211587f0e30;
+L_00000211587f1970 .concat [ 4 4 4 4], LS_00000211587f1970_0_0, LS_00000211587f1970_0_4, LS_00000211587f1970_0_8, LS_00000211587f1970_0_12;
+L_00000211587f0f70 .concat [ 16 16 0 0], o00000211587f71b8, L_00000211587f1970;
+L_00000211587f1150 .functor MUXZ 32, L_00000211588400d0, L_00000211587f0f70, L_00000211587f1d30, C4<>;
+L_00000211587f15b0 .functor MUXZ 32, L_00000211587f1150, L_00000211587f1510, L_00000211587f10b0, C4<>;
+# The file index is used to find the file name in the following table.
+:file_names 3;
+    "N/A";
+    "<interactive>";
+    "EXT.v";

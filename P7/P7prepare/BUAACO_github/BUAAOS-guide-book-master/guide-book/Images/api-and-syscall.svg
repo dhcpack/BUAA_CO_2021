@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:osb="http://www.openswatchbook.org/uri/2009/osb"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="170mm"
+   viewBox="0 0 744.09449 602.36221"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="api-and-syscall.svg">
+  <defs
+     id="defs4">
+    <linearGradient
+       id="linearGradient4138"
+       osb:paint="solid">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop4140" />
+    </linearGradient>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.7"
+     inkscape:cx="394.47583"
+     inkscape:cy="395.98272"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1600"
+     inkscape:window-height="836"
+     inkscape:window-x="-2"
+     inkscape:window-y="-3"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-449.99999)">
+    <rect
+       style="opacity:1;fill:#65a2e9;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:3.54645371;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4136"
+       width="602.91003"
+       height="194.57141"
+       x="74.972824"
+       y="624.78394" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="376.61139"
+       y="661.18433"
+       id="text4144"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4146"
+         x="376.61139"
+         y="661.18433"
+         style="font-size:25px;text-align:center;text-anchor:middle">Application Programming Interface</tspan><tspan
+         sodipodi:role="line"
+         x="376.61139"
+         y="691.06012"
+         id="tspan4148"
+         style="font-size:25px;text-align:center;text-anchor:middle">应用程序编程接口</tspan></text>
+    <rect
+       style="opacity:1;fill:#ebff00;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:2.32214236;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4154"
+       width="167.86319"
+       height="76.949432"
+       x="93.875565"
+       y="714.43042" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="117.01525"
+       y="767.08789"
+       id="text4158"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4160"
+         x="117.01525"
+         y="767.08789">POSIX</tspan></text>
+    <rect
+       style="opacity:1;fill:#ebff00;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:2.32214236;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4154-9"
+       width="167.86319"
+       height="76.949432"
+       x="287.23599"
+       y="714.7959" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="372.10654"
+       y="745.25031"
+       id="text4158-3"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="372.10654"
+         y="745.25031"
+         style="font-size:25px;text-align:center;text-anchor:middle"
+         id="tspan4193">C Standard</tspan><tspan
+         sodipodi:role="line"
+         x="372.10654"
+         y="776.50031"
+         style="font-size:25px;text-align:center;text-anchor:middle"
+         id="tspan4191">Library</tspan></text>
+    <rect
+       style="opacity:1;fill:#ebff00;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:2.32214236;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4154-7"
+       width="167.86319"
+       height="76.949432"
+       x="481.43906"
+       y="714.31372" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="504.57874"
+       y="766.97119"
+       id="text4158-7"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4160-8"
+         x="504.57874"
+         y="766.97119">......</tspan></text>
+    <rect
+       style="opacity:1;fill:#ade965;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:3.4020071;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4136-1"
+       width="603.0545"
+       height="179.00157"
+       x="74.881851"
+       y="820.17743" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="376.59265"
+       y="852.65009"
+       id="text4144-8"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4146-9"
+         x="376.59265"
+         y="852.65009"
+         style="font-size:25px;text-align:center;text-anchor:middle">System Call</tspan><tspan
+         sodipodi:role="line"
+         x="376.59265"
+         y="882.52588"
+         id="tspan4148-5"
+         style="font-size:25px;text-align:center;text-anchor:middle">系统调用</tspan></text>
+    <rect
+       style="opacity:1;fill:#f1ff52;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.05066824;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4154-4"
+       width="565.9234"
+       height="82.866791"
+       x="95.609734"
+       y="897.14313" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="197.77953"
+       y="952.68781"
+       id="text4158-9"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4160-2"
+         x="197.77953"
+         y="952.68781">read write fork ......</tspan></text>
+    <rect
+       style="opacity:1;fill:#f789cc;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:2.76605535;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4136-2"
+       width="603.69043"
+       height="118.20895"
+       x="74.726227"
+       y="506.68631" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="281.71429"
+       y="584.64795"
+       id="text4287"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4289"
+         x="281.71429"
+         y="584.64795"
+         style="font-size:50px">用户程序</tspan></text>
+  </g>
+</svg>

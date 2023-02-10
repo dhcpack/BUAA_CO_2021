@@ -1,0 +1,2 @@
+ISim log file
+Running: testmips.exe -intstyle ise -gui -tclbatch test.tcl 

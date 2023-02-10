@@ -1,0 +1,51 @@
+Running: D:\ISESetup\14.7\ISE_DS\ISE\bin\nt64\unwrapped\fuse.exe --nodebug --prj testmine.prj -o testmipsmine.exe mips_txt 
+ISim P.20131013 (signature 0x7708f090)
+Number of CPUs detected in this system: 12
+Turning on mult-threading, number of parallel sub-compilation jobs: 24 
+Determining compilation order of HDL files
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulemine\ALU.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulemine\CMP.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulemine\constant.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulemine\controller.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulemine\D.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulemine\E.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulemine\EXT.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulemine\F.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulemine\FlowReg_D.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulemine\FlowReg_E.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulemine\FloWReg_M.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulemine\FlowReg_W.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulemine\M.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulemine\mips.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulemine\mips_tb.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulemine\multdiv.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulemine\NPC.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulemine\PC.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulemine\RF.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testprogram\modulemine\RiskSolveUnit.v" into library work
+Starting static elaboration
+Completed static elaboration
+Compiling module PC
+Compiling module F
+Compiling module FlowReg_D
+Compiling module controller
+Compiling module EXT
+Compiling module RF
+Compiling module CMP
+Compiling module NPC
+Compiling module D
+Compiling module FlowReg_E
+Compiling module ALU
+Compiling module multdiv
+Compiling module E
+Compiling module FlowReg_M
+Compiling module M
+Compiling module FlowReg_W
+Compiling module RiskSolveUnit
+Compiling module mips
+Compiling module mips_txt
+Time Resolution for simulation is 1ps.
+Compiled 19 Verilog Units
+Built simulation executable testmipsmine.exe
+Fuse Memory Usage: 32868 KB
+Fuse CPU Usage: 452 ms

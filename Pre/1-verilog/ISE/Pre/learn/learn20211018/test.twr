@@ -1,0 +1,87 @@
+--------------------------------------------------------------------------------
+Release 14.7 Trace  (nt64)
+Copyright (c) 1995-2013 Xilinx, Inc.  All rights reserved.
+
+D:\ISESetup\14.7\ISE_DS\ISE\bin\nt64\unwrapped\trce.exe -intstyle ise -v 3 -s 2
+-n 3 -fastpaths -xml test.twx test.ncd -o test.twr test.pcf
+
+Design file:              test.ncd
+Physical constraint file: test.pcf
+Device,package,speed:     xc6slx4,tqg144,C,-2 (PRODUCTION 1.23 2013-10-13)
+Report level:             verbose report
+
+Environment Variable      Effect 
+--------------------      ------ 
+NONE                      No environment variables were set
+--------------------------------------------------------------------------------
+
+INFO:Timing:2698 - No timing constraints found, doing default enumeration.
+INFO:Timing:3412 - To improve timing, see the Timing Closure User Guide (UG612).
+INFO:Timing:2752 - To get complete path coverage, use the unconstrained paths 
+   option. All paths that are not constrained will be reported in the 
+   unconstrained paths section(s) of the report.
+INFO:Timing:3339 - The clock-to-out numbers in this timing report are based on 
+   a 50 Ohm transmission line loading model.  For the details of this model, 
+   and for more information on accounting for different loading conditions, 
+   please see the device datasheet.
+
+
+
+Data Sheet report:
+-----------------
+All values displayed in nanoseconds (ns)
+
+Pad to Pad
+---------------+---------------+---------+
+Source Pad     |Destination Pad|  Delay  |
+---------------+---------------+---------+
+gray<0>        |bin<0>         |   10.045|
+gray<1>        |bin<0>         |    9.945|
+gray<1>        |bin<1>         |    9.443|
+gray<2>        |bin<0>         |    8.839|
+gray<2>        |bin<1>         |    8.806|
+gray<2>        |bin<2>         |    8.798|
+gray<3>        |bin<0>         |    9.172|
+gray<3>        |bin<1>         |    9.150|
+gray<3>        |bin<2>         |    8.555|
+gray<3>        |bin<3>         |    8.596|
+gray<4>        |bin<0>         |    8.729|
+gray<4>        |bin<1>         |    8.697|
+gray<4>        |bin<2>         |    8.681|
+gray<4>        |bin<3>         |    9.054|
+gray<4>        |bin<4>         |    8.646|
+gray<5>        |bin<0>         |    8.625|
+gray<5>        |bin<1>         |    8.610|
+gray<5>        |bin<2>         |    8.825|
+gray<5>        |bin<3>         |    8.811|
+gray<5>        |bin<4>         |    8.403|
+gray<5>        |bin<5>         |    8.947|
+gray<6>        |bin<0>         |    9.185|
+gray<6>        |bin<1>         |    9.157|
+gray<6>        |bin<2>         |    8.213|
+gray<6>        |bin<3>         |    8.932|
+gray<6>        |bin<4>         |    8.524|
+gray<6>        |bin<5>         |    8.787|
+gray<6>        |bin<6>         |    8.324|
+gray<7>        |bin<0>         |   10.636|
+gray<7>        |bin<1>         |   10.134|
+gray<7>        |bin<2>         |    8.457|
+gray<7>        |bin<3>         |    8.596|
+gray<7>        |bin<4>         |    8.188|
+gray<7>        |bin<5>         |    8.797|
+gray<7>        |bin<6>         |    8.334|
+gray<7>        |bin<7>         |    7.627|
+---------------+---------------+---------+
+
+
+Analysis completed Mon Oct 18 15:58:39 2021 
+--------------------------------------------------------------------------------
+
+Trace Settings:
+-------------------------
+Trace Settings 
+
+Peak Memory Usage: 4554 MB
+
+
+

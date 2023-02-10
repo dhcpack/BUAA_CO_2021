@@ -1,0 +1,66 @@
+	//------------------------------------------------
+	assign packedControl=(currentCommand[31:26]==0)?judgeByLowerSix:
+		(currentCommand[31:26]==1)?judgeByMiddleFive:
+		(currentCommand[31:26]==28)?judgeByDoubleSix:
+		(currentCommand[31:26]==16)?judgeSpecialType:judgeByUpperSix;
+	//------------------------------------------------
+	assign judgeByUpperSix=(currentCommand[31:26]==`lw)?(51'h0000B0001E01049C):
+		(currentCommand[31:26]==`sw)?(51'h0000B004000004B8):
+		(currentCommand[31:26]==`lb)?(51'h0000B0029E01049C):
+		(currentCommand[31:26]==`lbu)?(51'h0000B0021E01049C):
+		(currentCommand[31:26]==`sb)?(51'h0000B006000004B8):
+		(currentCommand[31:26]==`lh)?(51'h0000B0019E01049C):
+		(currentCommand[31:26]==`lhu)?(51'h0000B0011E01049C):
+		(currentCommand[31:26]==`sh)?(51'h0000B005000004B8):
+		(currentCommand[31:26]==`beq)?(51'h0000020000400448):
+		(currentCommand[31:26]==`bne)?(51'h0000020800400448):
+		(currentCommand[31:26]==`bgtz)?(51'h0000021800400478):
+		(currentCommand[31:26]==`blez)?(51'h0000022000400478):
+		(currentCommand[31:26]==`addi)?(51'h0000B4001E0204BB):
+		(currentCommand[31:26]==`addiu)?(51'h0000B0001E0204BB):
+		(currentCommand[31:26]==`andi)?(51'h000280001E0204BB):
+		(currentCommand[31:26]==`ori)?(51'h000288001E0204BB):
+		(currentCommand[31:26]==`xori)?(51'h000298001E0204BB):
+		(currentCommand[31:26]==`lui)?(51'h000600001E2005FA):
+		(currentCommand[31:26]==`slti)?(51'h0000A0001E0204BB):
+		(currentCommand[31:26]==`sltiu)?(51'h0000A8001E0204BB):
+		(currentCommand[31:26]==`j)?(51'h00000000008005F8):
+		(currentCommand[31:26]==`jal)?(51'h000000005E8005FA):51'h0;
+	//------------------------------------------------
+	assign judgeByLowerSix=(currentCommand[5:0]==`add)?(51'h000034003E020493):
+		(currentCommand[5:0]==`addu)?(51'h000030003E020493):
+		(currentCommand[5:0]==`sub)?(51'h00003C003E020493):
+		(currentCommand[5:0]==`subu)?(51'h000038003E020493):
+		(currentCommand[5:0]==`and)?(51'h000000003E020493):
+		(currentCommand[5:0]==`or)?(51'h000008003E020493):
+		(currentCommand[5:0]==`slt)?(51'h000020003E020493):
+		(currentCommand[5:0]==`nor)?(51'h000010003E020493):
+		(currentCommand[5:0]==`xor)?(51'h000018003E020493):
+		(currentCommand[5:0]==`sll)?(51'h000540003E0205D3):
+		(currentCommand[5:0]==`srl)?(51'h000548003E0205D3):
+		(currentCommand[5:0]==`sra)?(51'h000550003E0205D3):
+		(currentCommand[5:0]==`sllv)?(51'h000040003E020493):
+		(currentCommand[5:0]==`srlv)?(51'h000048003E020493):
+		(currentCommand[5:0]==`srav)?(51'h000050003E020493):
+		(currentCommand[5:0]==`sltu)?(51'h000028003E020493):
+		(currentCommand[5:0]==`jr)?(51'h0000000000C00478):
+		(currentCommand[5:0]==`jalr)?(51'h000000003EC0047A):
+		(currentCommand[5:0]==`mfhi)?(51'h000000003E0485FB):
+		(currentCommand[5:0]==`mflo)?(51'h000000003E0685FB):
+		(currentCommand[5:0]==`mthi)?(51'h0000000000008CB8):
+		(currentCommand[5:0]==`mtlo)?(51'h00000000000094B8):
+		(currentCommand[5:0]==`mult)?(51'h000000000000AC90):
+		(currentCommand[5:0]==`multu)?(51'h000000000000B490):
+		(currentCommand[5:0]==`div)?(51'h0000000000009C90):
+		(currentCommand[5:0]==`divu)?(51'h000000000000A490):51'h0;
+	//------------------------------------------------
+	assign judgeByMiddleFive=(currentCommand[20:16]==`bltz)?(51'h0000022800400478):
+		(currentCommand[20:16]==`bgez)?(51'h0000021000400478):51'h0;
+	//------------------------------------------------
+	assign judgeSpecialType=(currentCommand[25:21]==`mfc0)?(51'h000000001E0805FB):
+		(currentCommand[25:21]==`mtc0)?(51'h00000000010005D0):
+		(currentCommand[5:0]==`eret)?(51'h00000000000007F8):51'h0;
+	//------------------------------------------------
+	assign judgeByDoubleSix=51'h0;
+
+endmodule

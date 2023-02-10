@@ -1,0 +1,117 @@
+Running: D:\ISESetup\14.7\ISE_DS\ISE\bin\nt64\unwrapped\fuse.exe --nodebug --prj testzqy.prj -o testmipszqy.exe mips_tb 
+ISim P.20131013 (signature 0x7708f090)
+Number of CPUs detected in this system: 12
+Turning on mult-threading, number of parallel sub-compilation jobs: 24 
+Determining compilation order of HDL files
+Analyzing Verilog file "E:\1-Project\P5\test\modulezqy\controller_tmpl.v" into library work
+Analyzing Verilog file "E:\1-Project\P5\test\modulezqy\control_values.v" into library work
+Analyzing Verilog file "E:\1-Project\P5\test\modulezqy\mips.v" into library work
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_PC.v" Line 3: Illegal redeclaration of module <mod_PC>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_MemInst.v" Line 7: Illegal redeclaration of module <mod_MemInst>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_MemData.v" Line 5: Illegal redeclaration of module <mod_MemData>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_Splitter.v" Line 3: Illegal redeclaration of module <mod_Splitter>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_ALU.v" Line 9: Illegal redeclaration of module <mod_ALU>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_CMP.v" Line 12: Illegal redeclaration of module <mod_CMP>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_EXT.v" Line 8: Illegal redeclaration of module <mod_EXT>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_GRF.v" Line 3: Illegal redeclaration of module <mod_RF>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_Branch.v" Line 7: Illegal redeclaration of module <mod_Branch>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_Replacer.v" Line 3: Illegal redeclaration of module <mod_Replacer>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_regIFID.v" Line 5: Illegal redeclaration of module <mod_regFD>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_regIDEX.v" Line 6: Illegal redeclaration of module <mod_regDE>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_regEXMem.v" Line 5: Illegal redeclaration of module <mod_regEM>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_regMemWB.v" Line 5: Illegal redeclaration of module <mod_regMW>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_Controller.v" Line 19: Illegal redeclaration of module <match_32bit>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_Controller.v" Line 26: Illegal redeclaration of module <mod_Controller>.
+Analyzing Verilog file "E:\1-Project\P5\test\modulezqy\mips_tb.v" into library work
+Analyzing Verilog file "E:\1-Project\P5\test\modulezqy\mod_ALU.v" into library work
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy\mod_ALU.v" Line 9: Illegal redeclaration of module <mod_ALU>.
+Analyzing Verilog file "E:\1-Project\P5\test\modulezqy\mod_Branch.v" into library work
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy\mod_Branch.v" Line 7: Illegal redeclaration of module <mod_Branch>.
+Analyzing Verilog file "E:\1-Project\P5\test\modulezqy\mod_CMP.v" into library work
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy\mod_CMP.v" Line 12: Illegal redeclaration of module <mod_CMP>.
+Analyzing Verilog file "E:\1-Project\P5\test\modulezqy\mod_Controller.v" into library work
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_PC.v" Line 3: Illegal redeclaration of module <mod_PC>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_MemInst.v" Line 7: Illegal redeclaration of module <mod_MemInst>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_MemData.v" Line 5: Illegal redeclaration of module <mod_MemData>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_Splitter.v" Line 3: Illegal redeclaration of module <mod_Splitter>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_ALU.v" Line 9: Illegal redeclaration of module <mod_ALU>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_CMP.v" Line 12: Illegal redeclaration of module <mod_CMP>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_EXT.v" Line 8: Illegal redeclaration of module <mod_EXT>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_GRF.v" Line 3: Illegal redeclaration of module <mod_RF>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_Branch.v" Line 7: Illegal redeclaration of module <mod_Branch>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_Replacer.v" Line 3: Illegal redeclaration of module <mod_Replacer>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_regIFID.v" Line 5: Illegal redeclaration of module <mod_regFD>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_regIDEX.v" Line 6: Illegal redeclaration of module <mod_regDE>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_regEXMem.v" Line 5: Illegal redeclaration of module <mod_regEM>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy/mod_regMemWB.v" Line 5: Illegal redeclaration of module <mod_regMW>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy\mod_Controller.v" Line 19: Illegal redeclaration of module <match_32bit>.
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy\mod_Controller.v" Line 26: Illegal redeclaration of module <mod_Controller>.
+Analyzing Verilog file "E:\1-Project\P5\test\modulezqy\mod_EXT.v" into library work
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy\mod_EXT.v" Line 8: Illegal redeclaration of module <mod_EXT>.
+Analyzing Verilog file "E:\1-Project\P5\test\modulezqy\mod_GRF.v" into library work
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy\mod_GRF.v" Line 3: Illegal redeclaration of module <mod_RF>.
+Analyzing Verilog file "E:\1-Project\P5\test\modulezqy\mod_MemData.v" into library work
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy\mod_MemData.v" Line 5: Illegal redeclaration of module <mod_MemData>.
+Analyzing Verilog file "E:\1-Project\P5\test\modulezqy\mod_MemInst.v" into library work
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy\mod_MemInst.v" Line 7: Illegal redeclaration of module <mod_MemInst>.
+Analyzing Verilog file "E:\1-Project\P5\test\modulezqy\mod_PC.v" into library work
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy\mod_PC.v" Line 3: Illegal redeclaration of module <mod_PC>.
+Analyzing Verilog file "E:\1-Project\P5\test\modulezqy\mod_regEXMem.v" into library work
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy\mod_regEXMem.v" Line 5: Illegal redeclaration of module <mod_regEM>.
+Analyzing Verilog file "E:\1-Project\P5\test\modulezqy\mod_regIDEX.v" into library work
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy\mod_regIDEX.v" Line 6: Illegal redeclaration of module <mod_regDE>.
+Analyzing Verilog file "E:\1-Project\P5\test\modulezqy\mod_regIFID.v" into library work
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy\mod_regIFID.v" Line 5: Illegal redeclaration of module <mod_regFD>.
+Analyzing Verilog file "E:\1-Project\P5\test\modulezqy\mod_regMemWB.v" into library work
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy\mod_regMemWB.v" Line 5: Illegal redeclaration of module <mod_regMW>.
+Analyzing Verilog file "E:\1-Project\P5\test\modulezqy\mod_Replacer.v" into library work
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy\mod_Replacer.v" Line 3: Illegal redeclaration of module <mod_Replacer>.
+Analyzing Verilog file "E:\1-Project\P5\test\modulezqy\mod_Splitter.v" into library work
+WARNING:HDLCompiler:687 - "E:\1-Project\P5\test\modulezqy\mod_Splitter.v" Line 3: Illegal redeclaration of module <mod_Splitter>.
+Starting static elaboration
+WARNING:HDLCompiler:1016 - "E:\1-Project\P5\test\modulezqy\mips.v" Line 42: Port oInst is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P5\test\modulezqy\mips.v" Line 49: Port oPC is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P5\test\modulezqy\mips.v" Line 58: Port opcode is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P5\test\modulezqy\mips.v" Line 65: Port oEn is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P5\test\modulezqy\mips.v" Line 69: Port oEn is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P5\test\modulezqy\mips.v" Line 74: Port oEn is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P5\test\modulezqy\mips.v" Line 78: Port oEn is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P5\test\modulezqy\mips.v" Line 84: Port oResult is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P5\test\modulezqy\mips.v" Line 94: Port o32 is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P5\test\modulezqy\mips.v" Line 120: Port oResultSince is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P5\test\modulezqy\mips.v" Line 141: Port oEn is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P5\test\modulezqy\mips.v" Line 145: Port oEn is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P5\test\modulezqy\mips.v" Line 150: Port oEn is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P5\test\modulezqy\mips.v" Line 154: Port oEn is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P5\test\modulezqy\mips.v" Line 163: Port oResult is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P5\test\modulezqy\mips.v" Line 178: Port oResultSince is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P5\test\modulezqy\mips.v" Line 215: Port oEn is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P5\test\modulezqy\mips.v" Line 223: Port oRData is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P5\test\modulezqy\mips.v" Line 238: Port oPC is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P5\test\modulezqy\mod_Controller.v" Line 47: Port o is not connected to this instance
+Completed static elaboration
+Compiling module mod_PC
+Compiling module mod_MemInst
+Compiling module mod_regFD
+Compiling module mod_Splitter
+Compiling module mod_Replacer
+Compiling module mod_CMP
+Compiling module mod_Branch
+Compiling module mod_EXT
+Compiling module mod_regDE
+Compiling module mod_ALU
+Compiling module mod_regEM
+Compiling module mod_MemData
+Compiling module mod_regMW
+Compiling module mod_RF
+Compiling module match_32bit
+Compiling module mod_Controller
+Compiling module mips
+Compiling module mips_tb
+Time Resolution for simulation is 1ps.
+Waiting for 1 sub-compilation(s) to finish...
+WARNING:Simulator - Unable to copy libPortabilityNOSH.dll to the simulation executable directory: boost::filesystem::copy_file: 系统找不到指定的路径。, "isim\testmipszqy.exe.sim\libPortability.dll".
+Compiled 18 Verilog Units
+Built simulation executable testmipszqy.exe
+Fuse Memory Usage: 30756 KB
+Fuse CPU Usage: 484 ms

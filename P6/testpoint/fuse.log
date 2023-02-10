@@ -1,0 +1,59 @@
+Running: D:\ISESetup\14.7\ISE_DS\ISE\bin\nt64\unwrapped\fuse.exe --nodebug --prj testlcy.prj -o testmipslcy.exe mips_txt 
+ISim P.20131013 (signature 0x7708f090)
+Number of CPUs detected in this system: 12
+Turning on mult-threading, number of parallel sub-compilation jobs: 24 
+Determining compilation order of HDL files
+Analyzing Verilog file "E:\1-Project\P6\testpoint\modulelcy\ALU.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testpoint\modulelcy\CMP.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testpoint\modulelcy\controller.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testpoint\modulelcy\CU.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testpoint\modulelcy\CU_D.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testpoint\modulelcy\DM.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testpoint\modulelcy\EXT.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testpoint\modulelcy\FORWARD.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testpoint\modulelcy\GRF.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testpoint\modulelcy\load_write.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testpoint\modulelcy\mips.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testpoint\modulelcy\mips_tb.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testpoint\modulelcy\mult_div.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testpoint\modulelcy\MUX.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testpoint\modulelcy\MUX_tb.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testpoint\modulelcy\NPC.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testpoint\modulelcy\PC_IM.v" into library work
+Analyzing Verilog file "E:\1-Project\P6\testpoint\modulelcy\staller.v" into library work
+Starting static elaboration
+WARNING:HDLCompiler:1016 - "E:\1-Project\P6\testpoint\modulelcy\mips.v" Line 249: Port clr_delay is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P6\testpoint\modulelcy\mips.v" Line 269: Port read_type is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P6\testpoint\modulelcy\mips.v" Line 313: Port in3 is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P6\testpoint\modulelcy\mips.v" Line 355: Port ImmI is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P6\testpoint\modulelcy\mips.v" Line 386: Port read_type is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P6\testpoint\modulelcy\mips.v" Line 408: Port in2 is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P6\testpoint\modulelcy\mips.v" Line 415: Port in2 is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P6\testpoint\modulelcy\mips.v" Line 446: Port RD1I is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P6\testpoint\modulelcy\mips.v" Line 476: Port Tuse_rs is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P6\testpoint\modulelcy\mips.v" Line 508: Port RD1I is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P6\testpoint\modulelcy\mips.v" Line 539: Port read_type is not connected to this instance
+WARNING:HDLCompiler:1016 - "E:\1-Project\P6\testpoint\modulelcy\mips.v" Line 552: Port in5 is not connected to this instance
+Completed static elaboration
+Compiling module PC_IM
+Compiling module NPC
+Compiling module CU_D
+Compiling module controller
+Compiling module MUX(WIDTH=5)
+Compiling module GRF
+Compiling module EXT
+Compiling module CMP
+Compiling module CU
+Compiling module MUX
+Compiling module mult_div
+Compiling module ALU
+Compiling module load_write
+Compiling module mips
+Compiling module mips_txt
+Time Resolution for simulation is 1ps.
+Waiting for 1 sub-compilation(s) to finish...
+WARNING:Simulator - Unable to copy libPortabilityNOSH.dll to the simulation executable directory: boost::filesystem::copy_file: 系统找不到指定的路径。, "isim\testmipslcy.exe.sim\libPortability.dll".
+Compiled 15 Verilog Units
+Built simulation executable testmipslcy.exe
+Fuse Memory Usage: 34216 KB
+Fuse CPU Usage: 514 ms

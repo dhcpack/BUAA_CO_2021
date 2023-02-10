@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<generated_project xmlns="http://www.xilinx.com/XMLSchema" xmlns:xil_pn="http://www.xilinx.com/XMLSchema">
+
+  <!--                                                          -->
+
+  <!--             For tool use only. Do not edit.              -->
+
+  <!--                                                          -->
+
+  <!-- ProjectNavigator created generated project file.         -->
+
+  <!-- For use in tracking generated file and other information -->
+
+  <!-- allowing preservation of process status.                 -->
+
+  <!--                                                          -->
+
+  <!-- Copyright (c) 1995-2013 Xilinx, Inc.  All rights reserved. -->
+
+  <version xmlns="http://www.xilinx.com/XMLSchema">11.1</version>
+
+  <sourceproject xmlns="http://www.xilinx.com/XMLSchema" xil_pn:fileType="FILE_XISE" xil_pn:name="learn20211002.xise"/>
+
+  <files xmlns="http://www.xilinx.com/XMLSchema">
+    <file xil_pn:fileType="FILE_DIRECTORY" xil_pn:name="_ngo"/>
+    <file xil_pn:fileType="FILE_XMSGS" xil_pn:name="_xmsgs/map.xmsgs"/>
+    <file xil_pn:fileType="FILE_XMSGS" xil_pn:name="_xmsgs/ngdbuild.xmsgs"/>
+    <file xil_pn:fileType="FILE_XMSGS" xil_pn:name="_xmsgs/par.xmsgs"/>
+    <file xil_pn:fileType="FILE_XMSGS" xil_pn:name="_xmsgs/trce.xmsgs"/>
+    <file xil_pn:fileType="FILE_XMSGS" xil_pn:name="_xmsgs/xst.xmsgs"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_NGDBUILD_LOG" xil_pn:name="practice1.bld"/>
+    <file xil_pn:fileType="FILE_CMD_LOG" xil_pn:name="practice1.cmd_log"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_LSO" xil_pn:name="practice1.lso"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_NCD" xil_pn:name="practice1.ncd" xil_pn:subbranch="Par"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_NGC" xil_pn:name="practice1.ngc"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_NGD" xil_pn:name="practice1.ngd"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_NGR" xil_pn:name="practice1.ngr"/>
+    <file xil_pn:fileType="FILE_PAD_MISC" xil_pn:name="practice1.pad"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_PAR_REPORT" xil_pn:name="practice1.par" xil_pn:subbranch="Par"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_PCF" xil_pn:name="practice1.pcf" xil_pn:subbranch="Map"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_XST_PROJECT" xil_pn:name="practice1.prj"/>
+    <file xil_pn:fileType="FILE_TRCE_MISC" xil_pn:name="practice1.ptwx"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_XST_STX" xil_pn:name="practice1.stx"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_XST_REPORT" xil_pn:name="practice1.syr"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_TIMING_TXT_REPORT" xil_pn:name="practice1.twr" xil_pn:subbranch="Par"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_TIMING_XML_REPORT" xil_pn:name="practice1.twx" xil_pn:subbranch="Par"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_UNROUTES" xil_pn:name="practice1.unroutes" xil_pn:subbranch="Par"/>
+    <file xil_pn:fileType="FILE_XPI" xil_pn:name="practice1.xpi"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_XST" xil_pn:name="practice1.xst"/>
+    <file xil_pn:fileType="FILE_HTML" xil_pn:name="practice1_envsettings.html"/>
+    <file xil_pn:fileType="FILE_NCD" xil_pn:name="practice1_guide.ncd" xil_pn:origination="imported"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_MAP_REPORT" xil_pn:name="practice1_map.map" xil_pn:subbranch="Map"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_MAP_REPORT" xil_pn:name="practice1_map.mrp" xil_pn:subbranch="Map"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_NCD" xil_pn:name="practice1_map.ncd" xil_pn:subbranch="Map"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_NGM" xil_pn:name="practice1_map.ngm" xil_pn:subbranch="Map"/>
+    <file xil_pn:fileType="FILE_XRPT" xil_pn:name="practice1_map.xrpt"/>
+    <file xil_pn:fileType="FILE_XRPT" xil_pn:name="practice1_ngdbuild.xrpt"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_PAD_EXCEL_REPORT" xil_pn:name="practice1_pad.csv" xil_pn:subbranch="Par"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_PAD_TXT_REPORT" xil_pn:name="practice1_pad.txt" xil_pn:subbranch="Par"/>
+    <file xil_pn:fileType="FILE_XRPT" xil_pn:name="practice1_par.xrpt"/>
+    <file xil_pn:fileType="FILE_HTML" xil_pn:name="practice1_summary.html"/>
+    <file xil_pn:fileType="FILE_FITTER_REPORT" xil_pn:name="practice1_summary.xml"/>
+    <file xil_pn:fileType="FILE_WEBTALK" xil_pn:name="practice1_usage.xml"/>
+    <file xil_pn:fileType="FILE_XRPT" xil_pn:name="practice1_xst.xrpt"/>
+    <file xil_pn:fileType="FILE_FITTER_REPORT" xil_pn:name="webtalk_pn.xml"/>
+    <file xil_pn:fileType="FILE_DIRECTORY" xil_pn:name="xlnx_auto_0_xdb"/>
+    <file xil_pn:fileType="FILE_DIRECTORY" xil_pn:name="xst"/>
+  </files>
+
+  <transforms xmlns="http://www.xilinx.com/XMLSchema">
+    <transform xil_pn:end_ts="1633140234" xil_pn:name="TRAN_copyInitialToXSTAbstractSynthesis" xil_pn:start_ts="1633140234">
+      <status xil_pn:value="SuccessfullyRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1633140234" xil_pn:name="TRAN_schematicsToHdl" xil_pn:prop_ck="-348010897021761039" xil_pn:start_ts="1633140234">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1633140234" xil_pn:name="TRAN_regenerateCores" xil_pn:prop_ck="3601305458837220987" xil_pn:start_ts="1633140234">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1633140234" xil_pn:name="TRAN_SubProjectAbstractToPreProxy" xil_pn:start_ts="1633140234">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1633140234" xil_pn:name="TRAN_xawsTohdl" xil_pn:prop_ck="-5952015255041037261" xil_pn:start_ts="1633140234">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1633140234" xil_pn:name="TRAN_SubProjectPreToStructuralProxy" xil_pn:prop_ck="-5609353907947751920" xil_pn:start_ts="1633140234">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1633140234" xil_pn:name="TRAN_platgen" xil_pn:prop_ck="5544523573914045317" xil_pn:start_ts="1633140234">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1633140288" xil_pn:in_ck="176968550473856512" xil_pn:name="TRANEXT_xstsynthesize_spartan6" xil_pn:prop_ck="5609083576045839914" xil_pn:start_ts="1633140282">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="WarningsGenerated"/>
+      <status xil_pn:value="ReadyToRun"/>
+      <status xil_pn:value="OutOfDateForOutputs"/>
+      <status xil_pn:value="OutputChanged"/>
+      <outfile xil_pn:name="_xmsgs/xst.xmsgs"/>
+      <outfile xil_pn:name="practice1.lso"/>
+      <outfile xil_pn:name="practice1.ngc"/>
+      <outfile xil_pn:name="practice1.ngr"/>
+      <outfile xil_pn:name="practice1.prj"/>
+      <outfile xil_pn:name="practice1.stx"/>
+      <outfile xil_pn:name="practice1.syr"/>
+      <outfile xil_pn:name="practice1.xst"/>
+      <outfile xil_pn:name="practice1_xst.xrpt"/>
+      <outfile xil_pn:name="webtalk_pn.xml"/>
+      <outfile xil_pn:name="xst"/>
+    </transform>
+    <transform xil_pn:end_ts="1633140288" xil_pn:name="TRAN_compileBCD2" xil_pn:prop_ck="-8119192512410131874" xil_pn:start_ts="1633140288">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1633140292" xil_pn:in_ck="8251310728934220194" xil_pn:name="TRANEXT_ngdbuild_FPGA" xil_pn:prop_ck="2784763950197033148" xil_pn:start_ts="1633140288">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+      <outfile xil_pn:name="_ngo"/>
+      <outfile xil_pn:name="_xmsgs/ngdbuild.xmsgs"/>
+      <outfile xil_pn:name="practice1.bld"/>
+      <outfile xil_pn:name="practice1.ngd"/>
+      <outfile xil_pn:name="practice1_ngdbuild.xrpt"/>
+    </transform>
+    <transform xil_pn:end_ts="1633140297" xil_pn:in_ck="8251310728934220195" xil_pn:name="TRANEXT_map_spartan6" xil_pn:prop_ck="-4339964950586311718" xil_pn:start_ts="1633140292">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+      <outfile xil_pn:name="_xmsgs/map.xmsgs"/>
+      <outfile xil_pn:name="practice1.pcf"/>
+      <outfile xil_pn:name="practice1_map.map"/>
+      <outfile xil_pn:name="practice1_map.mrp"/>
+      <outfile xil_pn:name="practice1_map.ncd"/>
+      <outfile xil_pn:name="practice1_map.ngm"/>
+      <outfile xil_pn:name="practice1_map.xrpt"/>
+      <outfile xil_pn:name="practice1_summary.xml"/>
+      <outfile xil_pn:name="practice1_usage.xml"/>
+    </transform>
+    <transform xil_pn:end_ts="1633140305" xil_pn:in_ck="-4764322072285328836" xil_pn:name="TRANEXT_par_spartan6" xil_pn:prop_ck="417176447551133118" xil_pn:start_ts="1633140297">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+      <outfile xil_pn:name="_xmsgs/par.xmsgs"/>
+      <outfile xil_pn:name="practice1.ncd"/>
+      <outfile xil_pn:name="practice1.pad"/>
+      <outfile xil_pn:name="practice1.par"/>
+      <outfile xil_pn:name="practice1.ptwx"/>
+      <outfile xil_pn:name="practice1.unroutes"/>
+      <outfile xil_pn:name="practice1.xpi"/>
+      <outfile xil_pn:name="practice1_pad.csv"/>
+      <outfile xil_pn:name="practice1_pad.txt"/>
+      <outfile xil_pn:name="practice1_par.xrpt"/>
+    </transform>
+    <transform xil_pn:end_ts="1633140305" xil_pn:in_ck="8251310728934220063" xil_pn:name="TRAN_postRouteTrce" xil_pn:prop_ck="445577401284416184" xil_pn:start_ts="1633140301">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+      <outfile xil_pn:name="_xmsgs/trce.xmsgs"/>
+      <outfile xil_pn:name="practice1.twr"/>
+      <outfile xil_pn:name="practice1.twx"/>
+    </transform>
+  </transforms>
+
+</generated_project>

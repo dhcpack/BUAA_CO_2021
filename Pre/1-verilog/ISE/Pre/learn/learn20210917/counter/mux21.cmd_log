@@ -1,0 +1,11 @@
+vhdtdtfi -lib work E:/ISE/counter/mux21.v -lang verilog -prj counter -o mux21.spl -module mux21 -template D:/ISESetup/14.7/ISE_DS/ISE//data/splveri.tft -deleteonerror 
+spl2sym -intstyle ise -family spartan6 mux21.spl E:/ISE/counter/mux21.sym 
+vhdtdtfi -lang verilog -prj counter -o E:/ISE/counter/mux21.vhi -lib work E:/ISE/counter//mux21.v -module mux21 -template D:/ISESetup/14.7/ISE_DS/ISE//data/vhdlinst.tft -deleteonerror 
+xst -intstyle ise -ifn "E:/ISE/counter/mux21.xst" -ofn "E:/ISE/counter/mux21.syr" 
+xst -intstyle ise -ifn "E:/ISE/counter/mux21.xst" -ofn "E:/ISE/counter/mux21.syr" 
+xst -intstyle ise -ifn "E:/ISE/counter/mux21.xst" -ofn "E:/ISE/counter/mux21.syr" 
+xst -intstyle ise -ifn "E:/ISE/counter/mux21.xst" -ofn "E:/ISE/counter/mux21.syr" 
+xst -intstyle ise -ifn "E:/ISE/counter/mux21.xst" -ofn "E:/ISE/counter/mux21.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc6slx150-fgg676-2 mux21.ngc mux21.ngd  
+map -intstyle ise -p xc6slx150-fgg676-2 -w -logic_opt off -ol high -t 1 -xt 0 -register_duplication off -r 4 -global_opt off -mt off -ir off -pr off -lc off -power off -o mux21_map.ncd mux21.ngd mux21.pcf 
+par -w -intstyle ise -ol high -mt off mux21_map.ncd mux21.ncd mux21.pcf 

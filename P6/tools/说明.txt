@@ -1,0 +1,4 @@
+说明：
+create.py功能是产生随机代码，约500~1000行，不包含P6中可能产生溢出导致Mars报错的add、addi和sub指令
+generate.py功能是使用命令行运行Isim进行仿真，并导出mars运行结果、两个对拍程序运行结果
+compare.py功能是对比generate.py得到的三个结果，结果完全相同则不会生成diff.txt文件

@@ -1,0 +1,28 @@
+Command line:
+   testmipszqy.exe
+     -simmode  tcl
+     -simrunnum  0
+     -socket  59079
+
+Tue Nov 23 17:57:29 2021
+
+
+ Elaboration Time: 0.046875 sec
+
+ Current Memory Usage: 5142.92 Meg
+
+ Total Signals          : 288
+ Total Nets             : 3252
+ Total Signal Drivers   : 210
+ Total Blocks           : 37
+ Total Primitive Blocks : 34
+ Total Processes        : 230
+ Total Traceable Variables  : 78
+ Total Scalar Nets and Variables : 267447
+
+ Total Simulation Time: 0.0625 sec
+
+ Current Memory Usage: 5142.92 Meg
+
+Tue Nov 23 17:57:30 2021
+

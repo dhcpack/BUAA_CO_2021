@@ -1,0 +1,37 @@
+xst -intstyle ise -ifn "E:/ISE/practice/practice.xst" -ofn "E:/ISE/practice/practice.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/practice.xst" -ofn "E:/ISE/practice/practice.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xa3s50-vqg100-4 practice.ngc practice.ngd  
+map -intstyle ise -p xa3s50-vqg100-4 -cm area -ir off -pr off -c 100 -o practice_map.ncd practice.ngd practice.pcf 
+par -w -intstyle ise -ol high -t 1 practice_map.ncd practice.ncd practice.pcf 
+trce -intstyle ise -v 3 -s 4 -n 3 -fastpaths -xml practice.twx practice.ncd -o practice.twr practice.pcf 
+xst -intstyle ise -ifn "E:/ISE/practice/practice.xst" -ofn "E:/ISE/practice/practice.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/practice.xst" -ofn "E:/ISE/practice/practice.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xa3s50-vqg100-4 practice.ngc practice.ngd  
+map -intstyle ise -p xa3s50-vqg100-4 -cm area -ir off -pr off -c 100 -o practice_map.ncd practice.ngd practice.pcf 
+par -w -intstyle ise -ol high -t 1 practice_map.ncd practice.ncd practice.pcf 
+trce -intstyle ise -v 3 -s 4 -n 3 -fastpaths -xml practice.twx practice.ncd -o practice.twr practice.pcf 
+xst -intstyle ise -ifn "E:/ISE/practice/practice.xst" -ofn "E:/ISE/practice/practice.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/practice.xst" -ofn "E:/ISE/practice/practice.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xa3s50-vqg100-4 practice.ngc practice.ngd  
+map -intstyle ise -p xa3s50-vqg100-4 -cm area -ir off -pr off -c 100 -o practice_map.ncd practice.ngd practice.pcf 
+par -w -intstyle ise -ol high -t 1 practice_map.ncd practice.ncd practice.pcf 
+trce -intstyle ise -v 3 -s 4 -n 3 -fastpaths -xml practice.twx practice.ncd -o practice.twr practice.pcf 
+xst -intstyle ise -ifn "E:/ISE/practice/practice.xst" -ofn "E:/ISE/practice/practice.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/practice.xst" -ofn "E:/ISE/practice/practice.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xa3s50-vqg100-4 practice.ngc practice.ngd  
+map -intstyle ise -p xa3s50-vqg100-4 -cm area -ir off -pr off -c 100 -o practice_map.ncd practice.ngd practice.pcf 
+par -w -intstyle ise -ol high -t 1 practice_map.ncd practice.ncd practice.pcf 
+trce -intstyle ise -v 3 -s 4 -n 3 -fastpaths -xml practice.twx practice.ncd -o practice.twr practice.pcf 
+xst -intstyle ise -ifn "E:/ISE/practice/practice.xst" -ofn "E:/ISE/practice/practice.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/practice.xst" -ofn "E:/ISE/practice/practice.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/practice.xst" -ofn "E:/ISE/practice/practice.syr" 
+xst -intstyle ise -ifn "E:/ISE/practice/practice.xst" -ofn "E:/ISE/practice/practice.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xa3s50-vqg100-4 practice.ngc practice.ngd  
+map -intstyle ise -p xa3s50-vqg100-4 -cm area -ir off -pr off -c 100 -o practice_map.ncd practice.ngd practice.pcf 
+par -w -intstyle ise -ol high -t 1 practice_map.ncd practice.ncd practice.pcf 
+trce -intstyle ise -v 3 -s 4 -n 3 -fastpaths -xml practice.twx practice.ncd -o practice.twr practice.pcf 
+xst -intstyle ise -ifn "E:/ISE/practice/practice.xst" -ofn "E:/ISE/practice/practice.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xa3s50-vqg100-4 practice.ngc practice.ngd  
+map -intstyle ise -p xa3s50-vqg100-4 -cm area -ir off -pr off -c 100 -o practice_map.ncd practice.ngd practice.pcf 
+par -w -intstyle ise -ol high -t 1 practice_map.ncd practice.ncd practice.pcf 
+trce -intstyle ise -v 3 -s 4 -n 3 -fastpaths -xml practice.twx practice.ncd -o practice.twr practice.pcf 

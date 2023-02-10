@@ -1,0 +1,20 @@
+xst -intstyle ise -ifn "E:/ISE/assss/count1s.xst" -ofn "E:/ISE/assss/count1s.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc6slx4-tqg144-2 count1s.ngc count1s.ngd  
+map -intstyle ise -p xc6slx4-tqg144-2 -w -logic_opt off -ol high -t 1 -xt 0 -register_duplication off -r 4 -global_opt off -mt off -ir off -pr off -lc off -power off -o count1s_map.ncd count1s.ngd count1s.pcf 
+par -w -intstyle ise -ol high -mt off count1s_map.ncd count1s.ncd count1s.pcf 
+trce -intstyle ise -v 3 -s 2 -n 3 -fastpaths -xml count1s.twx count1s.ncd -o count1s.twr count1s.pcf 
+xst -intstyle ise -ifn "E:/ISE/assss/count1s.xst" -ofn "E:/ISE/assss/count1s.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc6slx4-tqg144-2 count1s.ngc count1s.ngd  
+map -intstyle ise -p xc6slx4-tqg144-2 -w -logic_opt off -ol high -t 1 -xt 0 -register_duplication off -r 4 -global_opt off -mt off -ir off -pr off -lc off -power off -o count1s_map.ncd count1s.ngd count1s.pcf 
+par -w -intstyle ise -ol high -mt off count1s_map.ncd count1s.ncd count1s.pcf 
+trce -intstyle ise -v 3 -s 2 -n 3 -fastpaths -xml count1s.twx count1s.ncd -o count1s.twr count1s.pcf 
+xst -intstyle ise -ifn "E:/ISE/assss/count1s.xst" -ofn "E:/ISE/assss/count1s.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc6slx4-tqg144-2 count1s.ngc count1s.ngd  
+map -intstyle ise -p xc6slx4-tqg144-2 -w -logic_opt off -ol high -t 1 -xt 0 -register_duplication off -r 4 -global_opt off -mt off -ir off -pr off -lc off -power off -o count1s_map.ncd count1s.ngd count1s.pcf 
+par -w -intstyle ise -ol high -mt off count1s_map.ncd count1s.ncd count1s.pcf 
+trce -intstyle ise -v 3 -s 2 -n 3 -fastpaths -xml count1s.twx count1s.ncd -o count1s.twr count1s.pcf 
+xst -intstyle ise -ifn "E:/ISE/assss/count1s.xst" -ofn "E:/ISE/assss/count1s.syr" 
+xst -intstyle ise -ifn "E:/ISE/assss/count1s.xst" -ofn "E:/ISE/assss/count1s.syr" 
+xst -intstyle ise -ifn "E:/ISE/assss/count1s.xst" -ofn "E:/ISE/assss/count1s.syr" 
+xst -intstyle ise -ifn "E:/ISE/assss/count1s.xst" -ofn "E:/ISE/assss/count1s.syr" 
+xst -intstyle ise -ifn "E:/ISE/assss/count1s.xst" -ofn "E:/ISE/assss/count1s.syr" 

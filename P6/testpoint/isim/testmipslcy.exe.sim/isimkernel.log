@@ -1,0 +1,28 @@
+Command line:
+   testmipslcy.exe
+     -simmode  tcl
+     -simrunnum  0
+     -socket  50917
+
+Sat Dec 11 10:35:08 2021
+
+
+ Elaboration Time: 0.0625 sec
+
+ Current Memory Usage: 5143.03 Meg
+
+ Total Signals          : 675
+ Total Nets             : 5538
+ Total Signal Drivers   : 448
+ Total Blocks           : 22
+ Total Primitive Blocks : 20
+ Total Processes        : 474
+ Total Traceable Variables  : 85
+ Total Scalar Nets and Variables : 401800
+
+ Total Simulation Time: 0.3125 sec
+
+ Current Memory Usage: 5143.03 Meg
+
+Sat Dec 11 10:35:09 2021
+

@@ -1,0 +1,5 @@
+xst -intstyle ise -ifn "E:/ISE/learn20210917/block.xst" -ofn "E:/ISE/learn20210917/block.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc6slx4-tqg144-2 block.ngc block.ngd  
+map -intstyle ise -p xc6slx4-tqg144-2 -w -logic_opt off -ol high -t 1 -xt 0 -register_duplication off -r 4 -global_opt off -mt off -ir off -pr off -lc off -power off -o block_map.ncd block.ngd block.pcf 
+par -w -intstyle ise -ol high -mt off block_map.ncd block.ncd block.pcf 
+trce -intstyle ise -v 3 -s 2 -n 3 -fastpaths -xml block.twx block.ncd -o block.twr block.pcf 

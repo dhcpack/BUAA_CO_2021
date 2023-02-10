@@ -1,0 +1,7 @@
+xst -intstyle ise -ifn "E:/ISE/assss/Sample.xst" -ofn "E:/ISE/assss/Sample.syr" 
+xst -intstyle ise -ifn "E:/ISE/assss/Sample.xst" -ofn "E:/ISE/assss/Sample.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc6slx4-tqg144-2 Sample.ngc Sample.ngd  
+map -intstyle ise -p xc6slx4-tqg144-2 -w -logic_opt off -ol high -t 1 -xt 0 -register_duplication off -r 4 -global_opt off -mt off -ir off -pr off -lc off -power off -o Sample_map.ncd Sample.ngd Sample.pcf 
+xst -intstyle ise -ifn "E:/ISE/assss/Sample.xst" -ofn "E:/ISE/assss/Sample.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc6slx4-tqg144-2 Sample.ngc Sample.ngd  
+map -intstyle ise -p xc6slx4-tqg144-2 -w -logic_opt off -ol high -t 1 -xt 0 -register_duplication off -r 4 -global_opt off -mt off -ir off -pr off -lc off -power off -o Sample_map.ncd Sample.ngd Sample.pcf 

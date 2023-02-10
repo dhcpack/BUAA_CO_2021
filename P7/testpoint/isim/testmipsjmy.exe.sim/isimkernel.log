@@ -1,0 +1,28 @@
+Command line:
+   testmipsjmy.exe
+     -simmode  tcl
+     -simrunnum  0
+     -socket  60372
+
+Mon Dec 13 21:17:21 2021
+
+
+ Elaboration Time: 0.0625 sec
+
+ Current Memory Usage: 5143.11 Meg
+
+ Total Signals          : 593
+ Total Nets             : 2651
+ Total Signal Drivers   : 340
+ Total Blocks           : 23
+ Total Primitive Blocks : 20
+ Total Processes        : 363
+ Total Traceable Variables  : 105
+ Total Scalar Nets and Variables : 300147
+
+ Total Simulation Time: 0.703125 sec
+
+ Current Memory Usage: 5143.11 Meg
+
+Mon Dec 13 21:17:23 2021
+
